@@ -9,6 +9,8 @@ import play.api.libs.json._
 import play.api.libs.json.Json
 import play.api.libs.json.Json._
 
+import module.login.LoginModule
+
 object Application extends Controller {
   
 	def index = Action {
@@ -16,22 +18,50 @@ object Application extends Controller {
 	}
 
 	def authWithPhone = Action { request =>
-	  	request.body.asJson map { json => 
-	  	  	(json \ "phoneNo").asOpt[String].map (x => println(x))
-	  	}
 	  	
-	  	Ok(<message>Alfred Test</message>)
+	  	try {
+		  	request.body.asJson match { 
+		  	  case Some(x) => Ok(LoginModule.authWithPhone(x))
+		  	  case None => BadRequest("Bad Request for input")
+		  	}  		
+	  	} catch {
+	  	  case _ : Exception => BadRequest("Bad Request for input")
+	  	}
 	}
 
-	def authConfirm = Action  {
-		Ok("auth confirm")
+	def authConfirm = Action  { request =>
+	  
+	  	try {
+		  	request.body.asJson match { 
+		  	  case Some(x) => Ok(LoginModule.authComfirm(x))
+		  	  case None => BadRequest("Bad Request for input")
+		  	}  		
+	  	} catch {
+	  	  case _ : Exception => BadRequest("Bad Request for input")
+	  	}
 	}
 
-	def authWithThird = Action {
-		Ok("auth with third")
+	def authWithThird = Action { request =>
+			  	
+		try {
+		  	request.body.asJson match { 
+		  	  case Some(x) => Ok(LoginModule.authWithThird(x))
+		  	  case None => BadRequest("Bad Request for input")
+		  	}  		
+	  	} catch {
+	  	  case _ : Exception => BadRequest("Bad Request for input")
+	  	}
 	}
 
-	def connectWithThird = Action {
-		Ok("connect with third")
+	def connectWithThird = Action { request =>
+		
+		try {
+		  	request.body.asJson match { 
+		  	  case Some(x) => Ok(LoginModule.connectWithThird(x))
+		  	  case None => BadRequest("Bad Request for input")
+		  	}  		
+	  	} catch {
+	  	  case _ : Exception => BadRequest("Bad Request for input")
+	  	}
 	}
 }
