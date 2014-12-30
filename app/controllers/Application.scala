@@ -17,6 +17,18 @@ object Application extends Controller {
 		Ok(views.html.index("Your new application is ready."))
 	}
 
+	def authUpdateDetails = Action { request =>
+	 	 
+	  	try {
+		  	request.body.asJson match { 
+		  	  case Some(x) => Ok(LoginModule.authUpdateDetails(x))
+		  	  case None => BadRequest("Bad Request for input")
+		  	}  		
+	  	} catch {
+	  	  case _ : Exception => BadRequest("Bad Request for input")
+	  	} 
+	}
+	
 	def authWithPhone = Action { request =>
 	  	
 	  	try {

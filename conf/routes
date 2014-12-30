@@ -10,6 +10,7 @@ POST	/login/authWithPhone		controllers.Application.authWithPhone
 POST	/login/authConfirm			controllers.Application.authConfirm
 POST	/login/authWithThird		controllers.Application.authWithThird
 POST	/login/connectWithThird		controllers.Application.connectWithThird
+POST	/login/authUpdateDetails	controllers.Application.authUpdateDetails
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

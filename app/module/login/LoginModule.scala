@@ -11,6 +11,27 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 
 object LoginModule {
+  
+	def authUpdateDetails(data : JsValue) : JsValue = {
+		val auth_token = (data \ "auth_token").asOpt[String].get
+	
+		val rel = from db() in "users" where ("auth_token" -> auth_token) select (x => x)
+		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
+		else {
+			val user = rel.head
+			List("name", "phoneNo", "email") foreach { x => 
+				(data \ x).asOpt[String] match { 
+				  case Some(value) => println(x); user += x -> value
+				  case None => println(x); Unit
+				}
+			}
+			_data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
+			
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+					toJson(Map("auth_token" -> toJson(auth_token)))))
+		}
+	}
+  
 	def authWithPhone(data : JsValue) : JsValue = {
 	
 		val phoneNo = (data \ "phoneNo").asOpt[String].get
@@ -80,6 +101,7 @@ object LoginModule {
 						new_builder  += "auth_token" -> auth_token
 						new_builder  += "phoneNo" -> phoneNo
 						new_builder  += "email" -> ""
+						new_builder  += "name" -> ""
 						
 						val new_third_builder = MongoDBList.newBuilder
 						new_builder  += "third" -> new_third_builder.result
