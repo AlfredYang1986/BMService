@@ -21,8 +21,8 @@ object LoginModule {
 			val user = rel.head
 			List("name", "phoneNo", "email") foreach { x => 
 				(data \ x).asOpt[String] match { 
-				  case Some(value) => println(x); user += x -> value
-				  case None => println(x); Unit
+				  case Some(value) => user += x -> value
+				  case None => Unit
 				}
 			}
 			_data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
@@ -59,7 +59,7 @@ object LoginModule {
 		
 		val rel = from db() in "reg" where ("phoneNo" -> phoneNo) select (x => x) 
 		if (rel.empty) _data_connection.getCollection("reg") += builder.result
-		else _data_connection.getCollection("reg").update(rel.head.asDBObject, builder.result)
+		else _data_connection.getCollection("reg").update(DBObject("phoneNo" -> phoneNo), builder.result)
 	
 		/**
 		 * return 
@@ -88,37 +88,33 @@ object LoginModule {
 				else {
 					/**
 					 * when login success save user to the client database
-					 * 1. if phoneNo is already exist
-					 * 2. if not
 					 */
 					var result = from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)
 					if (result.empty) {
-						val new_builder = MongoDBObject.newBuilder
-
-						val time_span = LoginSercurity.getTimeSpanWithMillSeconds
-						val auth_token = LoginSercurity.md5Hash(phoneNo + time_span)
-					
-						new_builder  += "auth_token" -> auth_token
-						new_builder  += "phoneNo" -> phoneNo
-						new_builder  += "email" -> ""
-						new_builder  += "name" -> ""
 						
-						val new_third_builder = MongoDBList.newBuilder
-						new_builder  += "third" -> new_third_builder.result
-					
-						_data_connection.getCollection("users") += new_builder.result
+						/**
+						 * 1. this phone is not reg
+						 * 		create a new auth_token and connect to this phone number
+						 */
+						this.authCreateNewUserWithPhone(phoneNo)
 
-						Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("auth_token" -> toJson(auth_token)))))
 					} else {
+					  	/**
+						 * 2. this phone is already reg
+						 * 		pass this token to the client
+						 */
 						val cur = result.head
-						cur += "phoneNo" -> phoneNo
-						_data_connection.getCollection("users").update(DBObject("auth_token" -> cur.get("auth_token").get), cur)
+//						cur += "phoneNo" -> phoneNo
+//						_data_connection.getCollection("users").update(DBObject("auth_token" -> cur.get("auth_token").get), cur)
 					  
-						val auth_token = result.head.get("auth_token").get.asInstanceOf[String]
+						val auth_token = cur.get("auth_token").get.asInstanceOf[String]
+						val name = cur.get("name").get.asInstanceOf[String]
 
-						Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("auth_token" -> toJson(auth_token)))))
+						Json.toJson(Map("status" -> toJson("error"), "error" -> 
+							toJson(Map("message" -> toJson("already login"), 
+							    "auth_token" -> toJson(auth_token), 
+							    "name" -> toJson(name),
+							    "phoneNo" -> toJson(phoneNo)))))
 					}
 				} 
 			}
@@ -143,10 +139,10 @@ object LoginModule {
 			
 			tmp match {
 			  case Some(x) => {
-				  x.asInstanceOf[BasicDBObject]("provide_name") = provide_name
-				  x.asInstanceOf[BasicDBObject]("provide_token") = provide_token
-				  x.asInstanceOf[BasicDBObject]("provide_email") = provide_email
-				  x.asInstanceOf[BasicDBObject]("provide_screen_name") = provide_screen_name
+				  x.asInstanceOf[BasicDBObject] += ("provide_name") -> provide_name
+				  x.asInstanceOf[BasicDBObject] += ("provide_token") -> provide_token
+				  x.asInstanceOf[BasicDBObject] += ("provide_email") -> provide_email
+				  x.asInstanceOf[BasicDBObject] += ("provide_screen_name") -> provide_screen_name
 
 				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
 			  }
@@ -168,4 +164,49 @@ object LoginModule {
 	}
 
 	def connectWithThird(data : JsValue) : JsValue = authWithThird(data)
+	
+	def authCreateUserWithPhone(data : JsValue) : JsValue = {
+
+	  val phoneNo = (data \ "phoneNo").asOpt[String].get
+
+		val users = from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)
+		if (users.empty) {
+			/**
+			 * 2. if phoneNo is not, then create one directly
+			 */ 
+		  	authCreateNewUserWithPhone(phoneNo)
+			
+		} else {
+			/**
+			 * 1. if phoneNo is already connect to the auth token
+			 * 		unbind the auth token
+			 *   	then create new one
+			 */	  
+			val user = users.head
+			user += "phoneNo" -> ""
+			_data_connection.getCollection("users").update(DBObject("phoneNo" -> phoneNo), user)
+		
+			this.authCreateNewUserWithPhone(phoneNo)
+		}
+	}
+	
+	private def authCreateNewUserWithPhone(phoneNo : String) : JsValue = {
+		val new_builder = MongoDBObject.newBuilder
+
+		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
+		val auth_token = LoginSercurity.md5Hash(phoneNo + time_span)
+					
+		new_builder  += "auth_token" -> auth_token
+		new_builder  += "phoneNo" -> phoneNo
+		new_builder  += "email" -> ""
+		new_builder  += "name" -> ""
+						
+		val new_third_builder = MongoDBList.newBuilder
+		new_builder  += "third" -> new_third_builder.result
+					
+		_data_connection.getCollection("users") += new_builder.result
+
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+							toJson(Map("auth_token" -> toJson(auth_token)))))
+	}
 }

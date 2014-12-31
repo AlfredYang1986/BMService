@@ -12,68 +12,26 @@ import play.api.libs.json.Json._
 import module.login.LoginModule
 
 object Application extends Controller {
-  
-	def index = Action {
-		Ok(views.html.index("Your new application is ready."))
-	}
-
-	def authUpdateDetails = Action { request =>
-	 	 
-	  	try {
+ 
+	private def requestArgs(request : Request[AnyContent])(func : JsValue => JsValue) : Result = {
+		try {
 		  	request.body.asJson match { 
-		  	  case Some(x) => Ok(LoginModule.authUpdateDetails(x))
+		  	  case Some(x) => Ok(func(x))
 		  	  case None => BadRequest("Bad Request for input")
 		  	}  		
 	  	} catch {
 	  	  case _ : Exception => BadRequest("Bad Request for input")
 	  	} 
 	}
-	
-	def authWithPhone = Action { request =>
-	  	
-	  	try {
-		  	request.body.asJson match { 
-		  	  case Some(x) => Ok(LoginModule.authWithPhone(x))
-		  	  case None => BadRequest("Bad Request for input")
-		  	}  		
-	  	} catch {
-	  	  case _ : Exception => BadRequest("Bad Request for input")
-	  	}
+  
+	def index = Action {
+		Ok(views.html.index("Your new application is ready."))
 	}
 
-	def authConfirm = Action  { request =>
-	  
-	  	try {
-		  	request.body.asJson match { 
-		  	  case Some(x) => Ok(LoginModule.authComfirm(x))
-		  	  case None => BadRequest("Bad Request for input")
-		  	}  		
-	  	} catch {
-	  	  case _ : Exception => BadRequest("Bad Request for input")
-	  	}
-	}
-
-	def authWithThird = Action { request =>
-			  	
-		try {
-		  	request.body.asJson match { 
-		  	  case Some(x) => Ok(LoginModule.authWithThird(x))
-		  	  case None => BadRequest("Bad Request for input")
-		  	}  		
-	  	} catch {
-	  	  case _ : Exception => BadRequest("Bad Request for input")
-	  	}
-	}
-
-	def connectWithThird = Action { request =>
-		
-		try {
-		  	request.body.asJson match { 
-		  	  case Some(x) => Ok(LoginModule.connectWithThird(x))
-		  	  case None => BadRequest("Bad Request for input")
-		  	}  		
-	  	} catch {
-	  	  case _ : Exception => BadRequest("Bad Request for input")
-	  	}
-	}
+	def authUpdateDetails = Action (request => this.requestArgs(request)(LoginModule.authUpdateDetails))
+	def authWithPhone = Action (request => this.requestArgs(request)(LoginModule.authWithPhone))
+	def authConfirm = Action  (request => this.requestArgs(request)(LoginModule.authComfirm))
+	def authWithThird = Action (request => this.requestArgs(request)(LoginModule.authWithThird))
+	def connectWithThird = Action (request =>this.requestArgs(request)(LoginModule.connectWithThird))
+	def authCreateUserWithPhone = Action (request =>this.requestArgs(request)(LoginModule.authCreateUserWithPhone))
 }
