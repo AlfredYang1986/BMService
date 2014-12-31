@@ -121,27 +121,52 @@ object LoginModule {
 		}
 	}
 	
-	def authWithThird(data : JsValue) : JsValue = {
+	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
+		val new_builder = MongoDBObject.newBuilder
 
-		val auth_token = (data \ "auth_token").asOpt[String].get
-		val provide_name = (data \ "provide_name").asOpt[String].get
-		val provide_token = (data \ "provide_token").asOpt[String].get
-		val provide_email = (data \ "provide_email").asOpt[String].get
-		val provide_screen_name = (data \ "provide_screen_name").asOpt[String].get
+		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
+		val auth_token = LoginSercurity.md5Hash(provide_name + provide_token + time_span)
+					
+		new_builder  += "auth_token" -> auth_token
+		new_builder  += "phoneNo" -> ""
+		new_builder  += "email" -> ""
+		new_builder  += "name" -> provide_screen_name
+		
+		val new_third_builder = MongoDBList.newBuilder
+
+		val builder_third = MongoDBObject.newBuilder
+		builder_third += ("provide_name") -> provide_name
+		builder_third += ("provide_token") -> provide_token
+		builder_third += ("provide_uid") -> provide_uid
+		builder_third += ("provide_screen_name") -> provide_screen_name
+
+		new_third_builder += builder_third.result
+		
+		new_builder  += "third" -> new_third_builder.result
 	 
-		val users = from db() in "users" where ("auth_token" -> auth_token) select (x => x)
-		if (users.empty)
-			ErrorCode.errorToJson("auth token not valid")
-		else {
-			val user = users.head
-			val third_list = user.get("third").get.asInstanceOf[BasicDBList]
+	
+		_data_connection.getCollection("users") += new_builder.result
+		
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+				toJson(Map("auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
+	}
+
+	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
+
+		val auth_token = user.get("auth_token").get.asInstanceOf[String]
+		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
+		var name = user.get("name").get.asInstanceOf[String]
+			if (name == "") {
+				name = provide_name
+				user += ("name") -> name
+			}
 			val tmp = third_list.find(x => x.asInstanceOf[BasicDBObject].get("provide_name") ==  provide_name)
 			
 			tmp match {
 			  case Some(x) => {
 				  x.asInstanceOf[BasicDBObject] += ("provide_name") -> provide_name
 				  x.asInstanceOf[BasicDBObject] += ("provide_token") -> provide_token
-				  x.asInstanceOf[BasicDBObject] += ("provide_email") -> provide_email
+				  x.asInstanceOf[BasicDBObject] += ("provide_uid") -> provide_uid
 				  x.asInstanceOf[BasicDBObject] += ("provide_screen_name") -> provide_screen_name
 
 				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
@@ -151,7 +176,7 @@ object LoginModule {
 			    
 				  builder += ("provide_name") -> provide_name
 				  builder += ("provide_token") -> provide_token
-				  builder += ("provide_email") -> provide_email
+				  builder += ("provide_uid") -> provide_uid
 				  builder += ("provide_screen_name") -> provide_screen_name
 				  third_list += builder.result
 
@@ -159,8 +184,21 @@ object LoginModule {
 			  }
 			}
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("auth_token" -> toJson(auth_token), "connect_result" -> toJson("success")))))
-		}
+				toJson(Map("auth_token" -> toJson(auth_token), "name" -> toJson(name), "connect_result" -> toJson("success")))))
+	}
+	
+	def authWithThird(data : JsValue) : JsValue = {
+
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val provide_name = (data \ "provide_name").asOpt[String].get
+		val provide_token = (data \ "provide_token").asOpt[String].get
+		val provide_uid = (data \ "provide_uid").asOpt[String].get
+		val provide_screen_name = (data \ "provide_screen_name").asOpt[String].get
+  
+		val users = from db() in "users" where ("third.provide_name" -> provide_name, "third.provide_uid" -> provide_uid) select (x => x)
+	
+		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name)
+		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name)
 	}
 
 	def connectWithThird(data : JsValue) : JsValue = authWithThird(data)
