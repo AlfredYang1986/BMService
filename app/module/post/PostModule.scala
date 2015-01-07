@@ -27,9 +27,6 @@ object PostModule {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val message = (data \ "message").asOpt[String].get
 		
-		println(auth_token)
-		println(message)
-		
 		/**
 		 * check the token is validate or not
 		 */

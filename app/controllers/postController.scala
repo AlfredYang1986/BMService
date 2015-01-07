@@ -8,15 +8,6 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json._
 import module.post.PostModule
 import play.api.libs.Files.TemporaryFile
-import java.io.File
-import java.io.FileReader
-import java.io.InputStream
-import scala.collection.JavaConversions._
-import java.nio.charset.Charset
-import java.nio.CharBuffer
-import java.nio.ByteBuffer
-import javax.imageio.ImageIO
-import java.io.FileInputStream
 
 object postController extends Controller {
 
