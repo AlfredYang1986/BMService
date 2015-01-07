@@ -247,4 +247,9 @@ object LoginModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 							toJson(Map("auth_token" -> toJson(auth_token)))))
 	}
+	
+	def isAuthTokenValidate(token : String) : Boolean = {
+		val reVal = from db() in "users" where ("auth_token" -> token) select (x => x)
+		return !(reVal.empty)
+	}
 }
