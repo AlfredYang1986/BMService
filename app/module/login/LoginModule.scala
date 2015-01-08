@@ -1,34 +1,35 @@
 package module.login
 
 import play.api.libs.json.Json
-import play.api.libs.json.Json._
+import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
 import play.api.http.Writeable
 import util.dao.from
-import com.mongodb.casbah.commons.MongoDBObject
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 
 object LoginModule {
-  
+ 	
+	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
+	def isUserExist(user_id : String) : Boolean = !((from db() in "users" where ("user_id" -> user_id) select (x => x)).empty)
+	
 	def authUpdateDetails(data : JsValue) : JsValue = {
 		val auth_token = (data \ "auth_token").asOpt[String].get
+		val user_id= (data \ "user_id").asOpt[String].get
 	
-		val rel = from db() in "users" where ("auth_token" -> auth_token) select (x => x)
+		val rel = from db() in "users" where ("user_id" -> user_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
 		else {
 			val user = rel.head
 			List("name", "phoneNo", "email") foreach { x => 
-				(data \ x).asOpt[String] match { 
-				  case Some(value) => user += x -> value
-				  case None => Unit
-				}
+				(data \ x).asOpt[String].map { value =>
+				  user += x -> value
+				}.getOrElse(Unit)
 			}
-			_data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
+			_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user)
 			
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-					toJson(Map("auth_token" -> toJson(auth_token)))))
+			Json.toJson(Map("status" -> toJson("ok")))
 		}
 	}
   
@@ -108,11 +109,13 @@ object LoginModule {
 //						_data_connection.getCollection("users").update(DBObject("auth_token" -> cur.get("auth_token").get), cur)
 					  
 						val auth_token = cur.get("auth_token").get.asInstanceOf[String]
+						val user_id = cur.get("user_id").get.asInstanceOf[String]
 						val name = cur.get("name").get.asInstanceOf[String]
 
 						Json.toJson(Map("status" -> toJson("error"), "error" -> 
 							toJson(Map("message" -> toJson("already login"), 
 							    "auth_token" -> toJson(auth_token), 
+							    "user_id" -> toJson(user_id), 
 							    "name" -> toJson(name),
 							    "phoneNo" -> toJson(phoneNo)))))
 					}
@@ -125,8 +128,10 @@ object LoginModule {
 		val new_builder = MongoDBObject.newBuilder
 
 		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
+		val user_id = LoginSercurity.md5Hash(provide_name + provide_token + time_span)
 		val auth_token = LoginSercurity.md5Hash(provide_name + provide_token + time_span)
 					
+		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> ""
 		new_builder  += "email" -> ""
@@ -148,12 +153,13 @@ object LoginModule {
 		_data_connection.getCollection("users") += new_builder.result
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
 	}
 
 	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
 
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
+		val user_id = user.get("user_id").get.asInstanceOf[String]
 		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
 		var name = user.get("name").get.asInstanceOf[String]
 			if (name == "") {
@@ -184,12 +190,13 @@ object LoginModule {
 			  }
 			}
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("auth_token" -> toJson(auth_token), "name" -> toJson(name), "connect_result" -> toJson("success")))))
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(name), "connect_result" -> toJson("success")))))
 	}
 	
 	def authWithThird(data : JsValue) : JsValue = {
 
-		val auth_token = (data \ "auth_token").asOpt[String].get
+//		val user_id = (data \ "user_id").asOpt[String].get
+//		val auth_token = (data \ "auth_token").asOpt[String].get
 		val provide_name = (data \ "provide_name").asOpt[String].get
 		val provide_token = (data \ "provide_token").asOpt[String].get
 		val provide_uid = (data \ "provide_uid").asOpt[String].get
@@ -232,8 +239,10 @@ object LoginModule {
 		val new_builder = MongoDBObject.newBuilder
 
 		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
-		val auth_token = LoginSercurity.md5Hash(phoneNo + time_span)
+		val user_id = LoginSercurity.md5Hash(phoneNo + time_span)
+		val auth_token = LoginSercurity.md5Hash(user_id + time_span)
 					
+		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> phoneNo
 		new_builder  += "email" -> ""
@@ -245,11 +254,8 @@ object LoginModule {
 		_data_connection.getCollection("users") += new_builder.result
 
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("auth_token" -> toJson(auth_token)))))
+							toJson(Map("user_id" -> toJson(user_id), "phoneNo" -> toJson(phoneNo), "auth_token" -> toJson(auth_token)))))
 	}
 	
-	def isAuthTokenValidate(token : String) : Boolean = {
-		val reVal = from db() in "users" where ("auth_token" -> token) select (x => x)
-		return !(reVal.empty)
-	}
+
 }

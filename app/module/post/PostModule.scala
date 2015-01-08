@@ -1,11 +1,9 @@
 package module.post
 
 import play.api.libs.json.Json
-import play.api.libs.json.Json._
+import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
-import play.api.http.Writeable
 import util.dao.from
-import com.mongodb.casbah.commons.MongoDBObject
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
@@ -14,9 +12,9 @@ import util.errorcode._
 import java.util.Date
 import play.api.mvc.MultipartFormData
 import play.api.libs.Files.TemporaryFile
-import java.io.File
-import play.api.libs.Files
-import java.io.FileInputStream
+
+import module.common.files.fop
+
 
 object PostModule {
 	def postContent(data : JsValue) : JsValue = {
@@ -24,6 +22,7 @@ object PostModule {
 		/**
 		 * get data from token
 		 */
+		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val message = (data \ "message").asOpt[String].get
 		
@@ -32,6 +31,8 @@ object PostModule {
 		 */
 		if (!LoginModule.isAuthTokenValidate(auth_token)) {
 			ErrorCode.errorToJson("auth token not valid")
+		} else if (!LoginModule.isUserExist(user_id)) {
+			ErrorCode.errorToJson("unknown user")
 		} else {
 			/**
 			 * save all the data to database
@@ -63,21 +64,5 @@ object PostModule {
 		}
 	}
 	
-	def uploadFile(data : MultipartFormData[TemporaryFile]) : JsValue = {
-	  	data.file("upload").map { x =>
-	  	  	Files.moveFile(x.ref.file, new File("upload/" + x.filename), true, true)
-	  
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
-	  	  	
-	  	}.getOrElse {
-			ErrorCode.errorToJson("post image error")
-	  	} 
-	}
-
-	def downloadFile(name : String) : Array[Byte] = {
-	  	val file = new File("upload/" + name)
-		val reVal : Array[Byte] = new Array[Byte](file.length.intValue)
-		new FileInputStream(file).read(reVal)
-		reVal
-	}
+	def uploadFile(data : MultipartFormData[TemporaryFile]) : JsValue = fop.uploadFile(data)
 }
