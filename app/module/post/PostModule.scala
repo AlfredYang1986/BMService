@@ -22,7 +22,6 @@ object PostModule {
 		/**
 		 * get data from token
 		 */
-	  println(data)
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val message = (data \ "message").asOpt[String].get

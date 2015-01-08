@@ -6,4 +6,5 @@ import controllers.common.requestArgsQuery.{requestArgs}
 
 object profileController extends Controller {
 	def like = Action (request => requestArgs(request)(ProfileModule.like))
+	def follow = Action (request => requestArgs(request)(ProfileModule.like))
 }
