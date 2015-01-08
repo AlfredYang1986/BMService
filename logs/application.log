@@ -4,3 +4,9 @@ Listening for HTTP on /0:0:0:0:0:0:0:0:8888
 2015-01-09 01:47:05,644 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
+2015-01-09 03:10:55,684 - [INFO] - from play in play-internal-execution-context-2 
+Application started (Dev)
+
+2015-01-09 03:12:51,138 - [INFO] - from play in play-internal-execution-context-2 
+Application started (Dev)
+

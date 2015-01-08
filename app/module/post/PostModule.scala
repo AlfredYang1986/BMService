@@ -22,6 +22,7 @@ object PostModule {
 		/**
 		 * get data from token
 		 */
+	  println(data)
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val message = (data \ "message").asOpt[String].get
@@ -39,7 +40,7 @@ object PostModule {
 			 */
 			val builder = MongoDBObject.newBuilder
 			builder += "date" -> new Date().getTime().toString 
-			builder += "owner" -> auth_token
+			builder += "owner" -> user_id
 			builder += "message" -> message
 		
 			val list_builder = MongoDBList.newBuilder
