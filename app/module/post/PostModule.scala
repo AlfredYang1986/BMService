@@ -44,7 +44,6 @@ object PostModule {
 		
 			val list_builder = MongoDBList.newBuilder
 			val items = (data \ "items").asOpt[Seq[JsValue]].get map { x =>
-				println(x)
 			  	val t = (x \ "type").asOpt[String].get
 				val url = (x \ "url").asOpt[String].get
 				

@@ -11,7 +11,7 @@ object queryController extends Controller {
 		Ok(views.html.index("Your new application is ready."))
 	}
 	
-	def queryHomeContent = Action (request => requestArgs(request)(QueryModule.queryHomeContent))
+	def queryHomeContent = Action ( request => requestArgs(request)(QueryModule.queryHomeContent))
 
 	def downloadFile(name : String) = Action ( Ok(QueryModule.downloadFile(name)).as("image/png"))
 }

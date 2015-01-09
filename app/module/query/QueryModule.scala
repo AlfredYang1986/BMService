@@ -16,13 +16,48 @@ object QueryModule {
 	/**
 	 * for the initial stage, only can query yours data
 	 */
-  
 	def queryHomeContent(data : JsValue) : JsValue = {
-			
+
+		def opt_2_js(value : Option[AnyRef]) : JsValue = { 
+			def opt_str_2_js(value : String) : JsValue = toJson(value)
+			def opt_val_2_js(value : Number) : JsValue = toJson(value.doubleValue)
+			def opt_map_2_js(value : BasicDBList) : JsValue = {
+				var xls : List[JsValue] = Nil
+				value.map { x =>
+					var tmp : Map[String, JsValue] = Map.empty
+					List("type", "url") map { iter =>
+				  		x.asInstanceOf[BasicDBObject].get(iter) match {
+				  			case str : String => println(str); tmp += iter -> opt_str_2_js(str)
+				  			case list : BasicDBList => println(list); tmp += iter -> opt_map_2_js(list)
+				  			case n : Number => println(n); tmp += iter -> opt_val_2_js(n)
+				  			case _ => Unit
+				  		}
+					}			  
+				  	xls = xls :+ toJson(tmp)
+				}
+				Json.toJson(xls)
+			}
+	  
+		  	value.map ( x => x match {
+		  	  	case str : String => opt_str_2_js(str)
+		  	  	case list : BasicDBList => opt_map_2_js(list)
+		  	  	case n : Number => opt_val_2_js(n)
+		  	  	case _ => ??? 
+		  	  }
+		  	).getOrElse(toJson(""))
+		}
+
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
-	  
-		null
+
+		var xls : List[JsValue] = Nil
+		(from db() in "posts").selectTop(50)("date") { x => 
+		  	var tmp : Map[String, JsValue] = Map.empty
+		  	List("date", "owner", "message", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
+		  	xls = xls :+ toJson(tmp)
+		}
+
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(xls)))
 	}
 	
 	def downloadFile(name : String) : Array[Byte] = fop.downloadFile(name)
