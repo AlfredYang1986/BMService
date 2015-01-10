@@ -8,6 +8,7 @@ import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
+import java.util.Date
 
 import module.common.files.fop
 
@@ -20,7 +21,7 @@ object QueryModule {
 
 		def opt_2_js(value : Option[AnyRef]) : JsValue = { 
 			def opt_str_2_js(value : String) : JsValue = toJson(value)
-			def opt_val_2_js(value : Number) : JsValue = toJson(value.doubleValue)
+			def opt_val_2_js(value : Number) : JsValue = toJson(value.longValue())
 			def opt_map_2_js(value : BasicDBList) : JsValue = {
 				var xls : List[JsValue] = Nil
 				value.map { x =>
@@ -49,9 +50,14 @@ object QueryModule {
 
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
+		
+		val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
+		val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
+//		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)
+		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(2)
 
 		var xls : List[JsValue] = Nil
-		(from db() in "posts").selectTop(50)("date") { x => 
+		(from db() in "posts" where ("date" $lte date)).selectTop(take)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
 		  	List("date", "owner_id", "owner_name", "title", "description", "likes", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
 		  	xls = xls :+ toJson(tmp)

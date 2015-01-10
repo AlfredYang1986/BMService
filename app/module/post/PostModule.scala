@@ -42,7 +42,7 @@ object PostModule {
 			val user_name = (from db() in "users" where ("user_id" -> user_id) select (x => x.get("name").map(n=>n).getOrElse(user_id))).head.asInstanceOf[String]
 		  
 			val builder = MongoDBObject.newBuilder
-			builder += "date" -> new Date().getTime().toString 
+			builder += "date" -> new Date().getTime
 			builder += "owner_id" -> user_id
 			builder += "owner_name" -> user_name
 			builder += "title" -> title
