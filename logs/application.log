@@ -1,167 +1,41 @@
-2015-01-09 11:51:51,689 - [INFO] - from play in pool-30-thread-1 
+2015-01-10 10:31:55,438 - [INFO] - from play in pool-8-thread-1 
 Listening for HTTP on /0:0:0:0:0:0:0:0:8888
 
-2015-01-09 11:52:00,206 - [INFO] - from play in play-internal-execution-context-1 
+2015-01-10 10:38:43,535 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2015-01-09 11:56:34,746 - [ERROR] - from play in play-akka.actor.default-dispatcher-9 
-Cannot invoke the action, eventually got an error: java.lang.RuntimeException: scala.NotImplementedError: an implementation is missing
-
-2015-01-09 11:56:34,790 - [ERROR] - from application in play-akka.actor.default-dispatcher-9 
-
-
-! @6kn61md9o - Internal server error, for (POST) [/query/queryHomeContent] ->
-
-play.api.Application$$anon$1: Execution exception[[RuntimeException: scala.NotImplementedError: an implementation is missing]]
-	at play.api.Application$class.handleError(Application.scala:293) ~[play_2.10.jar:2.2.6]
-	at play.api.DefaultApplication.handleError(Application.scala:399) ~[play_2.10.jar:2.2.6]
-	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3$$anonfun$applyOrElse$3.apply(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
-	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3$$anonfun$applyOrElse$3.apply(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
-	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3.applyOrElse(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
-	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3.applyOrElse(PlayDefaultUpstreamHandler.scala:264) ~[play_2.10.jar:2.2.6]
-	at scala.concurrent.Future$$anonfun$recoverWith$1.apply(Future.scala:344) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Future$$anonfun$recoverWith$1.apply(Future.scala:343) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+2015-01-10 13:27:21,266 - [ERROR] - from play in New I/O worker #4 
+Exception caught in RequestBodyHandler
+java.nio.channels.ClosedChannelException: null
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.cleanUpWriteBuffer(AbstractNioWorker.java:434) ~[netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.writeFromUserCode(AbstractNioWorker.java:129) ~[netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioServerSocketPipelineSink.handleAcceptedSocket(NioServerSocketPipelineSink.java:99) ~[netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioServerSocketPipelineSink.eventSunk(NioServerSocketPipelineSink.java:36) ~[netty.jar:na]
+	at org.jboss.netty.channel.Channels.write(Channels.java:725) ~[netty.jar:na]
+	at org.jboss.netty.handler.codec.oneone.OneToOneEncoder.doEncode(OneToOneEncoder.java:71) ~[netty.jar:na]
+	at org.jboss.netty.handler.codec.oneone.OneToOneEncoder.handleDownstream(OneToOneEncoder.java:59) ~[netty.jar:na]
+	at com.typesafe.netty.http.pipelining.HttpPipeliningHandler.handleDownstream(HttpPipeliningHandler.java:88) ~[netty-http-pipelining.jar:na]
+	at play.core.server.netty.NettyResultStreamer$.sendDownstream(NettyResultStreamer.scala:183) ~[play_2.10.jar:2.2.6]
+	at play.core.server.netty.NettyResultStreamer$$anonfun$bufferingIteratee$1.apply(NettyResultStreamer.scala:108) ~[play_2.10.jar:2.2.6]
+	at play.core.server.netty.NettyResultStreamer$$anonfun$bufferingIteratee$1.apply(NettyResultStreamer.scala:102) ~[play_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$13.apply(Iteratee.scala:493) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$13.apply(Iteratee.scala:493) ~[play-iteratees_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at play.api.libs.iteratee.Execution$$anon$1.execute(Execution.scala:43) ~[play-iteratees_2.10.jar:2.2.6]
 	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at play.api.libs.iteratee.Execution$$anon$2.execute(Execution.scala:70) ~[play-iteratees_2.10.jar:2.2.6]
-	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.link(Promise.scala:304) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.linkRootOf(Promise.scala:289) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:253) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at play.api.libs.iteratee.Execution$$anon$2.execute(Execution.scala:70) ~[play-iteratees_2.10.jar:2.2.6]
-	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:23) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:42) ~[akka-actor_2.10.jar:2.2.0]
-	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:386) ~[akka-actor_2.10.jar:2.2.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
 	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-Caused by: java.lang.RuntimeException: scala.NotImplementedError: an implementation is missing
-	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:308) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4$$anonfun$apply$5.apply(Action.scala:109) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4$$anonfun$apply$5.apply(Action.scala:109) ~[play_2.10.jar:2.2.6]
-	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4.apply(Action.scala:108) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4.apply(Action.scala:107) ~[play_2.10.jar:2.2.6]
-	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at play.api.mvc.Action$$anonfun$apply$1.apply(Action.scala:107) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$$anonfun$apply$1.apply(Action.scala:100) ~[play_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$mapM$1.apply(Iteratee.scala:481) ~[play-iteratees_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$mapM$1.apply(Iteratee.scala:481) ~[play-iteratees_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$flatMapM$1.apply(Iteratee.scala:517) ~[play-iteratees_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$flatMapM$1.apply(Iteratee.scala:517) ~[play-iteratees_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$14.apply(Iteratee.scala:494) ~[play-iteratees_2.10.jar:2.2.6]
-	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$14.apply(Iteratee.scala:494) ~[play-iteratees_2.10.jar:2.2.6]
-	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	... 6 common frames omitted
-Caused by: scala.NotImplementedError: an implementation is missing
-	at scala.Predef$.$qmark$qmark$qmark(Predef.scala:252) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at module.query.QueryModule$$anonfun$module$query$QueryModule$$opt_2_js$1$1.apply(QueryModule.scala:30) ~[classes/:na]
-	at module.query.QueryModule$$anonfun$module$query$QueryModule$$opt_2_js$1$1.apply(QueryModule.scala:26) ~[classes/:na]
-	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at module.query.QueryModule$.module$query$QueryModule$$opt_2_js$1(QueryModule.scala:26) ~[classes/:na]
-	at module.query.QueryModule$$anonfun$queryHomeContent$1$$anonfun$apply$1.apply(QueryModule.scala:43) ~[classes/:na]
-	at module.query.QueryModule$$anonfun$queryHomeContent$1$$anonfun$apply$1.apply(QueryModule.scala:41) ~[classes/:na]
-	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.collection.immutable.List.foreach(List.scala:318) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.collection.TraversableLike$class.map(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at scala.collection.AbstractTraversable.map(Traversable.scala:105) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at module.query.QueryModule$$anonfun$queryHomeContent$1.apply(QueryModule.scala:41) ~[classes/:na]
-	at module.query.QueryModule$$anonfun$queryHomeContent$1.apply(QueryModule.scala:40) ~[classes/:na]
-	at util.dao.AMongoDBLINQ$$anonfun$selectTop$1.apply(querybase.scala:113) ~[classes/:na]
-	at util.dao.AMongoDBLINQ$$anonfun$selectTop$1.apply(querybase.scala:112) ~[classes/:na]
-	at scala.collection.Iterator$class.foreach(Iterator.scala:727) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at com.mongodb.casbah.MongoCursor.foreach(MongoCursor.scala:500) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at util.dao.AMongoDBLINQ.selectTop(querybase.scala:112) ~[classes/:na]
-	at module.query.QueryModule$.queryHomeContent(QueryModule.scala:40) ~[classes/:na]
-	at controllers.queryController$$anonfun$queryHomeContent$1$$anonfun$apply$1.apply(queryController.scala:16) ~[classes/:na]
-	at controllers.queryController$$anonfun$queryHomeContent$1$$anonfun$apply$1.apply(queryController.scala:16) ~[classes/:na]
-	at controllers.common.requestArgsQuery$$anonfun$requestArgs$1.apply(requestArgsQuery.scala:12) ~[classes/:na]
-	at controllers.common.requestArgsQuery$$anonfun$requestArgs$1.apply(requestArgsQuery.scala:11) ~[classes/:na]
-	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
-	at controllers.common.requestArgsQuery$.requestArgs(requestArgsQuery.scala:11) ~[classes/:na]
-	at controllers.queryController$$anonfun$queryHomeContent$1.apply(queryController.scala:16) ~[classes/:na]
-	at controllers.queryController$$anonfun$queryHomeContent$1.apply(queryController.scala:14) ~[classes/:na]
-	at play.api.mvc.ActionBuilder$$anonfun$apply$10.apply(Action.scala:221) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.ActionBuilder$$anonfun$apply$10.apply(Action.scala:220) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.Action$.invokeBlock(Action.scala:357) ~[play_2.10.jar:2.2.6]
-	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:309) ~[play_2.10.jar:2.2.6]
-	... 22 common frames omitted
 
-2015-01-09 11:58:25,746 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 11:59:41,158 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:00:40,055 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:02:06,826 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:15:42,724 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:16:26,600 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:33:56,185 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:34:46,395 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:35:46,595 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:36:36,890 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:37:36,482 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:39:55,238 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:40:47,199 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:41:18,018 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:41:44,238 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:44:49,436 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:47:02,664 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:48:18,284 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:49:22,014 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-01-09 12:50:27,594 - [INFO] - from play in play-internal-execution-context-1 
+2015-01-10 13:34:47,110 - [INFO] - from play in play-internal-execution-context-8 
 Application started (Dev)
 

@@ -25,7 +25,7 @@ object QueryModule {
 				var xls : List[JsValue] = Nil
 				value.map { x =>
 					var tmp : Map[String, JsValue] = Map.empty
-					List("type", "url") map { iter =>
+					List("type", "name") map { iter =>
 				  		x.asInstanceOf[BasicDBObject].get(iter) match {
 				  			case str : String => println(str); tmp += iter -> opt_str_2_js(str)
 				  			case list : BasicDBList => println(list); tmp += iter -> opt_map_2_js(list)
@@ -53,7 +53,7 @@ object QueryModule {
 		var xls : List[JsValue] = Nil
 		(from db() in "posts").selectTop(50)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("date", "owner", "message", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
+		  	List("date", "owner_id", "owner_name", "title", "description", "likes", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
 		  	xls = xls :+ toJson(tmp)
 		}
 

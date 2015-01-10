@@ -24,7 +24,8 @@ object PostModule {
 		 */
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
-		val message = (data \ "message").asOpt[String].get
+		val title = (data \ "title").asOpt[String].get
+		val description = (data \ "description").asOpt[String].get
 		
 		/**
 		 * check the token is validate or not
@@ -37,19 +38,25 @@ object PostModule {
 			/**
 			 * save all the data to database
 			 */
+		  
+			val user_name = (from db() in "users" where ("user_id" -> user_id) select (x => x.get("name").map(n=>n).getOrElse(user_id))).head.asInstanceOf[String]
+		  
 			val builder = MongoDBObject.newBuilder
 			builder += "date" -> new Date().getTime().toString 
-			builder += "owner" -> user_id
-			builder += "message" -> message
-		
+			builder += "owner_id" -> user_id
+			builder += "owner_name" -> user_name
+			builder += "title" -> title
+			builder += "description" -> description
+			builder += "likes" -> 0
+			
 			val list_builder = MongoDBList.newBuilder
 			val items = (data \ "items").asOpt[Seq[JsValue]].get map { x =>
-			  	val t = (x \ "type").asOpt[String].get
-				val url = (x \ "url").asOpt[String].get
+			  	val t = (x \ "type").asOpt[Int].get
+				val url = (x \ "name").asOpt[String].get
 				
 				val tmp = MongoDBObject.newBuilder
 				tmp += "type" -> t
-				tmp += "url" -> url
+				tmp += "name" -> url
 			
 				list_builder += tmp.result
 			}
