@@ -53,11 +53,10 @@ object QueryModule {
 		
 		val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
 		val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
-//		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)
-		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(2)
+		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)
 
 		var xls : List[JsValue] = Nil
-		(from db() in "posts" where ("date" $lte date)).selectTop(take)("date") { x => 
+		(from db() in "posts" where ("date" $lte date)).selectSkipTop(skip)(take)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
 		  	List("date", "owner_id", "owner_name", "title", "description", "likes", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
 		  	xls = xls :+ toJson(tmp)
