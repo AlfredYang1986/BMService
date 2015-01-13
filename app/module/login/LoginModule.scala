@@ -8,6 +8,7 @@ import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
+import module.sercurity.Sercurity
 
 object LoginModule {
  	
@@ -50,8 +51,8 @@ object LoginModule {
 		/**
 		 * generate a reg token
 		 */
-		val time_span_minutes = LoginSercurity.getTimeSpanWithMinutes
-		val reg_token = LoginSercurity.md5Hash(phoneNo + time_span_minutes)
+		val time_span_minutes = Sercurity.getTimeSpanWithMinutes
+		val reg_token = Sercurity.md5Hash(phoneNo + time_span_minutes)
 		
 		val builder = MongoDBObject.newBuilder
 		builder += "phoneNo" -> phoneNo
@@ -75,8 +76,8 @@ object LoginModule {
 		val code = (data \ "code").asOpt[String].get.toInt
 		val reg_token = (data \ "reg_token").asOpt[String].get
 		
-		val time_span_minutes = LoginSercurity.getTimeSpanWithMinutes
-		val reg_token_new = LoginSercurity.md5Hash(phoneNo + time_span_minutes)
+		val time_span_minutes = Sercurity.getTimeSpanWithMinutes
+		val reg_token_new = Sercurity.md5Hash(phoneNo + time_span_minutes)
 		if (!reg_token_new.equals(reg_token)) {
 			ErrorCode.errorToJson("token exprie")
 		} else {
@@ -127,9 +128,9 @@ object LoginModule {
 	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 
-		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
-		val user_id = LoginSercurity.md5Hash(provide_name + provide_token + time_span)
-		val auth_token = LoginSercurity.md5Hash(provide_name + provide_token + time_span)
+		val time_span = Sercurity.getTimeSpanWithMillSeconds
+		val user_id = Sercurity.md5Hash(provide_name + provide_token + time_span)
+		val auth_token = Sercurity.md5Hash(provide_name + provide_token + time_span)
 					
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
@@ -238,9 +239,9 @@ object LoginModule {
 	private def authCreateNewUserWithPhone(phoneNo : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 
-		val time_span = LoginSercurity.getTimeSpanWithMillSeconds
-		val user_id = LoginSercurity.md5Hash(phoneNo + time_span)
-		val auth_token = LoginSercurity.md5Hash(user_id + time_span)
+		val time_span = Sercurity.getTimeSpanWithMillSeconds
+		val user_id = Sercurity.md5Hash(phoneNo + time_span)
+		val auth_token = Sercurity.md5Hash(user_id + time_span)
 					
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token

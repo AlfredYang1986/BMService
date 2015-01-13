@@ -19,18 +19,23 @@ object QueryModule {
 	 */
 	def queryHomeContent(data : JsValue) : JsValue = {
 
-		def opt_2_js(value : Option[AnyRef]) : JsValue = { 
+		def opt_2_js(value : Option[AnyRef], key : String) : JsValue = { 
 			def opt_str_2_js(value : String) : JsValue = toJson(value)
 			def opt_val_2_js(value : Number) : JsValue = toJson(value.longValue())
-			def opt_map_2_js(value : BasicDBList) : JsValue = {
+			def opt_map_2_js(value : BasicDBList, key : String) : JsValue = {
+				def key2List : List[String] = key match {
+				  case "items" => List("type", "name")
+				  case "comments" => List("comment_owner_id", "comment_owner_name", "comment_date", "comment_content")
+				  case "likes" => List("like_owner_id", "like_owner_name")
+				}
 				var xls : List[JsValue] = Nil
 				value.map { x =>
 					var tmp : Map[String, JsValue] = Map.empty
-					List("type", "name") map { iter =>
+					key2List map { iter =>
 				  		x.asInstanceOf[BasicDBObject].get(iter) match {
-				  			case str : String => println(str); tmp += iter -> opt_str_2_js(str)
-				  			case list : BasicDBList => println(list); tmp += iter -> opt_map_2_js(list)
-				  			case n : Number => println(n); tmp += iter -> opt_val_2_js(n)
+				  			case str : String => tmp += iter -> opt_str_2_js(str)
+				  			case list : BasicDBList => tmp += iter -> opt_map_2_js(list, key)
+				  			case n : Number => tmp += iter -> opt_val_2_js(n)
 				  			case _ => Unit
 				  		}
 					}			  
@@ -41,7 +46,7 @@ object QueryModule {
 	  
 		  	value.map ( x => x match {
 		  	  	case str : String => opt_str_2_js(str)
-		  	  	case list : BasicDBList => opt_map_2_js(list)
+		  	  	case list : BasicDBList => opt_map_2_js(list, key)
 		  	  	case n : Number => opt_val_2_js(n)
 		  	  	case _ => ??? 
 		  	  }
@@ -58,7 +63,7 @@ object QueryModule {
 		var xls : List[JsValue] = Nil
 		(from db() in "posts" where ("date" $lte date)).selectSkipTop(skip)(take)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("date", "owner_id", "owner_name", "title", "description", "likes", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter)))
+		  	List("post_id", "date", "owner_id", "owner_name", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items") map (iter => tmp += iter -> opt_2_js(x.get(iter), iter))
 		  	xls = xls :+ toJson(tmp)
 		}
 

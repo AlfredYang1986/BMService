@@ -14,7 +14,8 @@ object ErrorCode {
   		new ErrorNode("phone number not valid", -4, "inputing phone code is not valid"),
   		new ErrorNode("auth token not valid", -5, "the auth token is not validated"),
   		new ErrorNode("post image error", -6, "post image with errors"),
-  		new ErrorNode("unknown user", -7, "user is not existing")
+  		new ErrorNode("unknown user", -7, "user is not existing"),
+  		new ErrorNode("post token not vaild", -8, "post id or post token not existing")
   	)
   
   	def getErrorCodeByName(name : String) : Int = (xls.find(x => x.name == name)) match {
