@@ -88,6 +88,7 @@ object PostModule {
 			val comment_builder = MongoDBObject.newBuilder
 			comment_builder += "comment_owner_id" -> user_id
 			comment_builder += "comment_owner_name" -> user_name
+			comment_builder += "comment_owner_photo" -> ""
 			comment_builder += "comment_date" -> new Date().getTime
 			comment_builder += "comment_content" -> content
 			
@@ -162,8 +163,10 @@ object PostModule {
 		
 		def createLike(user_id : String, user_name : String) : MongoDBObject = {
 			val like_builder = MongoDBObject.newBuilder
-			like_builder += "comment_owner_id" -> user_id
-			like_builder += "comment_owner_name" -> user_name
+			like_builder += "like_owner_id" -> user_id
+			like_builder += "like_owner_name" -> user_name
+			like_builder += "like_owner_photo" -> ""
+			like_builder += "like_date" -> new Date().getTime
 			
 			like_builder.result
 		}
