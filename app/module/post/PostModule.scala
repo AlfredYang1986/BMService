@@ -150,20 +150,20 @@ object PostModule {
 				}.getOrElse(Unit)
 				
 				ori_post.get("comments").map { x => 
-					val ori_comment_list = x.asInstanceOf[BasicDBList]
 					val new_comments = (from db() in "post_comments" where ("post_id" -> post_id)).select(x => x.get("comments").get.asInstanceOf[DBObject])
 					ori_post += "comments" -> new_comments.head.asInstanceOf[BasicDBList].take(resentCommentCount)
 				}.getOrElse(Unit)
 
 				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post);
-			
 				QueryModule.queryComments(data)
 			}
 		}
 	}
 	
-	def likePost(data : JsValue) : JsValue = {
-		
+	def postLike(data : JsValue) : JsValue = {
+	
+		def resentLikedCount = 6
+	  
 		def createLike(user_id : String, user_name : String) : MongoDBObject = {
 			val like_builder = MongoDBObject.newBuilder
 			like_builder += "like_owner_id" -> user_id
@@ -188,25 +188,25 @@ object PostModule {
 			/**
 			 * add like to likes table
 			 */
-			val ori_comments = from db() in "commments" where ("post_id" -> post_id) select (x => x)
+			val ori_comments = from db() in "post_likes" where ("post_id" -> post_id) select (x => x)
 			if (ori_comments.empty) {
 				val comment = createLike(user_id, user_name)
 				
 				val comment_list_builder = MongoDBList.newBuilder
 				comment_list_builder += comment 
 				
-				val post_builder = MongoDBList.newBuilder
+				val post_builder = MongoDBObject.newBuilder
 				post_builder += "post_id" -> post_id
 				post_builder += "likes" -> comment_list_builder.result
-				
-				_data_connection.getCollection("likes") += post_builder.result
+			
+				_data_connection.getCollection("post_likes") += post_builder.result
 			} else {
 				val comment = createLike(user_id, user_name)
 			
 				val ori = ori_comments.head
-				ori.get("likes").map(x => x.asInstanceOf[BasicDBList].add(comment)).getOrElse(Unit)
+				ori.get("likes").map(x => x.asInstanceOf[BasicDBList].add(0, comment)).getOrElse(Unit)
 				
-				_data_connection.getCollection("likes").update(DBObject("post_id" -> post_id), ori);
+				_data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), ori);
 			}
 			
 			/**
@@ -222,15 +222,12 @@ object PostModule {
 				}.getOrElse(Unit)
 				
 				ori_post.get("likes").map { x => 
-					val ori_comment_list = x.asInstanceOf[BasicDBList]
-					ori_comment_list += createLike(user_id, user_name)
-												
-					ori_post += "likes" -> ori_comment_list
+					val new_comments = (from db() in "post_likes" where ("post_id" -> post_id)).select(x => x.get("likes").get.asInstanceOf[DBObject])
+					ori_post += "likes" -> new_comments.head.asInstanceOf[BasicDBList].take(resentLikedCount)
 				}.getOrElse(Unit)
 				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post);
 				
-				Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("comment_result" -> toJson(true)))))
+				QueryModule.queryLikes(data)
 			}
 		}
 	}
