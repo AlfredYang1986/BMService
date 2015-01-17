@@ -16,6 +16,7 @@ POST	/login/authCreateUserWithPhone 	controllers.loginController.authCreateUserW
 # post modul
 POST	/post/postContent				controllers.postController.postContent
 POST	/post/uploadFile				controllers.postController.uploadFile
+POST	/post/postComment				controllers.postController.postComment
 
 # query modul
 GET		/query/downloadFile/*name		controllers.queryController.downloadFile(name)

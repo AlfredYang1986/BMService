@@ -14,6 +14,7 @@ import play.api.mvc.MultipartFormData
 import play.api.libs.Files.TemporaryFile
 import module.sercurity._
 import module.common.files.fop
+import module.query.QueryModule
 
 object PostModule {
 	def postContent(data : JsValue) : JsValue = {
@@ -83,6 +84,8 @@ object PostModule {
 	def uploadFile(data : MultipartFormData[TemporaryFile]) : JsValue = fop.uploadFile(data)
 	
 	def postCommnet(data : JsValue) : JsValue = {
+	 
+		def resentCommentCount = 2
 	  
 		def createComment(user_id : String, user_name : String, content : String) : MongoDBObject = {
 			val comment_builder = MongoDBObject.newBuilder
@@ -110,25 +113,28 @@ object PostModule {
 			/**
 			 * add commment to comments table
 			 */
-			val ori_comments = from db() in "commments" where ("post_id" -> post_id) select (x => x)
+			val ori_comments = from db() in "post_comments" where ("post_id" -> post_id) select (x => x)
 			if (ori_comments.empty) {
 				val comment = createComment(user_id, user_name, content)
 				
 				val comment_list_builder = MongoDBList.newBuilder
 				comment_list_builder += comment 
 				
-				val post_builder = MongoDBList.newBuilder
+				val post_builder = MongoDBObject.newBuilder
 				post_builder += "post_id" -> post_id
-				post_builder += "comments" -> comment_list_builder.result
+				post_builder += "comments" -> comment_list_builder.result//.sortBy{ x => x.asInstanceOf[BasicDBObject].get("comment_date").asInstanceOf[Number].longValue }.reverse
 				
-				_data_connection.getCollection("comments") += post_builder.result
+				_data_connection.getCollection("post_comments") += post_builder.result
 			} else {
 				val comment = createComment(user_id, user_name, content)
 			
 				val ori = ori_comments.head
-				ori.get("comments").map(x => x.asInstanceOf[BasicDBList].add(comment)).getOrElse(Unit)
+				ori.get("comments").map { x => 
+				  	val xls = x.asInstanceOf[BasicDBList]
+				  	xls.add(0, comment)
+				}.getOrElse(Unit)
 				
-				_data_connection.getCollection("comments").update(DBObject("post_id" -> post_id), ori);
+				_data_connection.getCollection("post_comments").update(DBObject("post_id" -> post_id), ori);
 			}
 			
 			/**
@@ -145,16 +151,13 @@ object PostModule {
 				
 				ori_post.get("comments").map { x => 
 					val ori_comment_list = x.asInstanceOf[BasicDBList]
-					ori_comment_list += createComment(user_id, user_name, content)
-					val new_comment_list = ori_comment_list.sortBy(x => x.asInstanceOf[BasicDBObject]
-												.get("comment_date").asInstanceOf[Number].longValue).reverse.tail
-												
-					ori_post += "comments" -> new_comment_list
+					val new_comments = (from db() in "post_comments" where ("post_id" -> post_id)).select(x => x.get("comments").get.asInstanceOf[DBObject])
+					ori_post += "comments" -> new_comments.head.asInstanceOf[BasicDBList].take(resentCommentCount)
 				}.getOrElse(Unit)
+
 				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post);
-				
-				Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("comment_result" -> toJson(true)))))
+			
+				QueryModule.queryComments(data)
 			}
 		}
 	}

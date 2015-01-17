@@ -12,4 +12,5 @@ object postController extends Controller {
 	
 	def postContent = Action (request => requestArgs(request)(PostModule.postContent))
 	def uploadFile = Action (request => uploadRequestArgs(request)(PostModule.uploadFile))
+	def postComment = Action (request => requestArgs(request)(PostModule.postCommnet))
 }
