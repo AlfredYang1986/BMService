@@ -22,6 +22,7 @@ POST	/post/postLike					controllers.postController.postLike
 # query modul
 GET		/query/downloadFile/*name		controllers.queryController.downloadFile(name)
 POST	/query/queryHomeContent			controllers.queryController.queryHomeContent
+POST	/query/queryComments			controllers.queryController.queryComments
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

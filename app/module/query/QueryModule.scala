@@ -67,7 +67,7 @@ object QueryModule {
 		  	xls = xls :+ toJson(tmp)
 		}
 
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(xls)))
+		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
 	
 	def downloadFile(name : String) : Array[Byte] = fop.downloadFile(name)
@@ -81,18 +81,21 @@ object QueryModule {
 		val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
 		val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
 		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)
-	
-		val comments = (from db() in "post_comments" where ("post_id" -> post_id)).select(x => x.get("comments").get.asInstanceOf[DBObject])
+
+		val comments_ori = (from db() in "post_comments" where ("post_id" -> post_id)).select(x => x.get("comments").get.asInstanceOf[DBObject])
+		val comments = comments_ori.head.asInstanceOf[BasicDBList].filter(x => x.asInstanceOf[BasicDBObject].get("comment_date").asInstanceOf[Number].longValue < date)
 		var xls : List[JsValue] = Nil
-		val size = comments.head.size
+		
+		val size = comments.size
 		if (skip < size) 
-			comments.head.asInstanceOf[BasicDBList].subList(skip, Math.min(size - 1, skip + take - 1)).toSeq.map { x => 
+			comments.subList(skip, Math.min(size, skip + take)).toSeq.map { x => 
 				var tmp : Map[String, JsValue] = Map.empty
 				List("comment_owner_id", "comment_owner_name", "comment_owner_photo", "comment_date", "comment_content") map (iter => tmp += iter -> opt_2_js(Option(x.asInstanceOf[BasicDBObject].get(iter)), iter))
 				xls = xls :+ toJson(tmp)
 			}
 
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("comments_count" -> toJson(size), "comments" -> toJson(xls)))))
+		println(xls)
+		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("comments_count" -> toJson(size), "comments" -> toJson(xls)))))
 	}
 	
 	def queryLikes(data : JsValue) : JsValue = {
@@ -109,12 +112,12 @@ object QueryModule {
 		var xls : List[JsValue] = Nil
 		val size = likes.head.size
 		if (skip < size) 
-			likes.head.asInstanceOf[BasicDBList].subList(skip, Math.min(size - 1, skip + take - 1)).toSeq.map { x => 
+			likes.head.asInstanceOf[BasicDBList].filter(x => x.asInstanceOf[BasicDBObject].get("like_date").asInstanceOf[Number].longValue < date).subList(skip, Math.min(size, skip + take)).toSeq.map { x => 
 				var tmp : Map[String, JsValue] = Map.empty
 				List("like_owner_id", "like_owner_name", "like_owner_photo", "like_date") map (iter => tmp += iter -> opt_2_js(Option(x.asInstanceOf[BasicDBObject].get(iter)), iter))
 				xls = xls :+ toJson(tmp)
 			}
 
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("likes_count" -> toJson(size), "likes" -> toJson(xls)))))
+		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("likes_count" -> toJson(size), "likes" -> toJson(xls)))))
 	}
 }

@@ -12,6 +12,8 @@ object queryController extends Controller {
 	}
 	
 	def queryHomeContent = Action ( request => requestArgs(request)(QueryModule.queryHomeContent))
+	def queryComments = Action ( request => requestArgs(request)(QueryModule.queryComments))
+	def queryLikes = Action ( request => requestArgs(request)(QueryModule.queryLikes))
 
 	def downloadFile(name : String) = Action ( Ok(QueryModule.downloadFile(name)).as("image/png"))
 }
