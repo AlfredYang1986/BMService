@@ -94,7 +94,6 @@ object QueryModule {
 				xls = xls :+ toJson(tmp)
 			}
 
-		println(xls)
 		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("comments_count" -> toJson(size), "comments" -> toJson(xls)))))
 	}
 	
