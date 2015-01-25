@@ -13,16 +13,19 @@ POST	/login/connectWithThird			controllers.loginController.connectWithThird
 POST	/login/authUpdateDetails		controllers.loginController.authUpdateDetails
 POST	/login/authCreateUserWithPhone 	controllers.loginController.authCreateUserWithPhone
 
-# post modul
+# post module
 POST	/post/postContent				controllers.postController.postContent
 POST	/post/uploadFile				controllers.postController.uploadFile
 POST	/post/postComment				controllers.postController.postComment
 POST	/post/postLike					controllers.postController.postLike
 
-# query modul
+# query module
 GET		/query/downloadFile/*name		controllers.queryController.downloadFile(name)
 POST	/query/queryHomeContent			controllers.queryController.queryHomeContent
 POST	/query/queryComments			controllers.queryController.queryComments
+
+# profile module
+POST	/profile/updateProfile 			controllers.profileController.updateProfile
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -21,12 +21,12 @@ object ErrorCode {
   
   	def getErrorCodeByName(name : String) : Int = (xls.find(x => x.name == name)) match {
   			case Some(y) => y.code
-  			case None => ???
+  			case None => -9999
   		}
   	
    	def getErrorMessageByName(name : String) : String = (xls.find(x => x.name == name)) match {
   			case Some(y) => y.message
-  			case None => ???
+  			case None => "unknow error"
   		}
    	
    	def errorToJson(name : String) : JsValue =

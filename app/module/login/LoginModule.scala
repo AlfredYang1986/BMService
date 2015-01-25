@@ -10,6 +10,8 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.sercurity.Sercurity
 
+import module.profile.ProfileModule
+
 object LoginModule {
  	
 	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
@@ -23,7 +25,8 @@ object LoginModule {
 		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
 		else {
 			val user = rel.head
-			List("name", "phoneNo", "email") foreach { x => 
+//			List("name", "phoneNo", "email") foreach { x => 
+			List("phoneNo", "email") foreach { x => 
 				(data \ x).asOpt[String].map { value =>
 				  user += x -> value
 				}.getOrElse(Unit)
@@ -111,7 +114,7 @@ object LoginModule {
 					  
 						val auth_token = cur.get("auth_token").get.asInstanceOf[String]
 						val user_id = cur.get("user_id").get.asInstanceOf[String]
-						val name = cur.get("name").get.asInstanceOf[String]
+						val name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 
 						Json.toJson(Map("status" -> toJson("error"), "error" -> 
 							toJson(Map("message" -> toJson("already login"), 
@@ -125,7 +128,7 @@ object LoginModule {
 		}
 	}
 	
-	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
+	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
@@ -136,7 +139,7 @@ object LoginModule {
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> ""
 		new_builder  += "email" -> ""
-		new_builder  += "name" -> provide_screen_name
+//		new_builder  += "name" -> provide_screen_name
 		
 		val new_third_builder = MongoDBList.newBuilder
 
@@ -145,53 +148,62 @@ object LoginModule {
 		builder_third += ("provide_token") -> provide_token
 		builder_third += ("provide_uid") -> provide_uid
 		builder_third += ("provide_screen_name") -> provide_screen_name
+		builder_third += ("provide_screen_photo") -> provide_screen_photo
 
 		new_third_builder += builder_third.result
 		
 		new_builder  += "third" -> new_third_builder.result
 	 
-	
 		_data_connection.getCollection("users") += new_builder.result
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id, "screen_name" -> provide_screen_name, "screen_photo" -> provide_screen_photo)))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
 	}
 
-	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String) : JsValue = {
+	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
 
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
 		val user_id = user.get("user_id").get.asInstanceOf[String]
 		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
-		var name = user.get("name").get.asInstanceOf[String]
-			if (name == "") {
-				name = provide_name
-				user += ("name") -> name
-			}
-			val tmp = third_list.find(x => x.asInstanceOf[BasicDBObject].get("provide_name") ==  provide_name)
+//		var name = user.get("name").get.asInstanceOf[String]
+//		
+//		if (name == "") {
+//			name = provide_name
+//			user += ("name") -> name
+//		}
+		val tmp = third_list.find(x => x.asInstanceOf[BasicDBObject].get("provide_name") ==  provide_name)
 			
-			tmp match {
-			  case Some(x) => {
+		tmp match {
+			case Some(x) => {
 				  x.asInstanceOf[BasicDBObject] += ("provide_name") -> provide_name
 				  x.asInstanceOf[BasicDBObject] += ("provide_token") -> provide_token
 				  x.asInstanceOf[BasicDBObject] += ("provide_uid") -> provide_uid
 				  x.asInstanceOf[BasicDBObject] += ("provide_screen_name") -> provide_screen_name
+				  x.asInstanceOf[BasicDBObject] += ("provide_screen_photo") -> provide_screen_photo
 
 				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
-			  }
-			  case None => {
+			}
+			
+			case None => {
 				  val builder = MongoDBObject.newBuilder
 			    
 				  builder += ("provide_name") -> provide_name
 				  builder += ("provide_token") -> provide_token
 				  builder += ("provide_uid") -> provide_uid
 				  builder += ("provide_screen_name") -> provide_screen_name
+				  builder += ("provide_screen_photo") -> provide_screen_photo
 				  third_list += builder.result
 
 				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
-			  }
 			}
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(name), "connect_result" -> toJson("success")))))
+		}
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id, "screen_name" -> provide_screen_name, "screen_photo" -> provide_screen_photo)))
+		
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "connect_result" -> toJson("success")))))
 	}
 	
 	def authWithThird(data : JsValue) : JsValue = {
@@ -202,11 +214,12 @@ object LoginModule {
 		val provide_token = (data \ "provide_token").asOpt[String].get
 		val provide_uid = (data \ "provide_uid").asOpt[String].get
 		val provide_screen_name = (data \ "provide_screen_name").asOpt[String].get
+		val provide_screen_photo = (data \ "provide_screen_photo").asOpt[String].get
   
 		val users = from db() in "users" where ("third.provide_name" -> provide_name, "third.provide_uid" -> provide_uid) select (x => x)
 	
-		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name)
-		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name)
+		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
+		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
 	}
 
 	def connectWithThird(data : JsValue) : JsValue = authWithThird(data)
@@ -253,6 +266,8 @@ object LoginModule {
 		new_builder  += "third" -> new_third_builder.result
 					
 		_data_connection.getCollection("users") += new_builder.result
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id)))
 
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 							toJson(Map("user_id" -> toJson(user_id), "phoneNo" -> toJson(phoneNo), "auth_token" -> toJson(auth_token)))))

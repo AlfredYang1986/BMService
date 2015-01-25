@@ -59,13 +59,15 @@ object PostModule {
 			 * save all the data to database
 			 */
 		  
-			val user_name = (from db() in "users" where ("user_id" -> user_id) select (x => x.get("name").map(n=>n).getOrElse(user_id))).head.asInstanceOf[String]
+			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 		  
 			val builder = MongoDBObject.newBuilder
 			builder += "post_id" -> Sercurity.md5Hash(user_id + user_name + Sercurity.getTimeSpanWithSeconds)
 			builder += "date" -> new Date().getTime
 			builder += "owner_id" -> user_id
 			builder += "owner_name" -> user_name
+			builder += "owner_photo" -> user_photo
 			builder += "title" -> title
 			builder += "description" -> description
 			builder += "items" -> postItemList
@@ -75,6 +77,16 @@ object PostModule {
 			builder += "comments" -> MongoDBList()
 			
 			_data_connection.getCollection("posts") += builder.result
+			
+			/**
+			 * refresh user profile table for resent
+			 */
+			val user_profile = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).head
+			user_profile.get("posts_count").map { x => 
+				  	val tmp : Number = x.asInstanceOf[Number].intValue + 1
+				  	user_profile += "posts_count" -> tmp
+				}.getOrElse(Unit)
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user_profile);
 			
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 							toJson(Map("post_result" -> toJson(true)))))
@@ -87,11 +99,11 @@ object PostModule {
 	 
 		def resentCommentCount = 2
 	  
-		def createComment(user_id : String, user_name : String, content : String) : MongoDBObject = {
+		def createComment(user_id : String, user_name : String, content : String, user_photo : String) : MongoDBObject = {
 			val comment_builder = MongoDBObject.newBuilder
 			comment_builder += "comment_owner_id" -> user_id
 			comment_builder += "comment_owner_name" -> user_name
-			comment_builder += "comment_owner_photo" -> ""
+			comment_builder += "comment_owner_photo" -> user_photo
 			comment_builder += "comment_date" -> new Date().getTime
 			comment_builder += "comment_content" -> content
 			
@@ -108,14 +120,15 @@ object PostModule {
 		
 		if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
 		else {
-			val user_name = (from db() in "users" where ("user_id" -> user_id) select (x => x.get("name").map(n=>n).getOrElse(user_id))).head.asInstanceOf[String]
+			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 			
 			/**
 			 * add commment to comments table
 			 */
 			val ori_comments = from db() in "post_comments" where ("post_id" -> post_id) select (x => x)
 			if (ori_comments.empty) {
-				val comment = createComment(user_id, user_name, content)
+				val comment = createComment(user_id, user_name, content, user_photo)
 				
 				val comment_list_builder = MongoDBList.newBuilder
 				comment_list_builder += comment 
@@ -126,7 +139,7 @@ object PostModule {
 				
 				_data_connection.getCollection("post_comments") += post_builder.result
 			} else {
-				val comment = createComment(user_id, user_name, content)
+				val comment = createComment(user_id, user_name, content, user_photo)
 			
 				val ori = ori_comments.head
 				ori.get("comments").map { x => 
@@ -164,11 +177,11 @@ object PostModule {
 	
 		def resentLikedCount = 6
 	  
-		def createLike(user_id : String, user_name : String) : MongoDBObject = {
+		def createLike(user_id : String, user_name : String, user_photo : String) : MongoDBObject = {
 			val like_builder = MongoDBObject.newBuilder
 			like_builder += "like_owner_id" -> user_id
 			like_builder += "like_owner_name" -> user_name
-			like_builder += "like_owner_photo" -> ""
+			like_builder += "like_owner_photo" -> user_photo
 			like_builder += "like_date" -> new Date().getTime
 			
 			like_builder.result
@@ -183,14 +196,15 @@ object PostModule {
 	 
 		if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
 		else {
-			val user_name = (from db() in "users" where ("user_id" -> user_id) select (x => x.get("name").map(n=>n).getOrElse(user_id))).head.asInstanceOf[String]
+			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 		  		
 			/**
 			 * add like to likes table
 			 */
 			val ori_comments = from db() in "post_likes" where ("post_id" -> post_id) select (x => x)
 			if (ori_comments.empty) {
-				val comment = createLike(user_id, user_name)
+				val comment = createLike(user_id, user_name, user_photo)
 				
 				val comment_list_builder = MongoDBList.newBuilder
 				comment_list_builder += comment 
@@ -201,7 +215,7 @@ object PostModule {
 			
 				_data_connection.getCollection("post_likes") += post_builder.result
 			} else {
-				val comment = createLike(user_id, user_name)
+				val comment = createLike(user_id, user_name, user_photo)
 			
 				val ori = ori_comments.head
 				ori.get("likes").map(x => x.asInstanceOf[BasicDBList].add(0, comment)).getOrElse(Unit)
