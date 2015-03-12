@@ -3,18 +3,18 @@
 <ivy-report version="1.0">
 	<info
 		organisation="default"
-		module="bmservice2-build-build"
+		module="project-build"
 		revision="0.1-SNAPSHOT"
 		extra-sbtVersion="0.13"
 		extra-scalaVersion="2.10"
-		conf="compile-internal"
+		conf="test-internal"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
-		date="20150307182657"/>
+		date="20150307172732"/>
 	<dependencies>
 		<module organisation="default" name="global-plugins">
-			<revision name="0.0" status="integration" pubdate="20150307182656" resolver="inter-project" artresolver="inter-project" extra-sbtVersion="0.13" extra-scalaVersion="2.10" downloaded="false" searched="false" default="false" conf="default(compile), compile" position="0">
+			<revision name="0.0" status="integration" pubdate="20150307172731" resolver="inter-project" artresolver="inter-project" extra-sbtVersion="0.13" extra-scalaVersion="2.10" downloaded="false" searched="false" default="false" conf="default(compile), compile" position="0">
 				<metadata-artifact status="failed" details="" size="0" time="0" searched="false"/>
-				<caller organisation="default" name="bmservice2-build-build" conf="optional, compile, provided, compile-internal" rev="0.0" rev-constraint-default="0.0" rev-constraint-dynamic="0.0" callerrev="0.1-SNAPSHOT" extra-sbtVersion="0.13" extra-scalaVersion="2.10"/>
+				<caller organisation="default" name="project-build" conf="test-internal, test, optional, compile, provided, runtime" rev="0.0" rev-constraint-default="0.0" rev-constraint-dynamic="0.0" callerrev="0.1-SNAPSHOT" extra-sbtVersion="0.13" extra-scalaVersion="2.10"/>
 				<artifacts>
 				</artifacts>
 			</revision>
@@ -114,7 +114,7 @@
 		<module organisation="org.scala-sbt" name="sbt">
 			<revision name="0.13.0" status="release" pubdate="20130823015127" resolver="sbt-chain" artresolver="sbt-chain" downloaded="false" searched="false" default="false" conf="default(compile), compile" position="2">
 				<metadata-artifact status="no" details="" size="2185" time="0" location="/usr/local/play-2.2.6/framework/../repository/cache/org.scala-sbt/sbt/ivy-0.13.0.xml" searched="false" origin-is-local="true" origin-location="/usr/local/play-2.2.6/repository/local/org.scala-sbt/sbt/0.13.0/ivys/ivy.xml"/>
-				<caller organisation="default" name="bmservice2-build-build" conf="optional, compile, provided, compile-internal" rev="0.13.0" rev-constraint-default="0.13.0" rev-constraint-dynamic="0.13.0" callerrev="0.1-SNAPSHOT"/>
+				<caller organisation="default" name="project-build" conf="test-internal, test, optional, compile, runtime, provided" rev="0.13.0" rev-constraint-default="0.13.0" rev-constraint-dynamic="0.13.0" callerrev="0.1-SNAPSHOT"/>
 				<caller organisation="org.scala-sbt" name="scripted-plugin" conf="compile" rev="0.13.0" rev-constraint-default="0.13.0" rev-constraint-dynamic="0.13.0" callerrev="0.13.0"/>
 				<artifacts>
 					<artifact name="sbt" type="jar" ext="jar" status="no" details="" size="21282" time="0" location="/usr/local/play-2.2.6/repository/local/org.scala-sbt/sbt/0.13.0/jars/sbt.jar">
@@ -687,6 +687,7 @@
 				<caller organisation="org.scala-sbt" name="testing" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="relation" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="interface" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
+				<caller organisation="default" name="project-build" conf="provided" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.3" callerrev="0.1-SNAPSHOT"/>
 				<caller organisation="org.scala-sbt" name="test-agent" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="sbt" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="tasks" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
@@ -706,7 +707,6 @@
 				<caller organisation="org.scalaz" name="scalaz-core_2.10" conf="default, compile, runtime, master" rev="2.10.1" rev-constraint-default="2.10.1" rev-constraint-dynamic="2.10.1" callerrev="7.0.2"/>
 				<caller organisation="org.scala-sbt" name="io" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="scripted-plugin" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
-				<caller organisation="default" name="bmservice2-build-build" conf="provided" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.3" callerrev="0.1-SNAPSHOT"/>
 				<caller organisation="org.scala-sbt" name="main" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scalariform" name="scalariform_2.10" conf="default, compile, runtime, master" rev="2.10.0" rev-constraint-default="2.10.0" rev-constraint-dynamic="2.10.0" callerrev="0.1.4"/>
 				<caller organisation="org.scala-sbt" name="run" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
@@ -737,6 +737,7 @@
 				<caller organisation="org.scala-sbt" name="relation" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="testing" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="interface" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
+				<caller organisation="default" name="project-build" conf="test-internal, test, optional, compile, runtime, provided" rev="2.10.3" rev-constraint-default="2.10.3" rev-constraint-dynamic="2.10.3" callerrev="0.1-SNAPSHOT"/>
 				<caller organisation="org.scala-sbt" name="test-agent" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="sbt" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="tasks" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
@@ -756,7 +757,6 @@
 				<caller organisation="org.scalaz" name="scalaz-core_2.10" conf="default, compile, runtime, master" rev="2.10.1" rev-constraint-default="2.10.1" rev-constraint-dynamic="2.10.1" callerrev="7.0.2"/>
 				<caller organisation="org.scala-sbt" name="scripted-plugin" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="io" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
-				<caller organisation="default" name="bmservice2-build-build" conf="optional, compile, provided, compile-internal" rev="2.10.3" rev-constraint-default="2.10.3" rev-constraint-dynamic="2.10.3" callerrev="0.1-SNAPSHOT"/>
 				<caller organisation="org.scala-sbt" name="main" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scala-sbt" name="run" conf="compile" rev="2.10.2" rev-constraint-default="2.10.2" rev-constraint-dynamic="2.10.2" callerrev="0.13.0"/>
 				<caller organisation="org.scalariform" name="scalariform_2.10" conf="default, compile, runtime, master" rev="2.10.0" rev-constraint-default="2.10.0" rev-constraint-dynamic="2.10.0" callerrev="0.1.4"/>

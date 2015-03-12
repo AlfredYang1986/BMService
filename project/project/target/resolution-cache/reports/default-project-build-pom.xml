@@ -3,13 +3,13 @@
 <ivy-report version="1.0">
 	<info
 		organisation="default"
-		module="bmservice2-build-build"
+		module="project-build"
 		revision="0.1-SNAPSHOT"
 		extra-sbtVersion="0.13"
 		extra-scalaVersion="2.10"
-		conf="optional"
+		conf="pom"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
-		date="20150307182657"/>
+		date="20150307172732"/>
 	<dependencies>
 	</dependencies>
 </ivy-report>

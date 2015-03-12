@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
 	<info organisation="default"
-		module="bmservice2-build-build"
+		module="project-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20150307182657"
+		publication="20150307172732"
 		e:scalaVersion="2.10" e:sbtVersion="0.13"
 	>
 		<description>
-		bmservice2-build-build
+		project-build
 		</description>
 	</info>
 	<configurations>
@@ -27,10 +27,10 @@
 		<conf name="scala-tool" visibility="private" description=""/>
 	</configurations>
 	<publications>
-		<artifact name="bmservice2-build-build" type="pom" ext="pom" conf="pom"/>
-		<artifact name="bmservice2-build-build" type="jar" ext="jar" conf="compile"/>
-		<artifact name="bmservice2-build-build" type="src" ext="jar" conf="sources" e:classifier="sources"/>
-		<artifact name="bmservice2-build-build" type="doc" ext="jar" conf="docs" e:classifier="javadoc"/>
+		<artifact name="project-build" type="pom" ext="pom" conf="pom"/>
+		<artifact name="project-build" type="jar" ext="jar" conf="compile"/>
+		<artifact name="project-build" type="src" ext="jar" conf="sources" e:classifier="sources"/>
+		<artifact name="project-build" type="doc" ext="jar" conf="docs" e:classifier="javadoc"/>
 	</publications>
 	<dependencies>
 		<dependency org="org.scala-lang" name="scala-compiler" rev="2.10.3" conf="scala-tool->default,optional(default)"/>
