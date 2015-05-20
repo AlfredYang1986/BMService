@@ -12,6 +12,7 @@ POST	/login/authWithThird			controllers.loginController.authWithThird
 POST	/login/connectWithThird			controllers.loginController.connectWithThird
 POST	/login/authUpdateDetails		controllers.loginController.authUpdateDetails
 POST	/login/authCreateUserWithPhone 	controllers.loginController.authCreateUserWithPhone
+POST	/login/authWithPwd				controllers.loginController.authWithPwd
 
 # post module
 POST	/post/postContent				controllers.postController.postContent

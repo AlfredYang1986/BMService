@@ -25,8 +25,8 @@ object LoginModule {
 		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
 		else {
 			val user = rel.head
-//			List("name", "phoneNo", "email") foreach { x => 
-			List("phoneNo", "email") foreach { x => 
+			List("name", "phoneNo", "email", "pwd") foreach { x => 
+//			List("phoneNo", "email") foreach { x => 
 				(data \ x).asOpt[String].map { value =>
 				  user += x -> value
 				}.getOrElse(Unit)
@@ -139,7 +139,8 @@ object LoginModule {
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> ""
 		new_builder  += "email" -> ""
-//		new_builder  += "name" -> provide_screen_name
+		new_builder  += "name" -> provide_screen_name
+		new_builder  += "pwd" -> "12345"
 		
 		val new_third_builder = MongoDBList.newBuilder
 
@@ -167,12 +168,12 @@ object LoginModule {
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
 		val user_id = user.get("user_id").get.asInstanceOf[String]
 		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
-//		var name = user.get("name").get.asInstanceOf[String]
-//		
-//		if (name == "") {
-//			name = provide_name
-//			user += ("name") -> name
-//		}
+		var name = user.get("name").get.asInstanceOf[String]
+		
+		if (name == "") {
+			name = provide_name
+			user += ("name") -> name
+		}
 		val tmp = third_list.find(x => x.asInstanceOf[BasicDBObject].get("provide_name") ==  provide_name)
 			
 		tmp match {
@@ -259,6 +260,7 @@ object LoginModule {
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> phoneNo
+		new_builder  += "pwd" -> "12345"
 		new_builder  += "email" -> ""
 		new_builder  += "name" -> ""
 						
@@ -273,5 +275,21 @@ object LoginModule {
 							toJson(Map("user_id" -> toJson(user_id), "phoneNo" -> toJson(phoneNo), "auth_token" -> toJson(auth_token)))))
 	}
 	
-
+	def authWithPwd(data : JsValue) : JsValue = {
+		val phoneNo = (data \ "phoneNo").asOpt[String].get
+		val pwd = (data \ "pwd").asOpt[String].get
+		
+		
+		val result = from db() in "users" where ("phoneNo" -> phoneNo, "pwd" -> pwd) select (x => x)
+		if (result.empty) ErrorCode.errorToJson("user not existing")
+		else {
+			val ral = result.head
+			val user_id = ral.getAs[String]("user_id").map(x => x).getOrElse(throw new Exception)
+			val auth_token = ral.getAs[String]("auth_token").map(x => x).getOrElse(throw new Exception)
+			val name = ral.getAs[String]("name").map(x => x).getOrElse(throw new Exception)
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(name)))))
+		}
+		  
+	}
 }

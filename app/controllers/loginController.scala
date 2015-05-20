@@ -17,4 +17,5 @@ object loginController extends Controller {
 	def authWithThird = Action (request => requestArgs(request)(LoginModule.authWithThird))
 	def connectWithThird = Action (request => requestArgs(request)(LoginModule.connectWithThird))
 	def authCreateUserWithPhone = Action (request => requestArgs(request)(LoginModule.authCreateUserWithPhone))
+	def authWithPwd = Action (request => requestArgs(request)(LoginModule.authWithPwd))
 }
