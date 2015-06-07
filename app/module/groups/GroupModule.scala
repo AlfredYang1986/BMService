@@ -22,12 +22,12 @@ object GroupModule {
 		val group_id = (data \ "group_id").asOpt[String].get
 		val sub_group_id = (data \ "sub_group_id").asOpt[String].map(x => x).getOrElse("")
 		val sub_group_name = (data \ "sub_group_name").asOpt[String].get
-		
+	
 		val cg = from db() in "groups" where ("group_id" -> group_id) select (x => x)
-		if (cg.count != 0) ErrorCode.errorToJson("group is not exist")
+		if (cg.count == 0) ErrorCode.errorToJson("group is not exist")
 		else {
-			val sb = cg.head.get("sub_groups").asInstanceOf[BasicDBList] 
-			(sb.find(x => x.asInstanceOf[BasicDBObject].get("sub_group_id") == sub_group_id)).map { y =>
+			val sb = cg.head.get("sub_groups").get.asInstanceOf[BasicDBList]
+			(sb.find(x => x.asInstanceOf[DBObject].get("sub_group_id") == sub_group_id)).map { y =>
 				ErrorCode.errorToJson("sub group is already exist")
 			}.getOrElse {
 			
@@ -37,7 +37,7 @@ object GroupModule {
 			  	tmp_builder += "sub_group_name" -> sub_group_name
 			  	tmp_builder += "sub_group_found_time" -> date
 			  	tmp_builder += "sub_group_update_time" -> date
-			  	
+			  
 			  	sb.add(tmp_builder.result)
 			  	val g = cg.head
 			  	g += "sub_groups" -> sb
