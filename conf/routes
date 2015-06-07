@@ -28,5 +28,9 @@ POST	/query/queryComments			controllers.queryController.queryComments
 # profile module
 POST	/profile/updateProfile 			controllers.profileController.updateProfile
 
+# group module
+POST	/group/queryGroups				controllers.groupController.queryGroups
+POST	/group/createSubGroup			controllers.groupController.createSubGroup
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
