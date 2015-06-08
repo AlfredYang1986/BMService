@@ -1,12 +1,9 @@
-2015-06-08 14:08:19,247 - [INFO] - from play in pool-39-thread-2 
+2015-06-08 18:23:56,882 - [INFO] - from play in pool-19-thread-3 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-06-08 14:08:43,180 - [INFO] - from play in play-internal-execution-context-1 
+2015-06-08 18:24:10,171 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2015-06-08 14:08:49,181 - [INFO] - from play in New I/O worker #2 
+2015-06-08 18:24:16,611 - [INFO] - from play in New I/O worker #2 
 Starting application default Akka system.
-
-2015-06-08 14:16:10,312 - [INFO] - from play in pool-39-thread-2 
-Shutdown application default Akka system.
 

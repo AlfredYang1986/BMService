@@ -11,9 +11,11 @@ import com.mongodb.casbah.Imports._
 
 import java.util.Date
 
-import module._
-
 object messageModule {
+  
+	val message_type_text = 0
+	val message_type_photo = 1
+	val message_type_movie = 2
 
 	// Login
 	def loginWithName(data : JsValue) : JsValue = {
@@ -109,7 +111,8 @@ object messageModule {
 	
 		val user_id = (data \ "user_id").asOpt[String].get
 		val date = new Date().getTime.longValue
-		val receiver = (data \ "receiver").asOpt[String].get
+		val receiver_type = (data \ "receiver_type").asOpt[Int].get
+		val receiver_id = (data \ "receiver_id").asOpt[String].get
 		val message_type = (data \ "message_type").asOpt[Int].get
 		val message_content = (data \ "message_content").asOpt[String].get
 	
@@ -117,7 +120,8 @@ object messageModule {
 		
 		val builder = MongoDBObject.newBuilder
 		builder += "sender" -> user_id
-		builder += "receiver" -> receiver
+		builder += "receiver_type" -> receiver_type
+		builder += "receiver" -> receiver_id
 		builder += "date" -> date 
 		builder += "message_type" -> message_type
 		builder += "message_content" -> message_content
@@ -138,12 +142,13 @@ object messageModule {
 	
 	def getField[T](obj : MongoDBObject, name : String) : T = obj.get(name).map(_.asInstanceOf[T]).getOrElse(throw new Exception)
 	def getSender(x : MongoDBObject) : String = getField[String](x, "sender")
-	def getReceiver(x : MongoDBObject) : String =getField[String](x, "receiver") 
+	def getReceiver(x : MongoDBObject) : String = getField[String](x, "receiver") 
+	def getReceiverType(x : MongoDBObject) : Int = getField[Int](x, "receiver_type") 
 	def getMessageType(x : MongoDBObject) : Int = getField[Int](x, "message_type")
 	def getMessageContent(x : MongoDBObject) : String = getField[String](x, "message_content")
 	def getMessageDate(x : MongoDBObject) : Long = getField[Long](x, "date")
 
-	def message2Json(x : MongoDBObject) : JsValue = toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), 
+	def message2Json(x : MongoDBObject) : JsValue = toJson(Map("sender" -> toJson(getSender(x)), "receiver" -> toJson(getReceiver(x)), "receiver_type" -> toJson(getReceiverType(x)),
 								"message_type" -> toJson(getMessageType(x)), "message_content" -> toJson(getMessageContent(x)), 
 								"date" -> toJson(getMessageDate(x))))
 	

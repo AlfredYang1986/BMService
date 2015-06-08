@@ -55,14 +55,14 @@ object GroupModule {
 			("group_name_1" :: "group_name_2" :: "group_name_3" :: "group_name_4" :: "group_name_5" :: Nil) map { x => 
 			  	val date = new Date().getTime
 			  	val builder = MongoDBObject.newBuilder
-			  	builder += "group_id" -> Sercurity.md5Hash(x)
+			  	builder += "group_id" -> Sercurity.md5Hash(x + Sercurity.getTimeSpanWithSeconds)
 			  	builder += "group_name" -> x
 			  	builder += "group_found_time" -> date
 			  	
 			  	val list_builder = MongoDBList.newBuilder
 			  	("sub_group1" :: Nil) map { y =>
 			  		val tmp_builder = MongoDBObject.newBuilder
-			  		tmp_builder += "sub_group_id" -> Sercurity.md5Hash(y)
+			  		tmp_builder += "sub_group_id" -> Sercurity.md5Hash(x + y + Sercurity.getTimeSpanWithSeconds)
 			  		tmp_builder += "sub_group_name" -> y
 			  		tmp_builder += "sub_group_found_time" -> date
 			  		tmp_builder += "sub_group_update_time" -> date
