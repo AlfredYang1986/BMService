@@ -18,7 +18,8 @@ object ErrorCode {
   		new ErrorNode("post token not vaild", -8, "post id or post token not existing"),
   		new ErrorNode("user not existing", -9, "user not exist or delected user"),
   		new ErrorNode("user have low authrity", -10, "can not complete the operation due to low authrity level"),
-  		new ErrorNode("group is not exist", -10, "parent for this sub group is no longer exist")
+  		new ErrorNode("group is not exist", -11, "parent for this sub group is no longer exist"),
+  		new ErrorNode("already friends", -12, "these two people are already friends")
   	)
   
   	def getErrorCodeByName(name : String) : Int = (xls.find(x => x.name == name)) match {
