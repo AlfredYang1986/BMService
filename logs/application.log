@@ -7,3 +7,6 @@ Application started (Dev)
 2015-06-08 14:08:49,181 - [INFO] - from play in New I/O worker #2 
 Starting application default Akka system.
 
+2015-06-08 14:16:10,312 - [INFO] - from play in pool-39-thread-2 
+Shutdown application default Akka system.
+

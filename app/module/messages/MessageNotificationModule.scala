@@ -54,10 +54,10 @@ class ChatNotifycationCenter extends Actor {
 	  case pushNotification(user_id, text) =>
 		  notifyImpl(user_id, text)
 
-	  case receiveNotification2(data) => println(1234)
+	  case receiveNotification2(data) => 
 		  messageModule.sendMessage(data)
 		  
-	  case pushNotification2(data) => println(2345)
+	  case pushNotification2(data) => 
 		  notify2PeersImpl(data)
 	}
 
