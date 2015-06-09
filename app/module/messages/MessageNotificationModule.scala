@@ -15,6 +15,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import akka.actor.ActorRef
 
+import module.notification._
+
 // messages
 case class register(user_id: String) 												// message for register a user
 case class unRegister(user_id: String)												// message for quit the chat service
@@ -29,7 +31,7 @@ case class CannotConnect(msg: String)												// connect not success
 
 class ChatNotifycationCenter extends Actor {
 
-	var registration_list = Map.empty[String,  Option[Concurrent.Channel[JsValue]]]
+//	var registration_list = Map.empty[String,  Option[Concurrent.Channel[JsValue]]]
 	
 //	var channel : Option[Concurrent.Channel[JsValue]] = null
 	def receive = {
@@ -38,54 +40,35 @@ class ChatNotifycationCenter extends Actor {
 		  val enumerator =  Concurrent.unicast[JsValue] { x => 
 		    	self ! channelCreated(user_id, x)
 		  }
-		 
-		  if(registration_list.contains(user_id)) {
+		
+		  if (module.notification.notifyMapping.isUserRegister(user_id)) {
+//		  if(registration_list.contains(user_id)) {
 			  sender ! CannotConnect("This username is already used")
 		  } else {
 			  sender ! Connected(enumerator)
 		  }    
 	  
 	  case channelCreated(user_id, channel) => 
-			registration_list = registration_list + (user_id -> Some(channel))
+	  	  module.notification.notifyMapping.connectAnUser(user_id, channel)
+//	    registration_list = registration_list + (user_id -> Some(channel))
 	  
 	  case unRegister(user_id) => 
-		  registration_list = registration_list - user_id
+	  	  module.notification.notifyMapping.disconnectAnUser(user_id)
+//		  registration_list = registration_list - user_id
 	  
-	  case pushNotification(user_id, text) =>
-		  notifyImpl(user_id, text)
+	  case pushNotification(user_id, text) => Unit
+//		  notifyImpl(user_id, text)
 
 	  case receiveNotification2(data) => 
-		  messageModule.sendMessage(data)
+		  (data \ "method").asOpt[String].get match {
+		    case "message" => messageModule.sendMessage(data)
+		    case "joinTmpGroup" => notifyMapping.userJoinTmpGroup((data \ "user_id").asOpt[String].get, (data \ "receiver").asOpt[String].get)
+		    case "unJoinTmpGroup" => notifyMapping.unJoinTmpGroup((data \ "user_id").asOpt[String].get, (data \ "receiver").asOpt[String].get)
+		    case _ => ???
+		  }
 		  
 	  case pushNotification2(data) => 
-		  notify2PeersImpl(data)
-	}
-
-	def notify2PeersImpl(data : JsValue) = {
-		val to = (data \ "receiver").asOpt[String].get
-		println(registration_list)
-//		registration_list.find(x => x._1 == to).foreach {
-//		  case (_, channel) => { println(to); channel.foreach(_.push(data))}
-//		}
-		registration_list.foreach {
-		  case (_, channel) => { channel.foreach(_.push(data)) }
-		}
-	}
-	
-	def notifyImpl(user_id : String, text : String) = {
-		
-		val msg = JsObject(
-			Seq(
-				"user" -> JsString(user_id),
-				"message" -> JsString(text),
-				"members" -> JsArray(
-						registration_list.keySet.toList.map(JsString)
-						)
-					)
-			)
-		registration_list.foreach { 
-			case (s, channel) => { channel.foreach(_.push(msg)) }
-		}
+		  notifyMapping.notify2Client(data)
 	}
 }
 

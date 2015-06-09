@@ -8,6 +8,7 @@ import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
+import module.common.helpOptions
 
 object ProfileModule {
 	def like(data : JsValue) : JsValue = {
@@ -72,10 +73,15 @@ object ProfileModule {
 		else if (owner_user_id == "")  ErrorCode.errorToJson("user not existing")
 		else {
 			// 1. TODO: check query_user_id and query_auth_token and is validate
-			
+			val re = from db() in "user_profile" where ("user_id" -> owner_user_id) select (x => x) 
+			if (re.count != 1) ErrorCode.errorToJson("user not existing")
 			// 2. 
+			else {
+				var tmp = Map.empty[String, JsValue]
+				("user_id" :: "screen_name" :: "screen_photo" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
+					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
+				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
+			}
 		}
-		
-		null
 	}
 }

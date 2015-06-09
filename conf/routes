@@ -27,6 +27,7 @@ POST	/query/queryComments					controllers.queryController.queryComments
 
 # profile module
 POST	/profile/updateProfile 					controllers.profileController.updateProfile
+POST	/profile/userProfile					controllers.profileController.userProfile
 
 # group module
 POST	/group/queryGroups						controllers.groupController.queryGroups
