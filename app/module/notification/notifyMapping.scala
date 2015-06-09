@@ -32,11 +32,11 @@ object notifyMapping {
 	var user2tmpGroup = Map.empty[String, List[String]]
 	def userJoinTmpGroup(user_id : String, sub_group_id : String) : Boolean = {
 		// 1. query data in the database to check the sub_group is still exist
-		if ((from db() in "groups" where ("sub_groups.sub_group_id" -> sub_group_id) select (x => x)).count != 1) {
-			user2tmpGroup -= sub_group_id
-			false
-		}
-		else {
+//		if ((from db() in "groups" where ("sub_groups.sub_group_id" -> sub_group_id) select (x => x)).count != 1) {
+//			user2tmpGroup -= sub_group_id
+//			false
+//		}
+//		else {
 			// TODO: check the user is connecting, send error?????need it ??
 			// 2. if exist mapping them 
 			val total_limits = 6
@@ -47,7 +47,7 @@ object notifyMapping {
 			    "receiver_type" -> toJson(0), /* tmp group */ 
 			    "resent_users" -> toJson(user2tmpGroup.get(sub_group_id).get.take(total_limits)))))
 			true
-		}
+//		}
 	}
 	def unJoinTmpGroup(user_id : String, sub_group_id : String) =
 		user2tmpGroup.get(sub_group_id).map(x => user2tmpGroup += sub_group_id -> x.filter(y => y != user_id))

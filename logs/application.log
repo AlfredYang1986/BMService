@@ -188,3 +188,21 @@ Application started (Dev)
 2015-06-09 23:35:33,746 - [INFO] - from play in New I/O worker #3 
 Starting application default Akka system.
 
+2015-06-09 23:38:48,130 - [INFO] - from play in play-internal-execution-context-60 
+Shutdown application default Akka system.
+
+2015-06-09 23:38:48,866 - [INFO] - from play in play-internal-execution-context-60 
+Application started (Dev)
+
+2015-06-09 23:38:55,210 - [INFO] - from play in New I/O worker #1 
+Starting application default Akka system.
+
+2015-06-10 00:06:08,634 - [INFO] - from play in play-internal-execution-context-60 
+Shutdown application default Akka system.
+
+2015-06-10 00:06:09,378 - [INFO] - from play in play-internal-execution-context-60 
+Application started (Dev)
+
+2015-06-10 00:06:09,415 - [INFO] - from play in New I/O worker #3 
+Starting application default Akka system.
+
