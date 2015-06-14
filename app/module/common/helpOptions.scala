@@ -12,6 +12,7 @@ object helpOptions {
 		def opt_map_2_js(value : BasicDBList, key : String) : JsValue = {
 			def key2List : List[String] = key match {
 				case "items" => List("type", "name")
+				case "tags" => List("type", "content", "offsetX", "offsetY")
 				case "comments" => List("comment_owner_id", "comment_owner_name", "comment_date", "comment_content", "comment_owner_photo")
 				case "likes" => List("like_owner_id", "like_owner_name", "like_owner_photo", "like_date")
 				case "gourps" => List("group_id", "group_name", "group_found_time")

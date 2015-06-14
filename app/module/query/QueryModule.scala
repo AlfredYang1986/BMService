@@ -30,7 +30,7 @@ object QueryModule {
 		var xls : List[JsValue] = Nil
 		(from db() in "posts" where ("date" $lte date)).selectSkipTop(skip)(take)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
 		  	xls = xls :+ toJson(tmp)
 		}
 

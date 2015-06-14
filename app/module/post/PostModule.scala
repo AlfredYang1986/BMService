@@ -25,15 +25,33 @@ object PostModule {
 		def postItemList : MongoDBList = {
 			val list_builder = MongoDBList.newBuilder
 			(data \ "items").asOpt[Seq[JsValue]].get map { x =>
-			  	val t = (x \ "type").asOpt[Int].get
-				val url = (x \ "name").asOpt[String].get
 				
 				val tmp = MongoDBObject.newBuilder
-				tmp += "type" -> t
-				tmp += "name" -> url
-			
+				tmp += "type" -> (x \ "type").asOpt[Int].get
+				tmp += "name" -> (x \ "name").asOpt[String].get
+				
 				list_builder += tmp.result
 			}
+			
+			list_builder.result
+		}
+		
+		/**
+		 * tags list store in database
+		 * tags is not complusory
+		 */
+		def postTagsList : MongoDBList = {
+			val list_builder = MongoDBList.newBuilder
+			(data \ "tags").asOpt[Seq[JsValue]].map { iter => iter.map { x => 
+				
+				val tmp = MongoDBObject.newBuilder
+				tmp += "type" -> (x \ "type").asOpt[Int].get
+				tmp += "content" -> (x \ "content").asOpt[String].get
+				tmp += "offsetX" -> (x \ "offsetX").asOpt[Double].map(x => x).getOrElse(-1.0)
+				tmp += "offsetY" -> (x \ "offsetY").asOpt[Double].map(x => x).getOrElse(-1.0)
+				
+				list_builder += tmp.result
+			}}.getOrElse(Unit)
 			
 			list_builder.result
 		}
@@ -71,6 +89,7 @@ object PostModule {
 			builder += "title" -> title
 			builder += "description" -> description
 			builder += "items" -> postItemList
+			builder += "tags" -> postTagsList
 			builder += "likes_count" -> 0
 			builder += "likes" -> MongoDBList()
 			builder += "comments_count" -> 0
