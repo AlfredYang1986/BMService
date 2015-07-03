@@ -33,21 +33,24 @@ POST	/profile/userProfile					controllers.profileController.userProfile
 POST	/group/queryGroups						controllers.groupController.queryGroups
 POST	/group/createSubGroup					controllers.groupController.createSubGroup
 
-# message
+# message module
 POST 	/messages/sendMessage					controllers.messageController.sendMessage
 POST 	/messages/queryMessages					controllers.messageController.queryMessages
 POST 	/messages/queryMessagesWithFriend		controllers.messageController.queryMessagesWithFriend
 
-# message websocket
+# message websocket 
 GET		/messages/registerDevice/:user_id		controllers.MessageNotificationController.registerDevice(user_id)
 
-# friends
+# friends module
 POST 	/messages/addOneFriend					controllers.messageController.addOneFriend
 POST 	/messages/deleteOneFriend				controllers.messageController.deleteOneFriend
 POST 	/messages/queryAllFriend				controllers.messageController.queryAllFriend
 
-# tags
+# tags module
 POST	/tags/queryContentsWithTag				controllers.tagController.queryContentsWithTag
+
+# notification module
+POST	/devices/registerUserDevice				controllers.apnsNotificationController.registerUserDevices
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
