@@ -12,5 +12,4 @@ object apnsNotificationController extends Controller {
 	}
 
 	def registerUserDevices = Action (request => requestArgs(request)(apnsNotification.registerUserDevices))
-//	def notificationAll = Action (request => requestArgs(request)(apnsNotification.createSubGroup))
 }

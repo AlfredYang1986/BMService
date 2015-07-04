@@ -14,6 +14,8 @@ import scala.collection.JavaConversions._
 import com.notnoop.apns.EnhancedApnsNotification
 
 object apnsNotification {
+	val service = APNS.newService.withCert("certificates/Certificates.p12", "Abcde@196125").withSandboxDestination.build
+	
 	def registerUserDevices(data : JsValue) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -54,13 +56,20 @@ object apnsNotification {
 		}
 	}
 	
-	def notificationAll(data : JsValue) : JsValue = {
-		val token = "3450fbe83072d7ae155b29c22c2ae170b3bd0ac5f569f837ab6ad0976308febb"
-		val service = APNS.newService.withCert("/Users/yangyuan/Desktop/BabySharing2/certificates/Certificates.p12", "Abcde@196125").withSandboxDestination.build
+	def notificationAll = {
+
+		var deviceList : List[String] = Nil
+		(from db() in "devices" select (x => x)).toList.foreach { iter =>
+			iter.get("devices").map { lst =>
+			  	lst.asInstanceOf[BasicDBList].foreach { device =>
+			  	  	deviceList = device.asInstanceOf[String] :: deviceList
+			  	}
+			}.getOrElse(Unit)
+		}
+
 		val payload = APNS.newPayload.alertBody("Alfred Test").build
-		service.push(token, payload)
-		service.stop()
-		
-		null
+		deviceList.distinct.foreach { token => 
+			service.push(token, payload)
+		}
 	}
 }
