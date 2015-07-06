@@ -1,9 +1,18 @@
-2015-07-04 12:02:07,568 - [INFO] - from play in pool-72-thread-1 
+2015-07-06 14:21:50,850 - [INFO] - from play in pool-28-thread-4 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-07-04 12:03:02,853 - [INFO] - from play in play-internal-execution-context-1 
+2015-07-06 14:22:41,998 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-07-04 12:03:02,891 - [INFO] - from play in play-internal-execution-context-1 
+2015-07-06 14:22:42,045 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-07-06 14:23:44,977 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-07-06 14:23:45,247 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-07-06 14:23:45,258 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 

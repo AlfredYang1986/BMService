@@ -9,11 +9,12 @@ import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.sercurity.Sercurity
+import module.sms._
 
 import module.profile.ProfileModule
 
 object LoginModule {
- 	
+  
 	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
 	def isUserExist(user_id : String) : Boolean = !((from db() in "users" where ("user_id" -> user_id) select (x => x)).empty)
 	
@@ -44,17 +45,13 @@ object LoginModule {
 		/**
 		 * generate code
 		 */
-		val code = 11111 // fake one
-//		val code = Math.random % 10000.0
+//		val code = 11111 // fake one
+		val code = scala.util.Random.nextInt(90000) + 10000
 
-		/**
-		 * TODO: send code to the phone
-		 */
-		
 		/**
 		 * generate a reg token
 		 */
-		val time_span_minutes = Sercurity.getTimeSpanWithMinutes
+		val time_span_minutes = Sercurity.getTimeSpanWith10Minutes
 		val reg_token = Sercurity.md5Hash(phoneNo + time_span_minutes)
 		
 		val builder = MongoDBObject.newBuilder
@@ -65,7 +62,13 @@ object LoginModule {
 		val rel = from db() in "reg" where ("phoneNo" -> phoneNo) select (x => x) 
 		if (rel.empty) _data_connection.getCollection("reg") += builder.result
 		else _data_connection.getCollection("reg").update(DBObject("phoneNo" -> phoneNo), builder.result)
-	
+
+		/**
+		 * send code to the phone
+		 */	
+		import play.api.Play.current
+		smsModule().sendSMS(phoneNo, code.toString)
+		
 		/**
 		 * return 
 		 */
@@ -79,8 +82,9 @@ object LoginModule {
 		val code = (data \ "code").asOpt[String].get.toInt
 		val reg_token = (data \ "reg_token").asOpt[String].get
 		
-		val time_span_minutes = Sercurity.getTimeSpanWithMinutes
+		val time_span_minutes = Sercurity.getTimeSpanWith10Minutes
 		val reg_token_new = Sercurity.md5Hash(phoneNo + time_span_minutes)
+		
 		if (!reg_token_new.equals(reg_token)) {
 			ErrorCode.errorToJson("token exprie")
 		} else {
