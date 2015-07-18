@@ -22,6 +22,7 @@ object ProfileModule {
 		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
 		val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse("")
+		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
 		val followings_count = (data \ "followings_count").asOpt[Int].map(x => x).getOrElse(0)
 		val followers_count = (data \ "followers_count").asOpt[Int].map(x => x).getOrElse(0)
 		val posts_count = (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
@@ -34,6 +35,7 @@ object ProfileModule {
 				builder += "user_id" -> user_id
 				builder += "screen_name" -> screen_name
 				builder += "screen_photo" -> screen_photo
+				builder += "role_tag" -> role_tag
 				builder += "followings_count" -> followings_count
 				builder += "followers_count" -> followers_count
 				builder += "posts_count" -> posts_count
@@ -41,7 +43,7 @@ object ProfileModule {
 				_data_connection.getCollection("user_profile") += builder.result
 			} else {
 				val user = reVal.head
-				List("screen_name", "screen_photo") foreach { x =>
+				List("role_tag", "screen_name", "screen_photo") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
 						user += x -> value
 					}.getOrElse(Unit)
@@ -55,7 +57,19 @@ object ProfileModule {
 		
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
 			}
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo))))
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo, "role_tag" -> role_tag))))
+		}
+	}
+
+	def queryUserProfile(user_id : String) : Map[String, JsValue] = {
+		val re = from db() in "user_profile" where ("user_id" -> user_id) select (x => x) 
+		if (re.count != 1) null
+		else {
+			var tmp = Map.empty[String, JsValue]
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
+					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
+			
+			tmp
 		}
 	}
 	
@@ -78,7 +92,7 @@ object ProfileModule {
 			// 2. 
 			else {
 				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
+				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}

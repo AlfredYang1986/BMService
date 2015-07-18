@@ -113,19 +113,16 @@ object LoginModule {
 						 * 		pass this token to the client
 						 */
 						val cur = result.head
-//						cur += "phoneNo" -> phoneNo
-//						_data_connection.getCollection("users").update(DBObject("auth_token" -> cur.get("auth_token").get), cur)
 					  
 						val auth_token = cur.get("auth_token").get.asInstanceOf[String]
 						val user_id = cur.get("user_id").get.asInstanceOf[String]
-						val name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 
-						Json.toJson(Map("status" -> toJson("error"), "error" -> 
-							toJson(Map("message" -> toJson("already login"), 
-							    "auth_token" -> toJson(auth_token), 
-							    "user_id" -> toJson(user_id), 
-							    "name" -> toJson(name),
-							    "phoneNo" -> toJson(phoneNo)))))
+						var tmp = ProfileModule.queryUserProfile(user_id)
+						tmp += "message" -> toJson("already login")
+						tmp += "phoneNo" -> toJson(phoneNo)
+						tmp += "auth_token" -> toJson(auth_token)
+						
+						Json.toJson(Map("status" -> toJson("error"), "error" -> toJson(tmp)))
 					}
 				} 
 			}
@@ -237,7 +234,7 @@ object LoginModule {
 		if (users.empty) {
 			/**
 			 * 2. if phoneNo is not, then create one directly
-			 */ 
+			 */
 		  	authCreateNewUserWithPhone(phoneNo)
 			
 		} else {
@@ -274,9 +271,12 @@ object LoginModule {
 		_data_connection.getCollection("users") += new_builder.result
 		
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id)))
-
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-							toJson(Map("user_id" -> toJson(user_id), "phoneNo" -> toJson(phoneNo), "auth_token" -> toJson(auth_token)))))
+		
+		var tmp = ProfileModule.queryUserProfile(user_id)
+		tmp += "phoneNo" -> toJson(phoneNo)
+		tmp += "auth_token" -> toJson(auth_token)
+		
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 	}
 	
 	def authWithPwd(data : JsValue) : JsValue = {
