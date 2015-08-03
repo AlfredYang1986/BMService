@@ -37,6 +37,40 @@ object QueryModule {
 		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
 	
+	def queryContentWithConditions(data : JsValue) : JsValue = {
+	  
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val user_id = (data \ "user_id").asOpt[String].get
+		
+		val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
+		val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
+		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)	
+		
+		val conditions = (data \ "conditions").asOpt[JsValue].map (x => x).getOrElse(null)
+	
+		def constructConditions : MongoDBObject = {
+			val reVal = "date" $lte date
+			
+			if (conditions != null) {
+			  	List("owner_id") foreach { x => 
+			  		(conditions \ x).asOpt[String].map { cdt =>
+			  			reVal += x -> cdt
+			  		}
+			  	}
+			}
+			reVal
+		}
+
+		var xls : List[JsValue] = Nil
+		(from db() in "posts" where constructConditions).selectSkipTop(skip)(take)("date") { x => 
+			var tmp : Map[String, JsValue] = Map.empty
+		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+		  	xls = xls :+ toJson(tmp)
+		}	
+
+		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls))) 
+	}
+	
 	def downloadFile(name : String) : Array[Byte] = fop.downloadFile(name)
 	
 	def queryComments(data : JsValue) : JsValue = {
