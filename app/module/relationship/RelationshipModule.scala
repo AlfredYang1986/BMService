@@ -27,24 +27,25 @@ object RelationshipModule {
 			if (lst.count == 0) {
 				val builder = MongoDBObject.newBuilder
 				
-				val following = MongoDBList.newBuilder
-				following += follower
+				val following_lst = MongoDBList.newBuilder
+				following_lst += follower
 				
-				val followed = MongoDBList.newBuilder
+				val followed_lst = MongoDBList.newBuilder
 				
 				builder += "user_id" -> owner
-				builder += "following" -> following.result
-				builder += "followed" -> followed.result
+				builder += "following" -> following_lst.result
+				builder += "followed" -> followed_lst.result
 	
 				_data_connection.getCollection("relationship") += builder.result
 				true
 			}
 			else if (lst.count == 1) {
 				val user = lst.head
-				val following = user.getAs[BasicDBList]("following").get
-				if (!following.exists(x => (x.asInstanceOf[DBObject].toString).equals(follower))) {
+				val following = user.getAs[MongoDBList]("following").get
+
+				if (!following.exists(x => x.asInstanceOf[String].equals(follower))) {
 					following.add(follower)
-					_data_connection.getCollection("relationship").update(DBObject("user_id" -> user_id), user)
+					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
 					true
 				}
 			}
@@ -57,24 +58,24 @@ object RelationshipModule {
 			if (lst.count == 0) {
 				val builder = MongoDBObject.newBuilder
 				
-				val following = MongoDBList.newBuilder
+				val following_lst = MongoDBList.newBuilder
 				
-				val followed = MongoDBList.newBuilder
-				following += followed
-				
+				val followed_lst = MongoDBList.newBuilder
+				followed_lst += followed
+				  
 				builder += "user_id" -> owner
-				builder += "following" -> following.result
-				builder += "followed" -> followed.result
+				builder += "following" -> following_lst.result
+				builder += "followed" -> followed_lst.result
 	
 				_data_connection.getCollection("relationship") += builder.result
 				true
 			}
 			else if (lst.count == 1) {
 				val user = lst.head
-				val following = user.getAs[BasicDBList]("followed").get
-				if (!following.exists(x => (x.asInstanceOf[DBObject].toString).equals(followed))) {
+				val following = user.getAs[MongoDBList]("followed").get
+				if (!following.exists(x => (x.asInstanceOf[String]).equals(followed))) {
 					following.add(followed)
-					_data_connection.getCollection("relationship").update(DBObject("user_id" -> user_id), user)
+					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
 					true
 				}
 			}
@@ -100,10 +101,10 @@ object RelationshipModule {
 
 			if (lst.count == 1) {
 				val user = lst.head
-				val following = user.getAs[BasicDBList]("following").get
-				if (following.exists(x => (x.asInstanceOf[DBObject].toString).equals(follower))) {
+				val following = user.getAs[MongoDBList]("following").get
+				if (following.exists(x => (x.asInstanceOf[String]).equals(follower))) {
 					following.remove(follower)
-					_data_connection.getCollection("relationship").update(DBObject("user_id" -> user_id), user)
+					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
 					true
 				}
 			}
@@ -115,10 +116,12 @@ object RelationshipModule {
 
 			if (lst.count == 1) {
 				val user = lst.head
-				val following = user.getAs[BasicDBList]("followed").get
-				if (!following.exists(x => (x.asInstanceOf[DBObject].toString).equals(followed))) {
-					following.remove(followed)
-					_data_connection.getCollection("relationship").update(DBObject("user_id" -> user_id), user)
+				val followed_lst = user.getAs[MongoDBList]("followed").get
+				if (followed_lst.exists(x => (x.asInstanceOf[String]).equals(followed))) {
+					followed_lst.remove(followed)
+					println(followed_lst)
+					println(user)
+					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
 					true
 				}
 			}
@@ -143,8 +146,7 @@ object RelationshipModule {
 		if (lst.count == 0) {
 		  	tmp += "following" -> null
 		} else if (lst.count == 1) {
-		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("following") map (iter => tmp += iter -> helpOptions.opt_2_js(lst.head.get(iter), iter))
+			tmp = this.queryResult(lst.head, List("following"))
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
@@ -163,8 +165,7 @@ object RelationshipModule {
 		if (lst.count == 0) {
 		  	tmp += "followed" -> null
 		} else if (lst.count == 1) {
-		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("followed") map (iter => tmp += iter -> helpOptions.opt_2_js(lst.head.get(iter), iter))
+			tmp = this.queryResult(lst.head, List("followed"))
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
@@ -177,19 +178,31 @@ object RelationshipModule {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val owner_id = (data \ "owner_id").asOpt[String].get
-		
+	
 		val lst = from db() in "relationship" where ("user_id" -> owner_id) select (x => x)
 		var tmp : Map[String, JsValue] = Map.empty
 		if (lst.count == 0) {
 		  	tmp += "followed" -> null
 		  	tmp += "following" -> null
 		} else if (lst.count == 1) {
-		  	var tmp : Map[String, JsValue] = Map.empty
-		  	List("followed", "following") map (iter => tmp += iter -> helpOptions.opt_2_js(lst.head.get(iter), iter))
+		  tmp = this.queryResult(lst.head, List("followed", "following"))
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
 		}
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
+	}
+	
+	def queryResult(one : MongoDBObject, lst : List[String]) : Map[String, JsValue] = {
+		var tmp : Map[String, JsValue] = Map.empty
+		lst map { iter => 
+			var tmp_lst : List[String] = Nil
+		  	one.getAs[MongoDBList](iter).map (value => 
+		  		value.foreach (x => tmp_lst = x.asInstanceOf[String] :: tmp_lst)).
+		  		getOrElse(Unit)
+		  	
+		  	tmp += iter -> toJson(tmp_lst)
+		}
+		tmp
 	}
 }
