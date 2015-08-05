@@ -52,5 +52,12 @@ POST	/tags/queryContentsWithTag				controllers.tagController.queryContentsWithTa
 # notification module
 POST	/devices/registerUserDevice				controllers.apnsNotificationController.registerUserDevices
 
+# relationship module
+POST	/connections/follow						controllers.relationshipController.follow
+POST	/connections/unfollow					controllers.relationshipController.unfollow
+POST	/connections/queryFollowingUsers		controllers.relationshipController.queryFollowingUsers
+POST	/connections/queryFollowedUsers			controllers.relationshipController.queryFollowedUsers
+POST	/connections/queryMutureFollowingUsers	controllers.relationshipController.queryMutureFollowingUsers
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
