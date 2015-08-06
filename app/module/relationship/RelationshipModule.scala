@@ -237,4 +237,15 @@ object RelationshipModule {
 			}	  
 		}
 	} 
+	
+	def queryRelationsBetweenUsers(data : JsValue) : JsValue = {
+		
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val owner_id = (data \ "owner_id").asOpt[String].get
+		
+		val result = this.relationsBetweenUserAndPostowner(user_id, owner_id)
+		
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result.con)))
+	} 
 }
