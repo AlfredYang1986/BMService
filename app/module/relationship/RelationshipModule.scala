@@ -13,6 +13,21 @@ import java.util.Date
 import module.common.helpOptions
 import scala.collection.JavaConversions._
 
+/**
+ * for con = 0: indicate no relations
+ * 			 1: indicate user is following post_owner
+ *     		 2: indicate user is followed by post_owner
+ *        	 3: indicate user and post_owner are friends
+ */
+sealed abstract class relations(val con : Int)
+object user2PostOwner {
+  case object no_connections extends relations(0)
+  case object same_person extends relations(1)
+  case object following extends relations(2)
+  case object followed extends relations(3)
+  case object friends extends relations(4)
+}
+
 object RelationshipModule {
  
 	def follow(data : JsValue) : JsValue = {
@@ -205,4 +220,21 @@ object RelationshipModule {
 		}
 		tmp
 	}
+
+	def relationsBetweenUserAndPostowner(user_id : String, post_owner_id : String) : relations = {
+		if (user_id.equals(post_owner_id)) user2PostOwner.same_person
+		else {
+			val lst = from db() in "relationship" where ("user_id" -> user_id) select (x => x)
+			if (lst.count == 0 || lst.count > 1) user2PostOwner.no_connections
+			else {
+				val is_followed = lst.head.getAs[MongoDBList]("followed").get.exists(x => (x.asInstanceOf[String]).equals(post_owner_id))
+				val is_following = lst.head.getAs[MongoDBList]("following").get.exists(x => (x.asInstanceOf[String]).equals(post_owner_id))
+				
+				if (is_followed && is_following) user2PostOwner.friends
+				else if (is_following) user2PostOwner.following
+				else if (is_followed) user2PostOwner.followed
+				else user2PostOwner.no_connections
+			}	  
+		}
+	} 
 }

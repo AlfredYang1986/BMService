@@ -12,6 +12,9 @@ import java.util.Date
 
 import module.common.files.fop
 import module.common.helpOptions
+
+import module.relationship.RelationshipModule
+
 import scala.collection.JavaConversions._
 
 object QueryModule {
@@ -31,6 +34,9 @@ object QueryModule {
 		(from db() in "posts" where ("date" $lte date)).selectSkipTop(skip)(take)("date") { x => 
 		  	var tmp : Map[String, JsValue] = Map.empty
 		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+		  	
+		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
+		  	tmp += "relations" -> toJson(con.con)
 		  	xls = xls :+ toJson(tmp)
 		}
 
@@ -47,14 +53,16 @@ object QueryModule {
 		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)	
 		
 		val conditions = (data \ "conditions").asOpt[JsValue].map (x => x).getOrElse(null)
-	
-		def constructConditions : MongoDBObject = {
-			val reVal = "date" $lte date
+
+		def dateConditions : DBObject = "date" $lte date
+		  
+		def constructConditions : DBObject = {
+			val reVal = dateConditions
 			
 			if (conditions != null) {
 			  	List("owner_id") foreach { x => 
 			  		(conditions \ x).asOpt[String].map { cdt =>
-			  			reVal += x -> cdt
+			  			reVal += (x -> cdt)
 			  		}
 			  	}
 			}
@@ -65,6 +73,11 @@ object QueryModule {
 		(from db() in "posts" where constructConditions).selectSkipTop(skip)(take)("date") { x => 
 			var tmp : Map[String, JsValue] = Map.empty
 		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+		  	/**
+		  	 * add post owner relations to the query user
+		  	 */
+		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
+		  	tmp += "relations" -> toJson(con.con)
 		  	xls = xls :+ toJson(tmp)
 		}	
 
