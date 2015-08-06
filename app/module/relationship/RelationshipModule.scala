@@ -11,6 +11,7 @@ import com.mongodb.casbah.Imports._
 import java.util.Date
 
 import module.common.helpOptions
+import module.profile.ProfileModule
 import scala.collection.JavaConversions._
 
 /**
@@ -29,14 +30,14 @@ object user2PostOwner {
 }
 
 object RelationshipModule {
- 
+
 	def follow(data : JsValue) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val follow_user_id = (data \ "follow_user_id").asOpt[String].get
 
-		def addfollowings(owner : String, follower : String) : Boolean = {
+		def addfollowings(owner : String, follower : String) = {
 			val lst = from db() in "relationship" where ("user_id" -> owner) select (x => x)
 
 			if (lst.count == 0) {
@@ -45,14 +46,13 @@ object RelationshipModule {
 				val following_lst = MongoDBList.newBuilder
 				following_lst += follower
 				
-				val followed_lst = MongoDBList.newBuilder
-				
 				builder += "user_id" -> owner
 				builder += "following" -> following_lst.result
-				builder += "followed" -> followed_lst.result
+				builder += "followed" -> MongoDBList.newBuilder.result
+				builder += "friends" -> MongoDBList.newBuilder.result
 	
 				_data_connection.getCollection("relationship") += builder.result
-				true
+				ProfileModule.updateFollowingCount(1, owner)
 			}
 			else if (lst.count == 1) {
 				val user = lst.head
@@ -60,44 +60,58 @@ object RelationshipModule {
 
 				if (!following.exists(x => x.asInstanceOf[String].equals(follower))) {
 					following.add(follower)
+					ProfileModule.updateFollowingCount(following.length, owner)
+					
+					val followed = user.getAs[MongoDBList]("followed").get
+					if (followed.exists(x => x.asInstanceOf[String].equals(follower))) {
+						val friends = user.getAs[MongoDBList]("friends").get
+						if (!friends.exists(x => x.asInstanceOf[String].equals(follower))) {
+							friends.add(follower)
+							ProfileModule.updateFriendsCount(friends.length, owner)
+						}
+					}
 					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
-					true
 				}
 			}
-			false
 		}
 	
-		def addfolloweds(owner : String, followed : String) : Boolean = {
+		def addfolloweds(owner : String, followed : String) = {
 			val lst = from db() in "relationship" where ("user_id" -> owner) select (x => x)
 
 			if (lst.count == 0) {
 				val builder = MongoDBObject.newBuilder
 				
-				val following_lst = MongoDBList.newBuilder
-				
 				val followed_lst = MongoDBList.newBuilder
 				followed_lst += followed
 				  
 				builder += "user_id" -> owner
-				builder += "following" -> following_lst.result
+				builder += "following" -> MongoDBList.newBuilder.result
 				builder += "followed" -> followed_lst.result
+				builder += "friends" -> MongoDBList.newBuilder.result
 	
 				_data_connection.getCollection("relationship") += builder.result
-				true
+				ProfileModule.updateFollowedCount(1, owner)
 			}
 			else if (lst.count == 1) {
 				val user = lst.head
-				val following = user.getAs[MongoDBList]("followed").get
-				if (!following.exists(x => (x.asInstanceOf[String]).equals(followed))) {
-					following.add(followed)
+				val followed_lst = user.getAs[MongoDBList]("followed").get
+				if (!followed_lst.exists(x => (x.asInstanceOf[String]).equals(followed))) {
+					followed_lst.add(followed)
+					ProfileModule.updateFollowedCount(followed_lst.length, owner)
+
+					val following = user.getAs[MongoDBList]("following").get
+					if (following.exists(x => x.asInstanceOf[String].equals(followed))) {
+						val friends = user.getAs[MongoDBList]("friends").get
+						if (!friends.exists(x => x.asInstanceOf[String].equals(followed))) {
+							friends.add(followed)
+							ProfileModule.updateFriendsCount(friends.length, owner)
+						}
+					}
 					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
-					true
 				}
 			}
-			false
 		}
 		
-
 		addfollowings(user_id, follow_user_id)
 		addfolloweds(follow_user_id, user_id)
 		
@@ -111,7 +125,7 @@ object RelationshipModule {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val follow_user_id = (data \ "follow_user_id").asOpt[String].get
 
-		def removefollowings(owner : String, follower : String) : Boolean = {
+		def removefollowings(owner : String, follower : String) = {
 			val lst = from db() in "relationship" where ("user_id" -> owner) select (x => x)
 
 			if (lst.count == 1) {
@@ -119,14 +133,23 @@ object RelationshipModule {
 				val following = user.getAs[MongoDBList]("following").get
 				if (following.exists(x => (x.asInstanceOf[String]).equals(follower))) {
 					following.remove(follower)
+					ProfileModule.updateFollowingCount(following.length, owner)
+					
+					val followed = user.getAs[MongoDBList]("followed").get
+					if (followed.exists(x => x.asInstanceOf[String].equals(follower))) {
+						val friends = user.getAs[MongoDBList]("friends").get
+						if (friends.exists(x => x.asInstanceOf[String].equals(follower))) {
+							friends.remove(follower)
+							ProfileModule.updateFriendsCount(friends.length, owner)
+						}
+					}
+					
 					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
-					true
 				}
 			}
-			false
 		}
 	
-		def removefolloweds(owner : String, followed : String) : Boolean = {
+		def removefolloweds(owner : String, followed : String) = {
 			val lst = from db() in "relationship" where ("user_id" -> owner) select (x => x)
 
 			if (lst.count == 1) {
@@ -134,13 +157,19 @@ object RelationshipModule {
 				val followed_lst = user.getAs[MongoDBList]("followed").get
 				if (followed_lst.exists(x => (x.asInstanceOf[String]).equals(followed))) {
 					followed_lst.remove(followed)
-					println(followed_lst)
-					println(user)
+					ProfileModule.updateFollowedCount(followed_lst.length, owner)
+					
+					val following = user.getAs[MongoDBList]("following").get
+					if (following.exists(x => x.asInstanceOf[String].equals(followed))) {
+						val friends = user.getAs[MongoDBList]("friends").get
+						if (friends.exists(x => x.asInstanceOf[String].equals(followed))) {
+							friends.remove(followed)
+							ProfileModule.updateFriendsCount(friends.length, owner)
+						}
+					}
 					_data_connection.getCollection("relationship").update(DBObject("user_id" -> owner), user)
-					true
 				}
 			}
-			false
 		}
 
 		removefollowings(user_id, follow_user_id)

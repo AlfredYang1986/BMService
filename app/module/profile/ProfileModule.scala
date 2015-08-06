@@ -23,9 +23,6 @@ object ProfileModule {
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
 		val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse("")
 		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
-		val followings_count = (data \ "followings_count").asOpt[Int].map(x => x).getOrElse(0)
-		val followers_count = (data \ "followers_count").asOpt[Int].map(x => x).getOrElse(0)
-		val posts_count = (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
 		
 		if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
@@ -36,9 +33,11 @@ object ProfileModule {
 				builder += "screen_name" -> screen_name
 				builder += "screen_photo" -> screen_photo
 				builder += "role_tag" -> role_tag
-				builder += "followings_count" -> followings_count
-				builder += "followers_count" -> followers_count
-				builder += "posts_count" -> posts_count
+				builder += "followings_count" -> (data \ "followings_count").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "followers_count" -> (data \ "followers_count").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "friends_count" -> (data \ "friends_count").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "posts_count" -> (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "cycle_count" -> (data \ "cycle_count").asOpt[Int].map(x => x).getOrElse(0)
 				
 				_data_connection.getCollection("user_profile") += builder.result
 			} else {
@@ -49,7 +48,7 @@ object ProfileModule {
 					}.getOrElse(Unit)
 				}
 				
-				List("followings_count", "followers_count", "posts_count") foreach { x => 
+				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count") foreach { x => 
 					(data \ x).asOpt[Int].map { value =>
 						user += x -> new Integer(value)
 					}.getOrElse(Unit)
@@ -66,7 +65,7 @@ object ProfileModule {
 		if (re.count != 1) null
 		else {
 			var tmp = Map.empty[String, JsValue]
-			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 			
 			tmp
@@ -92,10 +91,37 @@ object ProfileModule {
 			// 2. 
 			else {
 				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: Nil)
+				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}
 		}
+	}
+	
+	def updateFollowingCount(count : Int, user_id : String) = {
+		val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
+		if (!reVal.empty) {
+			val user = reVal.head
+			user += "followings_count" -> new Integer(count)
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+		}
+	}
+	
+	def updateFollowedCount(count : Int, user_id : String) = {
+		val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
+		if (!reVal.empty) {
+			val user = reVal.head
+			user += "followers_count" -> new Integer(count)
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+		}  
+	}
+	
+	def updateFriendsCount(count : Int, user_id : String) = {
+		val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
+		if (!reVal.empty) {
+			val user = reVal.head
+			user += "friends_count" -> new Integer(count)
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+		}  
 	}
 }
