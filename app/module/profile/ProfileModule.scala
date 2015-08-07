@@ -152,7 +152,6 @@ object ProfileModule {
 			toJson(tmp)
 		}
 	
-		println(reVal)
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(reVal.toList.asInstanceOf[List[JsValue]])))
 	}
 }
