@@ -1,18 +1,171 @@
-2015-08-06 17:33:11,412 - [INFO] - from play in pool-6-thread-2 
+2015-08-07 09:40:13,821 - [INFO] - from play in pool-6-thread-5 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-08-06 17:34:14,440 - [INFO] - from play in play-internal-execution-context-1 
+2015-08-07 12:35:33,432 - [ERROR] - from application in New I/O worker #1 
+
+
+! @6n3p9c9f1 - Internal server error, for (POST) [/login/authWithThird] ->
+
+play.PlayExceptions$CompilationException: Compilation error[value multipleUserProfile is not a member of object controllers.profileController]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2015-08-07 12:35:33,574 - [WARN] - from play in New I/O worker #1 
+No application found at invoker init
+
+2015-08-07 12:35:40,206 - [ERROR] - from application in New I/O worker #1 
+
+
+! @6n3p9cjgg - Internal server error, for (POST) [/profile/updateProfile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[value multipleUserProfile is not a member of object controllers.profileController]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2015-08-07 12:35:45,631 - [ERROR] - from application in New I/O worker #1 
+
+
+! @6n3p9d1h8 - Internal server error, for (POST) [/post/uploadFile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[value multipleUserProfile is not a member of object controllers.profileController]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2015-08-07 12:39:15,208 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-08-06 17:34:14,488 - [INFO] - from play in play-internal-execution-context-1 
+2015-08-07 12:39:15,225 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2015-08-06 18:20:16,430 - [INFO] - from play in play-internal-execution-context-1 
+2015-08-07 13:02:05,631 - [INFO] - from play in play-internal-execution-context-4 
 Shutdown application default Akka system.
 
-2015-08-06 18:20:16,967 - [INFO] - from play in play-internal-execution-context-1 
+2015-08-07 13:02:06,184 - [INFO] - from play in play-internal-execution-context-4 
 Starting application default Akka system.
 
-2015-08-06 18:20:16,974 - [INFO] - from play in play-internal-execution-context-1 
+2015-08-07 13:02:06,189 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:10:35,685 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:10:36,191 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:10:36,198 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:12:01,425 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:12:01,603 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:12:01,610 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:14:21,851 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:14:22,334 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:14:22,340 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:15:09,467 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:15:09,605 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:15:09,609 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:15:28,950 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:15:29,084 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:15:29,090 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:31:00,414 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:31:02,097 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:31:02,103 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:31:41,893 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:31:41,994 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:31:41,999 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2015-08-07 13:34:48,217 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2015-08-07 13:34:48,586 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2015-08-07 13:34:48,591 - [INFO] - from play in play-internal-execution-context-4 
 Application started (Dev)
 

@@ -115,8 +115,8 @@ object RelationshipModule {
 		addfollowings(user_id, follow_user_id)
 		addfolloweds(follow_user_id, user_id)
 		
-//		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("follow user success")))
-		queryMutureFollowingUsers(data)
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("follow user success")))
+//		queryMutureFollowingUsers(data)
 	}
 
 	def unfollow(data : JsValue) : JsValue = {
@@ -175,8 +175,8 @@ object RelationshipModule {
 		removefollowings(user_id, follow_user_id)
 		removefolloweds(follow_user_id, user_id)
 		
-//		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("follow user success")))
-		queryMutureFollowingUsers(data)
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("unfollow user success")))
+//		queryMutureFollowingUsers(data)
 	}
 
 	def queryFollowingUsers(data : JsValue) : JsValue = {
@@ -226,10 +226,9 @@ object RelationshipModule {
 		val lst = from db() in "relationship" where ("user_id" -> owner_id) select (x => x)
 		var tmp : Map[String, JsValue] = Map.empty
 		if (lst.count == 0) {
-		  	tmp += "followed" -> null
-		  	tmp += "following" -> null
+		  	tmp += "friends" -> null
 		} else if (lst.count == 1) {
-		  tmp = this.queryResult(lst.head, List("followed", "following"))
+		  tmp = this.queryResult(lst.head, List("friends"))
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")

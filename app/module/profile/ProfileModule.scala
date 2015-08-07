@@ -124,4 +124,35 @@ object ProfileModule {
 			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
 		}  
 	}
+	
+	/**
+	 * mutiple user profile
+	 */
+	def multipleUserProfile(data : JsValue) : JsValue = {
+		
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val query_list = (data \ "query_list").asOpt[List[String]].get
+
+		var conditions : DBObject = null
+		query_list.foreach { x=> 
+		  	if (conditions == null) {
+		  		val builder = MongoDBObject.newBuilder  
+		  		builder += "user_id" -> x
+		  		conditions = builder.result
+		  	}
+			else conditions = $or(conditions, DBObject("user_id" -> x))
+		}
+		
+		val reVal = from db() in "user_profile" where conditions select { x =>
+			var tmp = Map.empty[String, JsValue]
+			x.getAs[String]("screen_name").map (name => tmp += "screen_name" -> toJson(name)).getOrElse(tmp += "screen_name" -> toJson(""))
+			x.getAs[String]("screen_photo").map (photo => tmp += "screen_photo" -> toJson(photo)).getOrElse(tmp += "screen_photo" -> toJson(""))
+			x.getAs[String]("role_tag").map (tag => tmp += "role_tag" -> toJson(tag)).getOrElse(tmp += "role_tag" -> toJson(""))
+			toJson(tmp)
+		}
+	
+		println(reVal)
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(reVal.toList.asInstanceOf[List[JsValue]])))
+	}
 }
