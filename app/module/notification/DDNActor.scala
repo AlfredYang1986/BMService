@@ -10,11 +10,12 @@ import scala.concurrent.duration._
 /**
  * messages for start schedule notification
  */
-case object apnsNotificationAll
+case object DDNInit 
 
-class apnsActor extends Actor {
+class DDNActor extends Actor {
 	
 	def receive = {
-	  case apnsNotificationAll => apnsNotification.notificationAll
+	  case DDNInit => DDNNotification.getAuthTokenForXMPP
+	  case _ => 
 	}
 }
