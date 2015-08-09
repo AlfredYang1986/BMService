@@ -165,9 +165,12 @@ object RelationshipModule {
 								"msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
 //								, "thumb" -> null, "voiceLen" -> null, "pushFormat" -> null)
 				} else if ((x \ "user_id").asOpt[String].get.equals(follow_user_id)) {
-				 
-					if ((x \ "isLogin").asOpt[Int].get == 0) {
+				
+					val status = (x \ "isLogin").asOpt[Int].get 
+					if (status == -1) {
 						// TODO: offline send app notifications
+					} else if (status == 0) {
+						// TODO: user login, by now do nothing
 					}
 				} 
 			}

@@ -295,6 +295,20 @@ object LoginModule {
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(name)))))
 		}
 	}
+
+	/**
+	 * user status
+	 * 		-1 	=> offline
+	 *   	0	=> logout
+	 *    	1	=> login
+	 */
+	def userOffline(data : JsValue) : JsValue = {
+	 	val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(-1))))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("logout success"))) 
+	}
 	
 	def logout(data : JsValue) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
