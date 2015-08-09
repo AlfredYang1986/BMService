@@ -10,7 +10,14 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.common.helpOptions
 
+import akka.actor.{Actor, Props}
+import play.api.libs.concurrent.Akka
+import play.api.GlobalSettings
+import play.api.templates.Html
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 object ProfileModule {
+
 	def like(data : JsValue) : JsValue = {
 		null
 	}
@@ -38,6 +45,7 @@ object ProfileModule {
 				builder += "friends_count" -> (data \ "friends_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "posts_count" -> (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "cycle_count" -> (data \ "cycle_count").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(0)
 				
 				_data_connection.getCollection("user_profile") += builder.result
 			} else {
@@ -48,12 +56,12 @@ object ProfileModule {
 					}.getOrElse(Unit)
 				}
 				
-				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count") foreach { x => 
+				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin") foreach { x => 
 					(data \ x).asOpt[Int].map { value =>
 						user += x -> new Integer(value)
 					}.getOrElse(Unit)
 				}
-		
+				
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
 			}
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo, "role_tag" -> role_tag))))
@@ -65,7 +73,7 @@ object ProfileModule {
 		if (re.count != 1) null
 		else {
 			var tmp = Map.empty[String, JsValue]
-			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: Nil)
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 			
 			tmp
@@ -91,7 +99,7 @@ object ProfileModule {
 			// 2. 
 			else {
 				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: Nil)
+				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}
@@ -152,6 +160,7 @@ object ProfileModule {
 				x.getAs[String]("screen_name").map (name => tmp += "screen_name" -> toJson(name)).getOrElse(tmp += "screen_name" -> toJson(""))
 				x.getAs[String]("screen_photo").map (photo => tmp += "screen_photo" -> toJson(photo)).getOrElse(tmp += "screen_photo" -> toJson(""))
 				x.getAs[String]("role_tag").map (tag => tmp += "role_tag" -> toJson(tag)).getOrElse(tmp += "role_tag" -> toJson(""))
+				x.getAs[Int]("isLogin").map (tag => tmp += "isLogin" -> toJson(tag)).getOrElse(tmp += "isLogin" -> toJson(0))
 				toJson(tmp)
 			}
 		

@@ -1,8 +1,5 @@
 package module.relationship
 
-import play.api.libs.json.Json
-import play.api.libs.json.Json._
-import play.api.libs.json.JsValue
 import play.api.http.Writeable
 import util.dao.from
 import util.dao._data_connection
@@ -13,6 +10,24 @@ import java.util.Date
 import module.common.helpOptions
 import module.profile.ProfileModule
 import scala.collection.JavaConversions._
+import module.notification._
+
+import play.api._
+import play.api.mvc._
+import play.api.libs.json.Json
+import play.api.libs.json.Json.{ toJson }
+import play.api.libs.json.{ JsValue, JsObject, JsString, JsArray }
+import play.api.libs.iteratee._
+import play.api.libs.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits._
+import akka.actor.Actor
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.actor.ActorRef
+
+import module.common.AcitionType._
 
 /**
  * for con = 0: indicate no relations
@@ -31,6 +46,8 @@ object user2PostOwner {
 
 object RelationshipModule {
 
+	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
+	
 	def follow(data : JsValue) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -114,7 +131,49 @@ object RelationshipModule {
 		
 		addfollowings(user_id, follow_user_id)
 		addfolloweds(follow_user_id, user_id)
+		/**
+		 * 		senderAccount : notificatioin_account
+		 *   	receiverType : 0 => User, 1 => ChatGroup, 2 => UserGroup
+		 *    	receiverIds	: []
+		 *      isSave : 0 => Not Save, 1 => Save
+		 *      msgType : 0 => text, 3 => image, 4 => voice
+		 *      content : message content
+		 *      thumb : 
+		 *      voiceLen : null
+		 *      pushFormat :
+		 *      extraData :	
+		 */
+		var query_users : Map[String, JsValue] = Map.empty
+		query_users += "user_id" -> toJson(user_id)
+		query_users += "auth_token" -> toJson(auth_token)
+		query_users += "query_list" -> toJson(List(follow_user_id, user_id))
 		
+		(ProfileModule.multipleUserProfile(toJson(query_users)) \ "result").asOpt[List[JsValue]].map { lst =>
+			lst.foreach { x => 
+				if ((x \ "user_id").asOpt[String].get.equals(user_id)) {
+				  
+					var content : Map[String, JsValue] = Map.empty
+					content += "type" -> toJson(module.common.AcitionType.follow.index)
+					content += "sender_screen_name" -> (x \ "screen_name")
+					content += "sender_screen_photo" -> (x \ "screen_photo")
+					content += "sender_id" -> toJson(user_id)
+					content += "date" -> toJson(new Date().getTime)
+					content += "receiver_id" -> toJson(follow_user_id)
+					
+//					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(follow_user_id, user_id)), "isSave" -> toJson(1), 
+					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id)), "isSave" -> toJson(1), 
+								"msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+//								, "thumb" -> null, "voiceLen" -> null, "pushFormat" -> null)
+				} else if ((x \ "user_id").asOpt[String].get.equals(follow_user_id)) {
+				 
+					if ((x \ "isLogin").asOpt[Int].get == 0) {
+						// TODO: offline send app notifications
+					}
+				} 
+			}
+		  
+		}.getOrElse(Unit)
+			
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("follow user success")))
 //		queryMutureFollowingUsers(data)
 	}

@@ -118,7 +118,7 @@ object LoginModule {
 						val user_id = cur.get("user_id").get.asInstanceOf[String]
 
 						var tmp = ProfileModule.queryUserProfile(user_id)
-						tmp += "message" -> toJson("already login")
+						tmp += "message" -> toJson("already login")		// phone is already reg
 						tmp += "phoneNo" -> toJson(phoneNo)
 						tmp += "auth_token" -> toJson(auth_token)
 						
@@ -158,7 +158,7 @@ object LoginModule {
 	 
 		_data_connection.getCollection("users") += new_builder.result
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id, "screen_name" -> provide_screen_name, "screen_photo" -> provide_screen_photo)))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
@@ -202,7 +202,7 @@ object LoginModule {
 			}
 		}
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id, "screen_name" -> provide_screen_name, "screen_photo" -> provide_screen_photo)))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "connect_result" -> toJson("success")))))
@@ -270,7 +270,7 @@ object LoginModule {
 					
 		_data_connection.getCollection("users") += new_builder.result
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> user_id)))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
 		
 		var tmp = ProfileModule.queryUserProfile(user_id)
 		tmp += "phoneNo" -> toJson(phoneNo)
@@ -294,6 +294,13 @@ object LoginModule {
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(name)))))
 		}
-		  
+	}
+	
+	def logout(data : JsValue) : JsValue = {
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(0))))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("logout success")))
 	}
 }

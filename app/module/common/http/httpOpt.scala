@@ -59,15 +59,12 @@ case class httpOpt(val url : String) {
 		fromInputStream(connection.getInputStream) 
 	}
 	
-	def post(parameters : (String, JsValue)*) : JsValue = {
+	def post(parameters : JsValue) : JsValue = {
 		connection.setDoOutput(true)
 		connection.connect
 
-		var para : Map[String, JsValue] = Map.empty
-		for ((name, value) <- parameters) para += name -> value
-		
 		val postStream = new OutputStreamWriter(connection.getOutputStream())
-		postStream.write(toJson(para).toString)
+		postStream.write(parameters.toString)
 		postStream.flush
 		postStream.close
 
@@ -79,6 +76,13 @@ case class httpOpt(val url : String) {
 			line = in.readLine
 		} while (line != null)
 
-		parse(buffer.toString)
+		parse(buffer.toString) 
+	}
+	
+	def post(parameters : (String, JsValue)*) : JsValue = {
+		var para : Map[String, JsValue] = Map.empty
+		for ((name, value) <- parameters) para += name -> value
+
+		post(toJson(para))
 	}
 }
