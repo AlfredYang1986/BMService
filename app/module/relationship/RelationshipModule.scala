@@ -170,6 +170,7 @@ object RelationshipModule {
 					val status = (x \ "isLogin").asOpt[Int].get 
 					if (status == -1) {
 						// TODO: offline send app notifications
+//						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", follow_user_id, module.common.AcitionType.follow.index)
 						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", user_id, module.common.AcitionType.follow.index)
 					  
 					} else if (status == 0) {
