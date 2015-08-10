@@ -72,4 +72,34 @@ object apnsNotification {
 			service.push(token, payload)
 		}
 	}
+	
+	/**
+	 * parameters:
+	 * 		senderAccount : notificatioin_account
+	 *   	receiverType : 0 => User, 1 => ChatGroup, 2 => UserGroup
+	 *    	receiverIds	: []
+	 *      isSave : 0 => Not Save, 1 => Save
+	 *      msgType : 0 => text, 3 => image, 4 => voice
+	 *      content : message content
+	 *      thumb : 
+	 *      voiceLen : null
+	 *      pushFormart :
+	 *      extraData :
+	 */
+	def nofity(message : String, to : String, action : Int) = {
+	  
+		var deviceList : List[String] = Nil
+		(from db() in "devices" where ("user_id" -> to) select (x => x)).toList.foreach { iter =>
+			iter.get("devices").map { lst =>
+			  	lst.asInstanceOf[BasicDBList].foreach { device =>
+			  	  	deviceList = device.asInstanceOf[String] :: deviceList
+			  	}
+			}.getOrElse(Unit)
+		}
+	  
+		val payload = APNS.newPayload.alertBody(message).customField("action", action).build
+		deviceList.distinct.foreach { token => 
+			service.push(token, payload)
+		}
+	}
 }

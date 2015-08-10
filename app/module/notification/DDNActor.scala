@@ -11,9 +11,6 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
 
-/**
- * messages for start schedule notification
- */
 case object DDNInit
 case class 	DDNNotifyUsers(val parameters : (String, JsValue)*)
 

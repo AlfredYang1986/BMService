@@ -19,4 +19,6 @@ object loginController extends Controller {
 	def authCreateUserWithPhone = Action (request => requestArgs(request)(LoginModule.authCreateUserWithPhone))
 	def authWithPwd = Action (request => requestArgs(request)(LoginModule.authWithPwd))
 	def logout = Action (request => requestArgs(request)(LoginModule.logout))
+	def offline = Action (request => requestArgs(request)(LoginModule.userOffline))
+	def online = Action (request => requestArgs(request)(LoginModule.userOnline))
 }

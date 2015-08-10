@@ -13,7 +13,9 @@ POST	/login/connectWithThird					controllers.loginController.connectWithThird
 POST	/login/authUpdateDetails				controllers.loginController.authUpdateDetails
 POST	/login/authCreateUserWithPhone 			controllers.loginController.authCreateUserWithPhone
 POST	/login/authWithPwd						controllers.loginController.authWithPwd
-POST	/login/logout							controllers.loginController.logout
+POST	/login/signout							controllers.loginController.logout
+POST	/login/offline							controllers.loginController.offline
+POST	/login/online							controllers.loginController.online
 
 # post module
 POST	/post/postContent						controllers.postController.postContent

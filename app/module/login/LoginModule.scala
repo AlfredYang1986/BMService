@@ -300,14 +300,22 @@ object LoginModule {
 	 * user status
 	 * 		-1 	=> offline
 	 *   	0	=> logout
-	 *    	1	=> login
+	 *    	1	=> online 
 	 */
 	def userOffline(data : JsValue) : JsValue = {
 	 	val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(-1))))
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("logout success"))) 
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("offline success"))) 
+	}
+	
+	def userOnline(data : JsValue) : JsValue = {
+	 	val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("online success"))) 
 	}
 	
 	def logout(data : JsValue) : JsValue = {
