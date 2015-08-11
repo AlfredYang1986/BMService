@@ -161,7 +161,7 @@ object LoginModule {
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name)))))
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name), "screen_photo" -> toJson(provide_screen_photo)))))
 	}
 
 	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
@@ -205,7 +205,7 @@ object LoginModule {
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "connect_result" -> toJson("success")))))
+				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "connect_result" -> toJson("success")))))
 	}
 	
 	def authWithThird(data : JsValue) : JsValue = {
@@ -321,8 +321,12 @@ object LoginModule {
 	def logout(data : JsValue) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
+		val device_token = (data \ "device_token").asOpt[String].map (x => x).getOrElse("")
 		
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(0))))
+	
+		if (!device_token.equals("")) module.notification.apnsNotification.unRegisterUserDevices(user_id, device_token)
+
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("logout success")))
 	}
 }

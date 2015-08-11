@@ -15,6 +15,19 @@ import com.notnoop.apns.EnhancedApnsNotification
 
 object apnsNotification {
 	val service = APNS.newService.withCert("certificates/Certificates.p12", "Abcde@196125").withSandboxDestination.build
+
+	def unRegisterUserDevices(user_id : String, device_token : String) = {
+		val deviceList = from db() in "devices" where ("user_id" -> user_id) select (x => x)
+		if (!deviceList.empty) {
+			val dl = deviceList.head
+			dl.get("devices").map { x => 
+				  	if (x.asInstanceOf[BasicDBList].contains(device_token)) {
+				  		x.asInstanceOf[BasicDBList].remove(device_token)
+				  		_data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), dl)
+				  	}
+				}.getOrElse (throw new Exception)
+		}
+	}
 	
 	def registerUserDevices(data : JsValue) : JsValue = {
 

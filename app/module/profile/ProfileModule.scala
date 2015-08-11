@@ -9,6 +9,7 @@ import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.common.helpOptions
+import module.relationship._
 
 import akka.actor.{Actor, Props}
 import play.api.libs.concurrent.Akka
@@ -48,23 +49,29 @@ object ProfileModule {
 				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(0)
 				
 				_data_connection.getCollection("user_profile") += builder.result
+				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo, "role_tag" -> role_tag))))
+			
 			} else {
+				var result : Map[String, JsValue] = Map.empty
 				val user = reVal.head
 				List("role_tag", "screen_name", "screen_photo") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
 						user += x -> value
+						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
 				
 				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin") foreach { x => 
 					(data \ x).asOpt[Int].map { value =>
 						user += x -> new Integer(value)
+						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
-				
+			
+				result += "user_id" -> toJson(user_id)
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
 			}
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo, "role_tag" -> role_tag))))
 		}
 	}
 
@@ -101,6 +108,8 @@ object ProfileModule {
 				var tmp = Map.empty[String, JsValue]
 				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
+					
+				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}
 		}
