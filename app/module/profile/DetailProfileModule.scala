@@ -52,7 +52,6 @@ object DetailProfileModule {
 			(data \ "role_tag").asOpt[String].map (x => user += "role_tag" -> x).getOrElse(Unit)
 			(data \ "hometown").asOpt[String].map (x => user += "hometown" -> x).getOrElse(Unit)
 			(data \ "dob").asOpt[Long].map (x => user += "dob" -> x.longValue.asInstanceOf[java.lang.Long]).getOrElse(Unit)
-			(data \ "horoscope").asOpt[Int].map (x => user += "horoscope" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(Unit)
 			(data \ "school").asOpt[String].map (x => user += "school" -> x).getOrElse(Unit)
 			(data \ "gender").asOpt[Int].map (x => user += "gender" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(Unit)
 			
