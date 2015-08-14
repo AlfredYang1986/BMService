@@ -3,58 +3,61 @@
 # ~~~~
 
 # Home page
-GET     /                           			controllers.loginController.index
+GET     /                           				controllers.loginController.index
 
 # login module
-POST	/login/authWithPhone					controllers.loginController.authWithPhone
-POST	/login/authConfirm						controllers.loginController.authConfirm
-POST	/login/authWithThird					controllers.loginController.authWithThird
-POST	/login/connectWithThird					controllers.loginController.connectWithThird
-POST	/login/authUpdateDetails				controllers.loginController.authUpdateDetails
-POST	/login/authCreateUserWithPhone 			controllers.loginController.authCreateUserWithPhone
-POST	/login/authWithPwd						controllers.loginController.authWithPwd
-POST	/login/signout							controllers.loginController.logout
-POST	/login/offline							controllers.loginController.offline
-POST	/login/online							controllers.loginController.online
+POST	/login/authWithPhone						controllers.loginController.authWithPhone
+POST	/login/authConfirm							controllers.loginController.authConfirm
+POST	/login/authWithThird						controllers.loginController.authWithThird
+POST	/login/connectWithThird						controllers.loginController.connectWithThird
+POST	/login/authUpdateDetails					controllers.loginController.authUpdateDetails
+POST	/login/authCreateUserWithPhone 				controllers.loginController.authCreateUserWithPhone
+POST	/login/authWithPwd							controllers.loginController.authWithPwd
+POST	/login/signout								controllers.loginController.logout
+POST	/login/offline								controllers.loginController.offline
+POST	/login/online								controllers.loginController.online
 
 # post module
-POST	/post/postContent						controllers.postController.postContent
-POST	/post/uploadFile						controllers.postController.uploadFile
-POST	/post/postComment						controllers.postController.postComment
-POST	/post/postLike							controllers.postController.postLike
+POST	/post/postContent							controllers.postController.postContent
+POST	/post/uploadFile							controllers.postController.uploadFile
+POST	/post/postComment							controllers.postController.postComment
+POST	/post/postLike								controllers.postController.postLike
 
 # query module
-GET		/query/downloadFile/*name				controllers.queryController.downloadFile(name)
-POST	/query/queryHomeContent					controllers.queryController.queryHomeContent
-POST	/query/queryComments					controllers.queryController.queryComments
+GET		/query/downloadFile/*name					controllers.queryController.downloadFile(name)
+POST	/query/queryHomeContent						controllers.queryController.queryHomeContent
+POST	/query/queryComments						controllers.queryController.queryComments
 
 # profile module
-POST	/profile/updateProfile 					controllers.profileController.updateProfile
-POST	/profile/userProfile					controllers.profileController.userProfile
-POST	/profile/multipleUserProfile			controllers.profileController.multipleUserProfile
+POST	/profile/updateProfile 						controllers.profileController.updateProfile
+POST	/profile/userProfile						controllers.profileController.userProfile
+POST	/profile/multipleUserProfile				controllers.profileController.multipleUserProfile
+
+POST	/profile/queryDetailDescription				controllers.profileController.queryDetailDescription
+POST	/profile/createAndUpdataDetailDescription 	controllers.profileController.createAndUpdateDettailDescription
 
 # group module
-POST	/group/queryGroups						controllers.groupController.queryGroups
-POST	/group/createSubGroup					controllers.groupController.createSubGroup
+POST	/group/queryGroups							controllers.groupController.queryGroups
+POST	/group/createSubGroup						controllers.groupController.createSubGroup
 
 # message module
-POST 	/messages/sendMessage					controllers.messageController.sendMessage
-POST 	/messages/queryMessages					controllers.messageController.queryMessages
-POST 	/messages/queryMessagesWithFriend		controllers.messageController.queryMessagesWithFriend
+POST 	/messages/sendMessage						controllers.messageController.sendMessage
+POST 	/messages/queryMessages						controllers.messageController.queryMessages
+POST 	/messages/queryMessagesWithFriend			controllers.messageController.queryMessagesWithFriend
 
 # message websocket 
-GET		/messages/registerDevice/:user_id		controllers.MessageNotificationController.registerDevice(user_id)
+GET		/messages/registerDevice/:user_id			controllers.MessageNotificationController.registerDevice(user_id)
 
 # friends module
-POST 	/messages/addOneFriend					controllers.messageController.addOneFriend
-POST 	/messages/deleteOneFriend				controllers.messageController.deleteOneFriend
-POST 	/messages/queryAllFriend				controllers.messageController.queryAllFriend
+POST 	/messages/addOneFriend						controllers.messageController.addOneFriend
+POST 	/messages/deleteOneFriend					controllers.messageController.deleteOneFriend
+POST 	/messages/queryAllFriend					controllers.messageController.queryAllFriend
 
 # tags module
-POST	/tags/queryContentsWithTag				controllers.tagController.queryContentsWithTag
+POST	/tags/queryContentsWithTag					controllers.tagController.queryContentsWithTag
 
 # notification module
-POST	/devices/registerUserDevice				controllers.apnsNotificationController.registerUserDevices
+POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices
 
 # relationship module
 POST	/connections/follow						controllers.relationshipController.follow
