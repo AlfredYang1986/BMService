@@ -52,17 +52,20 @@ object DetailProfileModule {
 			(data \ "role_tag").asOpt[String].map (x => user += "role_tag" -> x).getOrElse(Unit)
 			(data \ "hometown").asOpt[String].map (x => user += "hometown" -> x).getOrElse(Unit)
 			(data \ "dob").asOpt[Long].map (x => user += "dob" -> x.longValue.asInstanceOf[java.lang.Long]).getOrElse(Unit)
+			(data \ "age").asOpt[Int].map (x => user += "age" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(Unit)
+			(data \ "horoscrope").asOpt[Int].map (x => user += "horoscrope" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(Unit)
 			(data \ "school").asOpt[String].map (x => user += "school" -> x).getOrElse(Unit)
 			(data \ "gender").asOpt[Int].map (x => user += "gender" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(Unit)
 			
-			(data \ "kids").asOpt[List[JsValue]].map { lst => 
+			(data \ "kids").asOpt[List[JsValue]].map { lst =>
 			  	val kids_builder = MongoDBList.newBuilder
 				lst.foreach { iter => 
 				  	val builder = MongoDBObject.newBuilder
-				  	(iter \ "dob").asOpt[Long].map (x => builder += "dob" -> x.longValue.asInstanceOf[java.lang.Long]).getOrElse(builder += "dob" -> -1.asInstanceOf[java.lang.Long])
-				  	(iter \ "horoscope").asOpt[Int].map (x => user += "horoscope" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(user += "horoscope" -> -1.asInstanceOf[java.lang.Integer])
-				  	(iter \ "school").asOpt[String].map (x => user += "school" -> x).getOrElse(user += "horoscope" -> "")
-				  	(iter \ "gender").asOpt[Int].map (x => user += "gender" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(user += "gender" -> -1.asInstanceOf[java.lang.Integer])
+				  	(iter \ "dob").asOpt[Long].map (x => builder += "dob" -> x.longValue.asInstanceOf[java.lang.Long]).getOrElse(builder += "dob" -> -1)
+				  	(iter \ "age").asOpt[Int].map (x => builder += "age" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(builder += "age" -> -1)
+				  	(iter \ "horoscrope").asOpt[Int].map (x => builder += "horoscrope" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(builder += "horoscrope" -> -1)
+				  	(iter \ "school").asOpt[String].map (x => builder += "school" -> x).getOrElse(builder += "school" -> "")
+				  	(iter \ "gender").asOpt[Int].map (x => builder += "gender" -> x.intValue.asInstanceOf[java.lang.Integer]).getOrElse(builder += "gender" -> -1)
 				  	kids_builder += builder.result
 				  	}
 			  	user += "kids" -> kids_builder.result
@@ -84,7 +87,8 @@ object DetailProfileModule {
 			x.getAs[String]("role_tag").map (y => tmp += "role_tag" -> toJson(y)).getOrElse(Unit)
 			x.getAs[Long]("dob").map (y => tmp += "dob" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("hometown").map (y => tmp += "hometown" -> toJson(y)).getOrElse(Unit)
-			x.getAs[Int]("horoscope").map (y => tmp += "horoscope" -> toJson(y)).getOrElse(Unit)
+			x.getAs[Int]("horoscrope").map (y => tmp += "horoscrope" -> toJson(y)).getOrElse(Unit)
+			x.getAs[Int]("age").map (y => tmp += "age" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("school").map (y => tmp += "school" -> toJson(y)).getOrElse(Unit)
 			x.getAs[Int]("gender").map (y => tmp += "gender" -> toJson(y)).getOrElse(Unit)
 
@@ -93,13 +97,10 @@ object DetailProfileModule {
 				kids.foreach { kid => 
 					var kid_tmp : Map[String, JsValue] = Map.empty
 					kid.asInstanceOf[BasicDBObject].getAs[Long]("dob").map (y => kid_tmp += "dob" -> toJson(y)).getOrElse(Unit)
-					println(kid_tmp)
 					kid.asInstanceOf[BasicDBObject].getAs[String]("school").map (y => kid_tmp += "school" -> toJson(y)).getOrElse(Unit)
-					println(kid_tmp)
 					kid.asInstanceOf[BasicDBObject].getAs[Int]("gender").map (y => kid_tmp += "gender" -> toJson(y)).getOrElse(Unit)
-					println(kid_tmp)
-					kid.asInstanceOf[BasicDBObject].getAs[Int]("horoscope").map (y => kid_tmp += "horoscope" -> toJson(y)).getOrElse(Unit)
-					println(kid_tmp)
+					kid.asInstanceOf[BasicDBObject].getAs[Int]("horoscrope").map (y => kid_tmp += "horoscrope" -> toJson(y)).getOrElse(Unit)
+					kid.asInstanceOf[BasicDBObject].getAs[Int]("age").map (y => kid_tmp += "age" -> toJson(y)).getOrElse(Unit)
 					kids_lst = toJson(kid_tmp):: kids_lst
 				
 				}
