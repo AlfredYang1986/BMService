@@ -63,6 +63,8 @@ class ALINQ[T] {
 		}
 		false
 	}
+	
+	def count : Int = ls.count(w)
 }
 
 object from {
@@ -124,4 +126,6 @@ class AMongoDBLINQ extends IDatabaseContext {
 		}
 		nc
 	}
+
+	def count : Int = openConnection.count(w)
 }
