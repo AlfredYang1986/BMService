@@ -16,3 +16,12 @@ Starting application default Akka system.
 2015-08-18 15:26:04,447 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
+2015-08-18 16:47:47,275 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-08-18 16:47:47,780 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-08-18 16:47:47,789 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+

@@ -144,7 +144,15 @@ object GroupModule2 {
 	  
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
+
+		val rel = from db() in "groups" select { x =>
+		  	var tmp : Map[String, JsValue] = Map.empty
+			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
+			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
+			x.getAs[MongoDBList]("joiners").map (y => tmp += "joiners_count" -> toJson(y.length)).getOrElse(Unit)
+			toJson(tmp)
+		}
 		
-		null
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(rel.toList)))
 	}
 }
