@@ -20,6 +20,8 @@ object ErrorCode {
   		new ErrorNode("user have low authrity", -10, "can not complete the operation due to low authrity level"),
   		new ErrorNode("group is not exist", -11, "parent for this sub group is no longer exist"),
   		new ErrorNode("already friends", -12, "these two people are already friends"),
+  		new ErrorNode("create chat group error", -13, "create chat group error"),
+  		new ErrorNode("dismiss chat group error", -14, "dismiss chat group error"),
 
   		new ErrorNode("unknown error", -999, "unknown error")
   	)

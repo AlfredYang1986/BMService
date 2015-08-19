@@ -13,15 +13,27 @@ import play.api.libs.json.JsValue
 
 case object DDNInit
 case class 	DDNNotifyUsers(val parameters : (String, JsValue)*)
+case class 	DDNCreateChatGroup(val parameters : (String, JsValue)*)
+case class 	DDNDismissChatGroup(val parameters : (String, JsValue)*)
 
 class DDNActor extends Actor {
+	
+	def parameters2Map(parameters : List[(String, JsValue)]) : Map[String, JsValue] = {
+		var pm : Map[String, JsValue] = Map.empty
+		for ((key, value) <- parameters) pm += key -> value
+		pm
+	}
 	
 	def receive = {
 	  case DDNInit => DDNNotification.getAuthTokenForXMPP
 	  case notify : DDNNotifyUsers => {
-		  var pm : Map[String, JsValue] = Map.empty
-		  for ((key, value) <- notify.parameters) pm += key -> value
-		  DDNNotification.nofity(pm)
+		  DDNNotification.nofity(parameters2Map(notify.parameters.toList))
+	  }
+	  case create : DDNCreateChatGroup => {
+		  sender ! DDNNotification.createChatGroup(parameters2Map(create.parameters.toList))
+	  }
+	  case dismiss : DDNDismissChatGroup => {
+		  sender ! DDNNotification.dismissChatGroup(parameters2Map(dismiss.parameters.toList))
 	  }
 	  case _ => 
 	}

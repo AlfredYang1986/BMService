@@ -176,4 +176,28 @@ object ProfileModule {
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(reVal.toList.asInstanceOf[List[JsValue]])))		  
 		}
 	}
+	
+	/**
+	 * increment cycle count
+	 */
+	def incrementCycleCount(user_id : String) = {
+	  	val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
+		if (!reVal.empty) {
+			val user = reVal.head
+			user.getAs[Int]("cycle_count").map(x => user += "cycle_count" -> new Integer(x + 1)).getOrElse(user += "cycle_count" -> new Integer(0))
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+		}  
+	}
+	
+	/**
+	 * decrement cycle count
+	 */
+	def decrementCycleCount(user_id : String) = {
+	  	val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
+		if (!reVal.empty) {
+			val user = reVal.head
+			user.getAs[Int]("cycle_count").map(x => user += "cycle_count" -> new Integer(x - 1)).getOrElse(user += "cycle_count" -> new Integer(0))
+			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+		} 
+	}
 }

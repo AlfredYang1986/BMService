@@ -40,7 +40,8 @@ POST	/profile/createAndUpdataDetailDescription 	controllers.profileController.cr
 POST	/group/queryGroups							controllers.groupController.queryGroups
 POST	/group/createSubGroup						controllers.groupController.createSubGroup
 
-POST	/group/createChatGroup						controllers.groupController.createChatGroup
+#POST	/group/createChatGroup						controllers.groupController.createChatGroup
+POST	/group/createChatGroup						controllers.groupController.dissmissChatGroup
 POST	/group/updateChatGroup						controllers.groupController.updateChatGroup
 POST	/group/joinChatGroup						controllers.groupController.joinChatGroup
 POST	/group/leaveChatGroup						controllers.groupController.leaveChatGroup

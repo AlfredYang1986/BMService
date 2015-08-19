@@ -46,4 +46,37 @@ object DDNNotification {
 		if (result == 200) println("notification sent success")
 		else println("notification sent error %d", result)
 	}
+	
+	/**
+	 * create chat group
+	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
+     * "roomName": "test room1",   // chat room name 
+     * "head": null,               // chat room photo
+     * "roomType": 1,              // 1 => normal chat room (text, image and voice) 2 =>  
+     * "scope": 0,                 // 0 => application 1 => developer 
+     * "maxUserNumber": 10         // maximum users
+	 */
+	def createChatGroup(pm : Map[String, JsValue]) : JsValue= {
+		var pushMsg = pm
+		
+		pushMsg += "appkey" -> app_key
+		pushMsg += "roomType" -> toJson(1) 
+		pushMsg += "scope" -> toJson(0)
+		pushMsg += "maxUserNumber" -> toJson(10)
+		
+		HTTP(XMPP + "CreateIMRoom").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + XMPP_access_token)).post(toJson(pushMsg)) 
+	}	
+
+	/**
+	 * dismiss chat group 
+	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
+     * "roomId": 340900
+	 */
+	def dismissChatGroup(pm : Map[String, JsValue]) : JsValue= {
+		var pushMsg = pm
+		
+		pushMsg += "appkey" -> app_key
+		
+		HTTP(XMPP + "DelIMRoom").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + XMPP_access_token)).post(toJson(pushMsg)) 
+	}
 }
