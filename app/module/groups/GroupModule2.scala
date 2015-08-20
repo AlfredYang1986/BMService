@@ -64,8 +64,8 @@ object GroupModule2 {
 			  ProfileModule.incrementCycleCount(user_id)
 			  _data_connection.getCollection("groups") += builder.result
 
-			  Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-			  			toJson(Map("group_id" -> toJson(group_id), "group_name" -> toJson(group_name))))) 
+			  Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
+			  			
 		  }
 		  case _ => ErrorCode.errorToJson("create chat group error")		// error or no response
 		}}.getOrElse(ErrorCode.errorToJson("create chat group error"))
@@ -86,8 +86,7 @@ object GroupModule2 {
 			(data \ "group_name").asOpt[String].map(x => group += "group_name" -> x).getOrElse(Unit)
 			_data_connection.getCollection("groups").update(DBObject("group_id" -> group_id), group)
 	
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				  			toJson(Map("group_id" -> toJson(group_id), "group_name" -> toJson(group_name))))) 
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 		}
 	}
 	
@@ -96,7 +95,7 @@ object GroupModule2 {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val group_id = (data \ "group_id").asOpt[Long].get
-		val joiner_id = (data \ "joiner_id").asOpt[String].get
+		val joiner_id = user_id
 		
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("group is not exist")
@@ -113,7 +112,7 @@ object GroupModule2 {
 			  
 			}.getOrElse(Unit)
 
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("join group success")))
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 		}	
 	}
 	
@@ -139,7 +138,7 @@ object GroupModule2 {
 			  
 			}.getOrElse(Unit)
 
-			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("leave group success")))
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 		}	
 	}
 	
@@ -155,7 +154,6 @@ object GroupModule2 {
 		 
 			val result = Await.result((ddn ? DDNDismissChatGroup("roomId" -> toJson(group_id))).mapTo[JsValue], timeout.duration)
 
-			println(result)
 			(result \ "status").asOpt[Int].map { status => status match {
 				case 200 => {		// success
 					val group = rel.head
@@ -170,6 +168,25 @@ object GroupModule2 {
 			}}.getOrElse(ErrorCode.errorToJson("dismiss chat group error"))
 		}	
 	}
+
+	def queryGroupsWithID(group_id : Long, user_id : String) : JsValue = {
+
+	    (from db() in "groups" where ("group_id" -> group_id)).selectTop(1)("group_id") { x =>
+		  	var tmp : Map[String, JsValue] = Map.empty
+			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
+			x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
+			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
+			x.getAs[MongoDBList]("joiners").map { y => 
+			  	tmp += "joiners_count" -> toJson(y.length)
+			
+			  	tmp += "in_the_group" -> {
+			  		if (y.exists(iter => iter.asInstanceOf[String].equals(user_id))) toJson(1)
+			  		else toJson(0)
+			  	}
+		  	}.getOrElse(Unit)
+		  	toJson(tmp)
+		}.head.asInstanceOf[JsValue]
+	}
 	
 	def queryGroups(data : JsValue) : JsValue = {
 	  
@@ -177,27 +194,24 @@ object GroupModule2 {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 
 		/**
-		 * 1. query my group
+		 * 1 => query my group
+		 * 0 => query recommend groups
 		 */
-		val rel = from db() in "groups" where ("joiner" -> user_id) select { x =>
+		val rel = from db() in "groups" select { x =>
 		  	var tmp : Map[String, JsValue] = Map.empty
 			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
+			x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
 			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
-			x.getAs[MongoDBList]("joiners").map (y => tmp += "joiners_count" -> toJson(y.length)).getOrElse(Unit)
+			x.getAs[MongoDBList]("joiners").map { y => 
+			  	tmp += "joiners_count" -> toJson(y.length)
+			  	
+			  	tmp += "in_the_group" -> {
+			  		if (y.exists(iter => iter.asInstanceOf[String].equals(user_id))) toJson(1)
+			  		else toJson(0)
+			  	}
+			}.getOrElse(Unit)
 			toJson(tmp)
 		}
-		
-		/**
-		 * 2. query recommend groups
-		 */
-		val recommends = from db() in "groups" select { x =>
-		  	var tmp : Map[String, JsValue] = Map.empty
-			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
-			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
-			x.getAs[MongoDBList]("joiners").map (y => tmp += "joiners_count" -> toJson(y.length)).getOrElse(Unit)
-			toJson(tmp)
-		}
-		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("my_group" -> toJson(rel.toList), "recommend_group" -> toJson(recommends.toList)))))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(rel.toList)))
 	}
 }

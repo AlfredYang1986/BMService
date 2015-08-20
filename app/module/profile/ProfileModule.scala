@@ -184,7 +184,7 @@ object ProfileModule {
 	  	val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
 		if (!reVal.empty) {
 			val user = reVal.head
-			user.getAs[Int]("cycle_count").map(x => user += "cycle_count" -> new Integer(x + 1)).getOrElse(user += "cycle_count" -> new Integer(0))
+			user.getAs[Int]("cycle_count").map(x => user += "cycle_count" -> new Integer(x + 1)).getOrElse(user += "cycle_count" -> new Integer(1))
 			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
 		}  
 	}

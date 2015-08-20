@@ -45,8 +45,8 @@ object LoginModule {
 		/**
 		 * generate code
 		 */
-		val code = 11111 // fake one
-//		val code = scala.util.Random.nextInt(90000) + 10000
+//		val code = 11111 // fake one
+		val code = scala.util.Random.nextInt(90000) + 10000
 
 		/**
 		 * generate a reg token
@@ -66,8 +66,8 @@ object LoginModule {
 		/**
 		 * send code to the phone
 		 */	
-//		import play.api.Play.current
-//		smsModule().sendSMS(phoneNo, code.toString)
+		import play.api.Play.current
+		smsModule().sendSMS(phoneNo, code.toString)
 		
 		/**
 		 * return 
