@@ -202,7 +202,7 @@ object LoginModule {
 			}
 		}
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1), "isThird" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "connect_result" -> toJson("success")))))

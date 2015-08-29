@@ -56,8 +56,11 @@ object ProfileModule {
 				val user = reVal.head
 				List("role_tag", "screen_name", "screen_photo") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
-						user += x -> value
-						result += x -> toJson(value)
+					
+					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
+					  		user += x -> value
+					  		result += x -> toJson(value)
+					  	}
 					}.getOrElse(Unit)
 				}
 				
