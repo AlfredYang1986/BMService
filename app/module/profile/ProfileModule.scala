@@ -47,6 +47,7 @@ object ProfileModule {
 				builder += "posts_count" -> (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "cycle_count" -> (data \ "cycle_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse(Unit)
 				
 				_data_connection.getCollection("user_profile") += builder.result
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("user_id" -> user_id, "name" -> screen_name, "screen_photo" -> screen_photo, "role_tag" -> role_tag))))
@@ -54,7 +55,7 @@ object ProfileModule {
 			} else {
 				var result : Map[String, JsValue] = Map.empty
 				val user = reVal.head
-				List("role_tag", "screen_name", "screen_photo") foreach { x =>
+				List("signature", "role_tag", "screen_name", "screen_photo") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
 					
 					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
@@ -83,7 +84,7 @@ object ProfileModule {
 		if (re.count != 1) null
 		else {
 			var tmp = Map.empty[String, JsValue]
-			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 			
 			tmp
@@ -109,7 +110,7 @@ object ProfileModule {
 			// 2. 
 			else {
 				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
+				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
 					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 					
 				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
