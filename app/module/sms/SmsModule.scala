@@ -20,6 +20,7 @@ import java.io.InputStreamReader
 import java.io.FileInputStream
 
 case class sms(phoneNo: String, code: String)
+case class invited(phoneNo: String, who: String)
 
 class smsActor extends Actor {
 	def receive = {
@@ -34,7 +35,19 @@ class smsActor extends Actor {
 //	    val result = new String(post.getResponseBodyAsString().getBytes("gbk"))
 //	    println(result)
 	    post.releaseConnection();
-	  
+	 
+	  case invited(phoneNo, who) => 
+		val client = new HttpClient()
+	  	val post = new PostMethod("http://gbk.sms.webchinese.cn")
+	    post.addRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=gbk")
+	    val br = new BufferedReader(new InputStreamReader(new FileInputStream("resource/invitation_content"), "utf8"))
+	    val data = "Uid=" + smsModule.userName + "&Key=" + smsModule.secertKey + "&smsMob=" + phoneNo + "&smsText=" + br.readLine.replace("11111", who)
+	    post.setRequestBody(data)
+	    client.executeMethod(post)
+//	    val result = new String(post.getResponseBodyAsString().getBytes("gbk"))
+//	    println(result)
+	    post.releaseConnection();
+		    
 	  case _ => Unit
 	}  
 }
@@ -44,6 +57,8 @@ case class smsModule(smsActor : ActorRef) {
 	
 	def sendSMS(phoneNo: String, code: String) = smsActor ! sms(phoneNo, code)
 	def sendSMSs(msgs: List[sms]) = msgs foreach (x => smsActor ! x)
+
+	def sendInvitation(phoneNo: String, who: String) = smsActor ! invited(phoneNo, who)
 }
 
 object smsModule {

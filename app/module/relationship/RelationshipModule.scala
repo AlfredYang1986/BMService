@@ -342,4 +342,21 @@ object RelationshipModule {
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result.con)))
 	} 
+	
+	def askPhoneAddressBookFriendsJoin(data : JsValue) : JsValue = {
+	 
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		val who = (data \ "screen_name").asOpt[String].get
+		val phoneNo = (data \ "phoneNo").asOpt[String].get
+	
+		/**
+		 * send code to the phone
+		 */	
+		import play.api.Play.current
+		import module.sms.smsModule
+		smsModule().sendInvitation(phoneNo, who)
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("Send invatation success")))
+	}
 }

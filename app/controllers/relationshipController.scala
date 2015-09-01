@@ -17,4 +17,6 @@ object relationshipController extends Controller {
 	def queryFollowedUsers = Action (request => requestArgs(request)(RelationshipModule.queryFollowedUsers))
 	def queryMutureFollowingUsers = Action (request => requestArgs(request)(RelationshipModule.queryMutureFollowingUsers))
 	def queryRelationsBetweenUsers = Action (request => requestArgs(request)(RelationshipModule.queryRelationsBetweenUsers))
+	
+	def askPhoneAddressBookFriendsJoin = Action (request => requestArgs(request)(RelationshipModule.askPhoneAddressBookFriendsJoin))
 }
