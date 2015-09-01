@@ -26,6 +26,7 @@ POST	/post/postLike								controllers.postController.postLike
 # query module
 GET		/query/downloadFile/*name					controllers.queryController.downloadFile(name)
 POST	/query/queryHomeContent						controllers.queryController.queryHomeContent
+POST	/query/queryCollections						controllers.queryController.queryCollections
 POST	/query/queryComments						controllers.queryController.queryComments
 
 # profile module

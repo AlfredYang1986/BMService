@@ -42,6 +42,8 @@ class smsActor extends Actor {
 	    post.addRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=gbk")
 	    val br = new BufferedReader(new InputStreamReader(new FileInputStream("resource/invitation_content"), "utf8"))
 	    val data = "Uid=" + smsModule.userName + "&Key=" + smsModule.secertKey + "&smsMob=" + phoneNo + "&smsText=" + br.readLine.replace("11111", who)
+//	    val phoneNo2 = "13720200856"
+//	    val data = "Uid=" + smsModule.userName + "&Key=" + smsModule.secertKey + "&smsMob=" + phoneNo2 + "&smsText=" + br.readLine
 	    post.setRequestBody(data)
 	    client.executeMethod(post)
 //	    val result = new String(post.getResponseBodyAsString().getBytes("gbk"))
