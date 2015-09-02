@@ -68,13 +68,17 @@ POST	/tags/queryContentsWithTag					controllers.tagController.queryContentsWithT
 POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices
 
 # relationship module
-POST	/connections/follow						controllers.relationshipController.follow
-POST	/connections/unfollow					controllers.relationshipController.unfollow
-POST	/connections/queryFollowingUsers		controllers.relationshipController.queryFollowingUsers
-POST	/connections/queryFollowedUsers			controllers.relationshipController.queryFollowedUsers
-POST	/connections/queryMutureFollowingUsers	controllers.relationshipController.queryMutureFollowingUsers
-POST	/connections/queryRelationsBetweenUsers controllers.relationshipController.queryRelationsBetweenUsers
-POST	/connections/sentSMSInvitation			controllers.relationshipController.askPhoneAddressBookFriendsJoin
+POST	/connections/follow							controllers.relationshipController.follow
+POST	/connections/unfollow						controllers.relationshipController.unfollow
+POST	/connections/queryFollowingUsers			controllers.relationshipController.queryFollowingUsers
+POST	/connections/queryFollowedUsers				controllers.relationshipController.queryFollowedUsers
+POST	/connections/queryMutureFollowingUsers		controllers.relationshipController.queryMutureFollowingUsers
+POST	/connections/queryRelationsBetweenUsers 	controllers.relationshipController.queryRelationsBetweenUsers
+POST	/connections/sentSMSInvitation				controllers.relationshipController.askPhoneAddressBookFriendsJoin
+
+# role tage module
+POST	/roletags/queryAllRoleTags					controllers.roleTagController.queryAllRoleTags	
+POST	/roletags/addRoleTag						controllers.roleTagController.addRoleTag
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
