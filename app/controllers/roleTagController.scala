@@ -7,10 +7,6 @@ import module.profile.RoleTagModule
 import controllers.common.requestArgsQuery.{requestArgs}
 
 object roleTagController extends Controller {
-	def index = Action {
-		Ok(views.html.index("Your new application is ready."))
-	}
-
 	def queryAllRoleTags = Action (request => requestArgs(request)(RoleTagModule.queryAllRoleTags))
 	def addRoleTag = Action (request => requestArgs(request)(RoleTagModule.addRoleTags))
 }

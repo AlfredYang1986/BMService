@@ -1,9 +1,9 @@
-2015-09-02 15:00:19,355 - [INFO] - from play in pool-17-thread-4 
+2015-09-03 09:58:14,275 - [INFO] - from play in pool-6-thread-2 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-09-02 16:10:12,588 - [INFO] - from play in play-internal-execution-context-1 
+2015-09-03 11:41:47,955 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-09-02 16:10:12,645 - [INFO] - from play in play-internal-execution-context-1 
+2015-09-03 11:41:48,006 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 

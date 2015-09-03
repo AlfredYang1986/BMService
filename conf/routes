@@ -80,5 +80,9 @@ POST	/connections/sentSMSInvitation				controllers.relationshipController.askPho
 POST	/roletags/queryAllRoleTags					controllers.roleTagController.queryAllRoleTags	
 POST	/roletags/addRoleTag						controllers.roleTagController.addRoleTag
 
+# schools module
+POST	/schools/queryAllRoleTags					controllers.schoolsController.queryAllSchools
+POST	/schools/addRoleTag							controllers.schoolsController.addOneSchool
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
