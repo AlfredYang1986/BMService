@@ -9,6 +9,8 @@
 	<classpathentry kind="lib" path="lib/JavaAPNS.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/org.apache.commons.httpclient.jar"/>
+	<classpathentry kind="lib" path="lib/javax.mail-1.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-email-1.4.jar"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="lib" path="/usr/local/play-2.2.6/repository/local/com.typesafe.play/play-jdbc_2.10/2.2.6/jars/play-jdbc_2.10.jar"/>
 	<classpathentry kind="lib" path="/usr/local/play-2.2.6/repository/local/com.typesafe.play/play_2.10/2.2.6/jars/play_2.10.jar"/>
