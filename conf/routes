@@ -33,6 +33,7 @@ POST	/query/queryComments						controllers.queryController.queryComments
 POST	/profile/updateProfile 						controllers.profileController.updateProfile
 POST	/profile/userProfile						controllers.profileController.userProfile
 POST	/profile/multipleUserProfile				controllers.profileController.multipleUserProfile
+POST	/profile/recommendUserProfile				controllers.profileController.recommendUserProfile
 
 POST	/profile/queryDetailDescription				controllers.profileController.queryDetailDescription
 POST	/profile/createAndUpdataDetailDescription 	controllers.profileController.createAndUpdateDettailDescription

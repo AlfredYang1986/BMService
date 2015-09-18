@@ -181,6 +181,26 @@ object ProfileModule {
 		}
 	}
 	
+	def recommendUserProfile(data : JsValue) : JsValue = {
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0)
+		val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(10)
+		
+		val reVal = (from db() in "user_profile").selectSkipTop(skip)(take)("user_id") { x =>
+		  	var tmp = Map.empty[String, JsValue]
+			x.getAs[String]("user_id").map (id => tmp += "user_id" -> toJson(id)).getOrElse(throw new Exception("user not exists"))
+			x.getAs[String]("screen_name").map (name => tmp += "screen_name" -> toJson(name)).getOrElse(tmp += "screen_name" -> toJson(""))
+			x.getAs[String]("screen_photo").map (photo => tmp += "screen_photo" -> toJson(photo)).getOrElse(tmp += "screen_photo" -> toJson(""))
+			x.getAs[String]("role_tag").map (tag => tmp += "role_tag" -> toJson(tag)).getOrElse(tmp += "role_tag" -> toJson(""))
+			x.getAs[Int]("isLogin").map (tag => tmp += "isLogin" -> toJson(tag)).getOrElse(tmp += "isLogin" -> toJson(0))
+			toJson(tmp)
+		}
+
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(reVal.toList.asInstanceOf[List[JsValue]])))		  
+	}
+	
 	/**
 	 * increment cycle count
 	 */
