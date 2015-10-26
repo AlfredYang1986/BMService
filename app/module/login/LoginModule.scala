@@ -45,8 +45,8 @@ object LoginModule {
 		/**
 		 * generate code
 		 */
-//		val code = 11111 // fake one
-		val code = scala.util.Random.nextInt(90000) + 10000
+		val code = 11111 // fake one
+//		val code = scala.util.Random.nextInt(90000) + 10000
 
 		/**
 		 * generate a reg token
@@ -66,8 +66,8 @@ object LoginModule {
 		/**
 		 * send code to the phone
 		 */	
-		import play.api.Play.current
-		smsModule().sendSMS(phoneNo, code.toString)
+//		import play.api.Play.current
+//		smsModule().sendSMS(phoneNo, code.toString)
 		
 		/**
 		 * return 
@@ -118,11 +118,19 @@ object LoginModule {
 						val user_id = cur.get("user_id").get.asInstanceOf[String]
 
 						var tmp = ProfileModule.queryUserProfile(user_id)
-						tmp += "message" -> toJson("already login")		// phone is already reg
-						tmp += "phoneNo" -> toJson(phoneNo)
-						tmp += "auth_token" -> toJson(auth_token)
+						if (tmp == null) {
+							tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
 						
-						Json.toJson(Map("status" -> toJson("error"), "error" -> toJson(tmp)))
+							tmp += "message" -> toJson("new user")		// phone is already reg
+							tmp += "phoneNo" -> toJson(phoneNo)
+							tmp += "auth_token" -> toJson(auth_token)
+						} else {
+							tmp += "message" -> toJson("already login")		// phone is already reg
+							tmp += "phoneNo" -> toJson(phoneNo)
+							tmp += "auth_token" -> toJson(auth_token)
+						}
+					
+						Json.toJson(Map("status" -> toJson("error"), "error" -> toJson(tmp))) 
 					}
 				} 
 			}
@@ -257,7 +265,7 @@ object LoginModule {
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(phoneNo + time_span)
 		val auth_token = Sercurity.md5Hash(user_id + time_span)
-					
+
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
 		new_builder  += "phoneNo" -> phoneNo
@@ -270,11 +278,22 @@ object LoginModule {
 					
 		_data_connection.getCollection("users") += new_builder.result
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
-		
 		var tmp = ProfileModule.queryUserProfile(user_id)
-		tmp += "phoneNo" -> toJson(phoneNo)
-		tmp += "auth_token" -> toJson(auth_token)
+	
+		println(tmp)
+		if (tmp == null) {
+			println(tmp)
+			tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
+			println(tmp)
+			tmp += "auth_token" -> toJson(auth_token)
+			println(tmp)
+		  
+		} else {
+			tmp += "phoneNo" -> toJson(phoneNo)
+			tmp += "auth_token" -> toJson(auth_token)
+		}
+
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 	}

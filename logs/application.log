@@ -1,12 +1,133 @@
-2015-09-18 19:41:13,709 - [INFO] - from play in pool-7-thread-1 
+2015-10-26 12:02:33,043 - [INFO] - from play in pool-114-thread-2 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-09-18 20:12:57,447 - [INFO] - from play in play-internal-execution-context-1 
+2015-10-26 12:02:58,737 - [ERROR] - from net.sf.ehcache.Cache in play-internal-execution-context-1 
+Unable to set localhost. This prevents creation of a GUID. Cause was: bogon: bogon: nodename nor servname provided, or not known
+java.net.UnknownHostException: bogon: bogon: nodename nor servname provided, or not known
+	at java.net.InetAddress.getLocalHost(InetAddress.java:1466) ~[na:1.7.0_25]
+	at net.sf.ehcache.Cache.<clinit>(Cache.java:214) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.config.ConfigurationHelper.createCache(ConfigurationHelper.java:296) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.config.ConfigurationHelper.createDefaultCache(ConfigurationHelper.java:219) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.configure(CacheManager.java:722) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.doInit(CacheManager.java:439) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.init(CacheManager.java:377) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.<init>(CacheManager.java:259) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.newInstance(CacheManager.java:1037) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.newInstance(CacheManager.java:936) ~[ehcache-core.jar:na]
+	at net.sf.ehcache.CacheManager.create(CacheManager.java:904) ~[ehcache-core.jar:na]
+	at play.api.cache.EhCachePlugin.manager$lzycompute(Cache.scala:139) ~[play-cache_2.10.jar:2.2.6]
+	at play.api.cache.EhCachePlugin.manager(Cache.scala:134) ~[play-cache_2.10.jar:2.2.6]
+	at play.api.cache.EhCachePlugin.cache$lzycompute(Cache.scala:143) ~[play-cache_2.10.jar:2.2.6]
+	at play.api.cache.EhCachePlugin.cache(Cache.scala:142) ~[play-cache_2.10.jar:2.2.6]
+	at play.api.cache.EhCachePlugin.onStart(Cache.scala:159) ~[play-cache_2.10.jar:2.2.6]
+	at play.api.Play$$anonfun$start$1$$anonfun$apply$mcV$sp$1.apply(Play.scala:88) ~[play_2.10.jar:2.2.6]
+	at play.api.Play$$anonfun$start$1$$anonfun$apply$mcV$sp$1.apply(Play.scala:88) ~[play_2.10.jar:2.2.6]
+	at scala.collection.immutable.List.foreach(List.scala:318) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.api.Play$$anonfun$start$1.apply$mcV$sp(Play.scala:88) ~[play_2.10.jar:2.2.6]
+	at play.api.Play$$anonfun$start$1.apply(Play.scala:88) ~[play_2.10.jar:2.2.6]
+	at play.api.Play$$anonfun$start$1.apply(Play.scala:88) ~[play_2.10.jar:2.2.6]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.2.6]
+	at play.api.Play$.start(Play.scala:87) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$apply$1$$anonfun$1.apply(ApplicationProvider.scala:139) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$apply$1$$anonfun$1.apply(ApplicationProvider.scala:112) ~[play_2.10.jar:2.2.6]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$apply$1.apply(ApplicationProvider.scala:112) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$apply$1.apply(ApplicationProvider.scala:110) ~[play_2.10.jar:2.2.6]
+	at scala.util.Success.flatMap(Try.scala:200) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:110) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+Caused by: java.net.UnknownHostException: bogon: nodename nor servname provided, or not known
+	at java.net.Inet6AddressImpl.lookupAllHostAddr(Native Method) ~[na:1.7.0_25]
+	at java.net.InetAddress$1.lookupAllHostAddr(InetAddress.java:894) ~[na:1.7.0_25]
+	at java.net.InetAddress.getAddressesFromNameService(InetAddress.java:1286) ~[na:1.7.0_25]
+	at java.net.InetAddress.getLocalHost(InetAddress.java:1462) ~[na:1.7.0_25]
+	... 38 common frames omitted
+
+2015-10-26 12:02:59,312 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-09-18 20:12:57,509 - [INFO] - from play in play-internal-execution-context-1 
+2015-10-26 12:02:59,373 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2015-09-18 21:19:19,670 - [INFO] - from play in pool-7-thread-1 
+2015-10-26 12:08:10,905 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:08:11,284 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:08:11,297 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:11:06,736 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:11:06,876 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:11:06,885 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:12:54,649 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:12:54,779 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:12:54,789 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:17:17,382 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:17:17,497 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:17:17,508 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:18:41,653 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:18:41,782 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:18:41,794 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:20:36,766 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:20:36,887 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:20:36,896 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:22:00,989 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:22:01,098 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:22:01,107 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 12:24:49,633 - [INFO] - from play in play-internal-execution-context-1 
+Shutdown application default Akka system.
+
+2015-10-26 12:24:49,710 - [INFO] - from play in play-internal-execution-context-1 
+Starting application default Akka system.
+
+2015-10-26 12:24:49,720 - [INFO] - from play in play-internal-execution-context-1 
+Application started (Dev)
+
+2015-10-26 21:19:33,492 - [INFO] - from play in pool-114-thread-2 
 Shutdown application default Akka system.
 

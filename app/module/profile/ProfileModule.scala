@@ -80,8 +80,9 @@ object ProfileModule {
 	}
 
 	def queryUserProfile(user_id : String) : Map[String, JsValue] = {
+
 		val re = from db() in "user_profile" where ("user_id" -> user_id) select (x => x) 
-		if (re.count != 1) null
+		if (re.empty) null 
 		else {
 			var tmp = Map.empty[String, JsValue]
 			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
@@ -89,6 +90,32 @@ object ProfileModule {
 			
 			tmp
 		}
+	}
+	
+	def creatUserProfile(user_id : String, phoneNo : String) : Map[String, JsValue] = {
+  	  	val builder = MongoDBObject.newBuilder
+		builder += "user_id" -> user_id
+		builder += "screen_name" -> user_id
+		builder += "screen_photo" -> ""
+		builder += "role_tag" -> ""
+		builder += "followings_count" -> 0
+		builder += "followers_count" -> 0
+		builder += "friends_count" -> 0
+		builder += "posts_count" -> 0
+		builder += "cycle_count" -> 0
+		builder += "isLogin" -> 0
+		builder += "signature" -> ""
+
+		val re = builder.result
+		_data_connection.getCollection("user_profile") += re //builder.result
+		
+		var tmp = Map.empty[String, JsValue]
+		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
+//				.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
+				.map(x => tmp += x -> helpOptions.opt_2_js(Option(re.get(x)), x))
+	
+		println(tmp)
+		tmp
 	}
 	
 	/**
