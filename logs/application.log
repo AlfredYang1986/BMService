@@ -1,7 +1,7 @@
-2015-10-26 12:02:33,043 - [INFO] - from play in pool-114-thread-2 
+2015-10-27 12:02:00,226 - [INFO] - from play in pool-28-thread-2 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-10-26 12:02:58,737 - [ERROR] - from net.sf.ehcache.Cache in play-internal-execution-context-1 
+2015-10-27 12:03:19,085 - [ERROR] - from net.sf.ehcache.Cache in play-internal-execution-context-1 
 Unable to set localhost. This prevents creation of a GUID. Cause was: bogon: bogon: nodename nor servname provided, or not known
 java.net.UnknownHostException: bogon: bogon: nodename nor servname provided, or not known
 	at java.net.InetAddress.getLocalHost(InetAddress.java:1466) ~[na:1.7.0_25]
@@ -50,84 +50,9 @@ Caused by: java.net.UnknownHostException: bogon: nodename nor servname provided,
 	at java.net.InetAddress.getLocalHost(InetAddress.java:1462) ~[na:1.7.0_25]
 	... 38 common frames omitted
 
-2015-10-26 12:02:59,312 - [INFO] - from play in play-internal-execution-context-1 
+2015-10-27 12:03:20,342 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-10-26 12:02:59,373 - [INFO] - from play in play-internal-execution-context-1 
+2015-10-27 12:03:20,400 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
-
-2015-10-26 12:08:10,905 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:08:11,284 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:08:11,297 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:11:06,736 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:11:06,876 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:11:06,885 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:12:54,649 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:12:54,779 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:12:54,789 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:17:17,382 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:17:17,497 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:17:17,508 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:18:41,653 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:18:41,782 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:18:41,794 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:20:36,766 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:20:36,887 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:20:36,896 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:22:00,989 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:22:01,098 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:22:01,107 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 12:24:49,633 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2015-10-26 12:24:49,710 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2015-10-26 12:24:49,720 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2015-10-26 21:19:33,492 - [INFO] - from play in pool-114-thread-2 
-Shutdown application default Akka system.
 

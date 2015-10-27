@@ -114,7 +114,6 @@ object ProfileModule {
 //				.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
 				.map(x => tmp += x -> helpOptions.opt_2_js(Option(re.get(x)), x))
 	
-		println(tmp)
 		tmp
 	}
 	

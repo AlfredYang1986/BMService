@@ -280,13 +280,10 @@ object LoginModule {
 		
 		var tmp = ProfileModule.queryUserProfile(user_id)
 	
-		println(tmp)
 		if (tmp == null) {
-			println(tmp)
 			tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
-			println(tmp)
+			tmp += "phoneNo" -> toJson(phoneNo)
 			tmp += "auth_token" -> toJson(auth_token)
-			println(tmp)
 		  
 		} else {
 			tmp += "phoneNo" -> toJson(phoneNo)
