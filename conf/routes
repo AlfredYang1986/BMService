@@ -64,6 +64,9 @@ POST 	/messages/queryAllFriend					controllers.messageController.queryAllFriend
 
 # tags module
 POST	/tags/queryContentsWithTag					controllers.tagController.queryContentsWithTag
+POST	/tags/queryRecommandTags					controllers.tagController.queryRecommandTags
+POST	/tags/queryTagPreViewWithTagName			controllers.tagController.queryTagPreViewWithTagName
+POST	/tags/queryFoundSearchTagData				controllers.tagController.queryFoundSearchTagData
 
 # notification module
 POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices

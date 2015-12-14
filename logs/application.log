@@ -1,7 +1,7 @@
-2015-10-27 12:02:00,226 - [INFO] - from play in pool-28-thread-2 
+2015-12-14 22:36:00,587 - [INFO] - from play in pool-7-thread-2 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2015-10-27 12:03:19,085 - [ERROR] - from net.sf.ehcache.Cache in play-internal-execution-context-1 
+2015-12-14 22:37:03,955 - [ERROR] - from net.sf.ehcache.Cache in play-internal-execution-context-1 
 Unable to set localhost. This prevents creation of a GUID. Cause was: bogon: bogon: nodename nor servname provided, or not known
 java.net.UnknownHostException: bogon: bogon: nodename nor servname provided, or not known
 	at java.net.InetAddress.getLocalHost(InetAddress.java:1466) ~[na:1.7.0_25]
@@ -50,9 +50,292 @@ Caused by: java.net.UnknownHostException: bogon: nodename nor servname provided,
 	at java.net.InetAddress.getLocalHost(InetAddress.java:1462) ~[na:1.7.0_25]
 	... 38 common frames omitted
 
-2015-10-27 12:03:20,342 - [INFO] - from play in play-internal-execution-context-1 
+2015-12-14 22:37:04,743 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2015-10-27 12:03:20,400 - [INFO] - from play in play-internal-execution-context-1 
+2015-12-14 22:37:04,800 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
+
+2015-12-14 23:49:51,865 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-14 23:49:52,109 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-14 23:49:52,120 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-14 23:59:15,824 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-14 23:59:15,988 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-14 23:59:15,997 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-14 23:59:42,165 - [ERROR] - from play in play-akka.actor.default-dispatcher-67 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: scala.NotImplementedError: an implementation is missing
+
+2015-12-14 23:59:42,196 - [ERROR] - from application in play-akka.actor.default-dispatcher-67 
+
+
+! @6oe4n58ff - Internal server error, for (POST) [/tags/queryTagPreViewWithTagName] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: scala.NotImplementedError: an implementation is missing]]
+	at play.api.Application$class.handleError(Application.scala:293) ~[play_2.10.jar:2.2.6]
+	at play.api.DefaultApplication.handleError(Application.scala:399) ~[play_2.10.jar:2.2.6]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3$$anonfun$applyOrElse$3.apply(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3$$anonfun$applyOrElse$3.apply(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3.applyOrElse(PlayDefaultUpstreamHandler.scala:268) ~[play_2.10.jar:2.2.6]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$3.applyOrElse(PlayDefaultUpstreamHandler.scala:264) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.Future$$anonfun$recoverWith$1.apply(Future.scala:344) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$recoverWith$1.apply(Future.scala:343) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.api.libs.iteratee.Execution$$anon$1.execute(Execution.scala:43) ~[play-iteratees_2.10.jar:2.2.6]
+	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.api.libs.iteratee.Execution$$anon$2.execute(Execution.scala:70) ~[play-iteratees_2.10.jar:2.2.6]
+	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Future$$anonfun$flatMap$1.apply(Future.scala:249) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:32) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.api.libs.iteratee.Execution$$anon$2.execute(Execution.scala:70) ~[play-iteratees_2.10.jar:2.2.6]
+	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:40) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:248) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.Promise$class.complete(Promise.scala:55) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:153) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:23) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:42) ~[akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:386) ~[akka-actor_2.10.jar:2.2.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+Caused by: java.lang.RuntimeException: scala.NotImplementedError: an implementation is missing
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:308) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4$$anonfun$apply$5.apply(Action.scala:109) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4$$anonfun$apply$5.apply(Action.scala:109) ~[play_2.10.jar:2.2.6]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4.apply(Action.scala:108) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$4.apply(Action.scala:107) ~[play_2.10.jar:2.2.6]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.api.mvc.Action$$anonfun$apply$1.apply(Action.scala:107) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$$anonfun$apply$1.apply(Action.scala:100) ~[play_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$mapM$1.apply(Iteratee.scala:481) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$mapM$1.apply(Iteratee.scala:481) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMapM$1.apply(Iteratee.scala:517) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMapM$1.apply(Iteratee.scala:517) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$14.apply(Iteratee.scala:494) ~[play-iteratees_2.10.jar:2.2.6]
+	at play.api.libs.iteratee.Iteratee$$anonfun$flatMap$1$$anonfun$apply$14.apply(Iteratee.scala:494) ~[play-iteratees_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	... 6 common frames omitted
+Caused by: scala.NotImplementedError: an implementation is missing
+	at scala.Predef$.$qmark$qmark$qmark(Predef.scala:252) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at module.tags.TagModule$$anonfun$queryPreViewWithTagType$1$1$$anonfun$apply$2.apply(TagModule.scala:97) ~[classes/:na]
+	at module.tags.TagModule$$anonfun$queryPreViewWithTagType$1$1$$anonfun$apply$2.apply(TagModule.scala:93) ~[classes/:na]
+	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.collection.Iterator$class.foreach(Iterator.scala:727) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1157) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.collection.IterableLike$class.foreach(IterableLike.scala:72) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at com.mongodb.casbah.commons.MongoDBList.foreach(MongoDBList.scala:33) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.collection.TraversableLike$class.map(TraversableLike.scala:244) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at com.mongodb.casbah.commons.MongoDBList.map(MongoDBList.scala:33) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at module.tags.TagModule$$anonfun$queryPreViewWithTagType$1$1.apply(TagModule.scala:93) ~[classes/:na]
+	at module.tags.TagModule$$anonfun$queryPreViewWithTagType$1$1.apply(TagModule.scala:89) ~[classes/:na]
+	at util.dao.AMongoDBLINQ$$anonfun$selectTop$1.apply(querybase.scala:115) ~[classes/:na]
+	at util.dao.AMongoDBLINQ$$anonfun$selectTop$1.apply(querybase.scala:114) ~[classes/:na]
+	at scala.collection.Iterator$class.foreach(Iterator.scala:727) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at com.mongodb.casbah.MongoCursor.foreach(MongoCursor.scala:500) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at util.dao.AMongoDBLINQ.selectTop(querybase.scala:114) ~[classes/:na]
+	at module.tags.TagModule$.queryPreViewWithTagType$1(TagModule.scala:89) ~[classes/:na]
+	at module.tags.TagModule$.queryTagPreViewWithTagName(TagModule.scala:108) ~[classes/:na]
+	at controllers.tagController$$anonfun$queryTagPreViewWithTagName$1$$anonfun$apply$3.apply(tagController.scala:17) ~[classes/:na]
+	at controllers.tagController$$anonfun$queryTagPreViewWithTagName$1$$anonfun$apply$3.apply(tagController.scala:17) ~[classes/:na]
+	at controllers.common.requestArgsQuery$$anonfun$requestArgs$1.apply(requestArgsQuery.scala:12) ~[classes/:na]
+	at controllers.common.requestArgsQuery$$anonfun$requestArgs$1.apply(requestArgsQuery.scala:11) ~[classes/:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at controllers.common.requestArgsQuery$.requestArgs(requestArgsQuery.scala:11) ~[classes/:na]
+	at controllers.tagController$$anonfun$queryTagPreViewWithTagName$1.apply(tagController.scala:17) ~[classes/:na]
+	at controllers.tagController$$anonfun$queryTagPreViewWithTagName$1.apply(tagController.scala:17) ~[classes/:na]
+	at play.api.mvc.ActionBuilder$$anonfun$apply$10.apply(Action.scala:221) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.ActionBuilder$$anonfun$apply$10.apply(Action.scala:220) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.Action$.invokeBlock(Action.scala:357) ~[play_2.10.jar:2.2.6]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:309) ~[play_2.10.jar:2.2.6]
+	... 22 common frames omitted
+
+2015-12-15 00:03:59,993 - [ERROR] - from application in New I/O worker #2 
+
+
+! @6oe4njpol - Internal server error, for (POST) [/devices/registerUserDevice] ->
+
+play.PlayExceptions$CompilationException: Compilation error[No Json serializer found for type List[Object]. Try to implement an implicit Writes or Format for this type.]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2015-12-15 00:04:17,342 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:04:17,521 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:04:17,530 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:07:28,991 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:07:29,152 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:07:29,166 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:09:24,442 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:09:24,574 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:09:24,584 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:11:07,519 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:11:07,636 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:11:07,648 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:15:03,427 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:15:03,530 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:15:03,540 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:16:38,831 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:16:38,924 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:16:38,932 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:19:29,213 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:19:29,313 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:19:29,321 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:22:43,596 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:22:43,685 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:22:43,693 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 00:25:55,383 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 00:25:55,469 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 00:25:55,476 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 01:24:03,592 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 01:24:03,679 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 01:24:03,687 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 01:43:48,463 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 01:43:48,565 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 01:43:48,578 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 01:44:39,958 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 01:44:40,047 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 01:44:40,056 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 01:45:16,680 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 01:45:16,796 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 01:45:16,808 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 01:47:28,881 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 01:47:28,953 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 01:47:28,961 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 02:07:59,434 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2015-12-15 02:07:59,568 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2015-12-15 02:07:59,578 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2015-12-15 02:16:08,597 - [INFO] - from play in pool-7-thread-2 
+Shutdown application default Akka system.
 

@@ -11,6 +11,16 @@ import com.mongodb.casbah.Imports._
 import module.common.helpOptions
 import java.util.Date
 
+import scala.concurrent.Await
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits._
+import akka.util.Timeout
+import scala.concurrent.duration._
+
+sealed abstract class tag_type(val index : Int, val dis : String)
+case object tag_type_time extends tag_type(0, "time tag")
+case object tag_type_location extends tag_type(1, "locationn tag")
+
 object TagModule {
 	def queryContentsWithTag(data : JsValue) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -36,6 +46,67 @@ object TagModule {
 			}
 
 			Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
+		}
+	}
+
+	def queryFoundSearchTagData(data : JsValue) : JsValue = {
+			
+		val f0 = Future(this.queryRecommandTags(data))
+		val f1 = Future(this.queryTagPreViewWithTagName(data))
+		
+		Await.result((f0 zip f1) map { x => 
+			val result0 = if ((x._1 \ "status").asOpt[String].get.equals("ok")) (true, (x._1 \ "recommands"))
+						  else (false, null)
+			val result1 = if ((x._2 \ "status").asOpt[String].get.equals("ok")) (true, (x._2 \ "preview"))
+						  else (false, null)
+		  	if (result0._1 && result1._1) toJson(Map("status" -> toJson("ok"), "recommands" -> result0._2, "preview" -> result1._2))
+		  	else ErrorCode.errorToJson("unknown error")
+		}, Timeout(2 second).duration).asInstanceOf[JsValue]
+	}
+	
+	def queryRecommandTags(data : JsValue) : JsValue = {
+		
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+		Json.toJson(Map("status" -> toJson("ok"), "recommands" -> toJson((from db() in "tags").selectTop(10)("date"){ x => 
+			toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
+		}.toList)))
+	}
+	
+	def queryTagPreViewWithTagName(data : JsValue) : JsValue = {
+	  
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val tag_name = (data \ "tag_name").asOpt[String].get
+		val date = (data \ "date").asOpt[Long].map(x => x).getOrElse(new Date().getTime)
+
+		def queryPreViewWithTagType(t : Integer) : JsValue = {
+			((from db() in "posts" where ("tags.content" -> tag_name, "tags.type" -> t)).selectTop(3)("date") { x => 
+				toJson(Map("post_id" -> toJson(x.getAs[String]("post_id").get), 
+				    "items" -> toJson(
+				        ((x.getAs[MongoDBList]("items").get.toSeq) map { y => y match {
+				          case item : BasicDBObject=>
+				        	toJson(Map("name" -> toJson(item.get("name").asInstanceOf[String]), "type" -> toJson(item.get("type").asInstanceOf[Number].intValue)))
+				          case _ => ???
+				        }}).toList
+				    )))
+			}).toList match {
+			  case Nil => null 
+			  case x : List[JsValue] => toJson(Map("type" -> toJson(
+					  	if (t == 0) "time"
+					  	else "loction"
+					  ), "tag_name" -> toJson(tag_name), "content" -> toJson(x)))
+			}
+		}
+		
+		val user_check = from db() in "users" where ("user_id" -> user_id) select (x => x)
+		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
+		else {
+			toJson(Map("status" -> toJson("ok"), "preview" -> 
+				toJson((queryPreViewWithTagType(tag_type_time.index) :: 
+				    	queryPreViewWithTagType(tag_type_location.index) :: Nil)
+				    	.filterNot(_ == null))))
 		}
 	}
 }

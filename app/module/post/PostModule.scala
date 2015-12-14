@@ -41,16 +41,34 @@ object PostModule {
 		 * tags is not complusory
 		 */
 		def postTagsList : MongoDBList = {
+		  
+			def checkTags(tag_name: String, tag_type: Int) = {
+				(from db() in "tags" where ("content" -> tag_name, "type" -> tag_type) select ( x => x)).toList match {
+				  case Nil => {
+					val tag_builder = MongoDBObject.newBuilder
+					tag_builder += "content" -> tag_name
+					tag_builder += "type" -> tag_type
+					_data_connection.getCollection("tags") += tag_builder.result
+				  }
+				  case head :: Nil => 
+				  case _ => ???
+				}
+			}
+		  
 			val list_builder = MongoDBList.newBuilder
 			(data \ "tags").asOpt[Seq[JsValue]].map { iter => iter.map { x => 
 				
 				val tmp = MongoDBObject.newBuilder
-				tmp += "type" -> (x \ "type").asOpt[Int].get
-				tmp += "content" -> (x \ "content").asOpt[String].get
+				val t = (x \ "type").asOpt[Int].get
+				val content = (x \ "content").asOpt[String].get
+				tmp += "type" -> t
+				tmp += "content" -> content
 				tmp += "offsetX" -> (x \ "offsetX").asOpt[Double].map(x => x).getOrElse(-1.0)
 				tmp += "offsetY" -> (x \ "offsetY").asOpt[Double].map(x => x).getOrElse(-1.0)
 				
 				list_builder += tmp.result
+				
+				checkTags(content, t)
 			}}.getOrElse(Unit)
 			
 			list_builder.result
@@ -76,7 +94,6 @@ object PostModule {
 			/**
 			 * save all the data to database
 			 */
-		  
 			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
 		  
@@ -106,7 +123,7 @@ object PostModule {
 				  	user_profile += "posts_count" -> tmp
 				}.getOrElse(Unit)
 			_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user_profile);
-			
+				
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 							toJson(Map("post_result" -> toJson(true)))))
 		}
