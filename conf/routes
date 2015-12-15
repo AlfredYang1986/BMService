@@ -68,6 +68,10 @@ POST	/tags/queryRecommandTags					controllers.tagController.queryRecommandTags
 POST	/tags/queryTagPreViewWithTagName			controllers.tagController.queryTagPreViewWithTagName
 POST	/tags/queryFoundSearchTagData				controllers.tagController.queryFoundSearchTagData
 
+# user search module
+POST	/users/queryRecommandUsers					controllers.userSearchController.queryRecommandUsers
+POST	/users/queryUsersWithRoleTag				controllers.userSearchController.queryUsersWithRoleTag
+
 # notification module
 POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices
 
