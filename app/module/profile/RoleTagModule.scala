@@ -11,8 +11,8 @@ import com.mongodb.casbah.Imports._
 
 object RoleTagModule {
 	def queryAllRoleTags(data : JsValue) : JsValue = {
-		val user_id = (data \ "user_id").asOpt[String].get
-		val auth_token = (data \ "auth_token").asOpt[String].get
+//		val user_id = (data \ "user_id").asOpt[String].get
+//		val auth_token = (data \ "auth_token").asOpt[String].get
 		
 		val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
 		val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(20)
