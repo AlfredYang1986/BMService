@@ -161,8 +161,8 @@ object RelationshipModule {
 					content += "date" -> toJson(new Date().getTime)
 					content += "receiver_id" -> toJson(follow_user_id)
 					
-					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(follow_user_id)), "isSave" -> toJson(1), 
-//					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id)), "isSave" -> toJson(1), 
+//					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(follow_user_id)), "isSave" -> toJson(1), 
+					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id)), "isSave" -> toJson(1), 
 								"msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
 //								, "thumb" -> null, "voiceLen" -> null, "pushFormat" -> null)
 				} else if ((x \ "user_id").asOpt[String].get.equals(follow_user_id)) {
@@ -170,8 +170,8 @@ object RelationshipModule {
 					val status = (x \ "isLogin").asOpt[Int].get 
 					if (status == -1) {
 						// TODO: offline send app notifications
-						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", follow_user_id, module.common.AcitionType.follow.index)
-//						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", user_id, module.common.AcitionType.follow.index)
+//						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", follow_user_id, module.common.AcitionType.follow.index)
+						apn ! new module.notification.apnsNotifyUsers("you have been followed by a friends", user_id, module.common.AcitionType.follow.index)
 					  
 					} else if (status == 0) {
 						// TODO: user login, by now do nothing
