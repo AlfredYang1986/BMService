@@ -3,20 +3,40 @@ package module.post
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
+import play.api.libs.iteratee._
+import play.api.libs.concurrent._
+import play.api.mvc.MultipartFormData
+import play.api.libs.Files.TemporaryFile
+
+import java.util.Date
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.collection.JavaConversions._
+
 import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
-import com.mongodb.casbah.Imports._
-import module.login.LoginModule
 import util.errorcode._
-import java.util.Date
-import play.api.mvc.MultipartFormData
-import play.api.libs.Files.TemporaryFile
+
+import com.mongodb.casbah.Imports._
+
+import module.login.LoginModule
 import module.sercurity._
 import module.common.files.fop
 import module.query.QueryModule
+import module.common.helpOptions
+import module.notification._
+
+import akka.actor.Actor
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.actor.ActorRef
 
 object PostModule {
+    
+	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
+    
 	def postContent(data : JsValue) : JsValue = {
 	 
 		/**
@@ -33,7 +53,7 @@ object PostModule {
 				list_builder += tmp.result
 			}
 			
-			list_builder.result
+	    list_builder.result
 		}
 		
 		/**
@@ -211,57 +231,60 @@ object PostModule {
 	
 	def postLike(data : JsValue) : JsValue = {
 	
-		def resentLikedCount = 6
+		  def resentLikedCount = 6
 	  
-		def createLike(user_id : String, user_name : String, user_photo : String) : MongoDBObject = {
-			val like_builder = MongoDBObject.newBuilder
-			like_builder += "like_owner_id" -> user_id
-			like_builder += "like_owner_name" -> user_name
-			like_builder += "like_owner_photo" -> user_photo
-			like_builder += "like_date" -> new Date().getTime
-			
-			like_builder.result
-		}
+		  def createLike(user_id : String, user_name : String, user_photo : String) : MongoDBObject = {
+    			val like_builder = MongoDBObject.newBuilder
+    			like_builder += "like_owner_id" -> user_id
+    			like_builder += "like_owner_name" -> user_name
+    			like_builder += "like_owner_photo" -> user_photo
+    			like_builder += "like_date" -> new Date().getTime
+    			
+    			like_builder.result
+		  }
 	  
-		/**
-		 * get arguments
-		 */
-		val post_id = (data \ "post_id").asOpt[String].map(x => x).getOrElse("")
-		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
-		val auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
-	 
-		if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
-		else {
-			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
-			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
-		  		
-			/**
-			 * add like to likes table
-			 */
-			val ori_likes = from db() in "post_likes" where ("post_id" -> post_id) select (x => x)
-			if (ori_likes.empty) {
-				val like = createLike(user_id, user_name, user_photo)
-				
-				val like_list_builder = MongoDBList.newBuilder
-				like_list_builder += like
-				
-				val post_builder = MongoDBObject.newBuilder
-				post_builder += "post_id" -> post_id
-				post_builder += "likes" -> like_list_builder.result
-			
-				_data_connection.getCollection("post_likes") += post_builder.result
-			} else {
-				val like = createLike(user_id, user_name, user_photo)
-			
-				val ori = ori_likes.head
-				ori.get("likes").map { x => 
-				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("like_owner_id").get.equals(user_id))) {
-				  		x.asInstanceOf[BasicDBList].add(0, like)
-				  		_data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), ori);
-				  	}
-				  	else Unit
-				}.getOrElse(Unit)
-			}
+  		/**
+  		 * get arguments
+  		 */
+  		val post_id = (data \ "post_id").asOpt[String].map(x => x).getOrElse("")
+  		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
+  		val auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
+	
+  		var user_name = ""
+  		var user_photo = ""
+  		
+		  if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
+		  else {
+    			user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+    			user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+    		  		
+    			/**
+    			 * add like to likes table
+    			 */
+    			val ori_likes = from db() in "post_likes" where ("post_id" -> post_id) select (x => x)
+    			if (ori_likes.empty) {
+    				  val like = createLike(user_id, user_name, user_photo)
+    				
+    				  val like_list_builder = MongoDBList.newBuilder
+    				  like_list_builder += like
+    				
+    				  val post_builder = MongoDBObject.newBuilder
+    				  post_builder += "post_id" -> post_id
+    				  post_builder += "likes" -> like_list_builder.result
+    			
+    				  _data_connection.getCollection("post_likes") += post_builder.result
+    			} else {
+    				  val like = createLike(user_id, user_name, user_photo)
+    			
+    				  val ori = ori_likes.head
+    				  ori.get("likes").map { x => 
+      				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("like_owner_id").get.equals(user_id))) {
+      				  		  x.asInstanceOf[BasicDBList].add(0, like)
+      				  		  _data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), ori);
+      				  	}
+      				  	else Unit
+    				  }.getOrElse(Unit)
+  			}
 		
 			/**
 			 * refresh user like post table
@@ -307,7 +330,30 @@ object PostModule {
 					ori_post += "likes" -> new_likes.head.asInstanceOf[BasicDBList].take(resentLikedCount)
 				}.getOrElse(Unit)
 				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post);
-				
+			
+				/**
+				 * push notifycations to the user
+				 */					
+				 def likeNotifycations(op : MongoDBObject) = {			
+				     var content : Map[String, JsValue] = Map.empty
+				     content += "type" -> toJson(module.common.AcitionType.like.index)
+				     content += "sender_screen_name" -> toJson(user_name)
+				     content += "sender_screen_photo" -> toJson(user_photo)
+				     content += "sender_id" -> toJson(user_id)
+				     content += "date" -> toJson(new Date().getTime)
+				     val receiver_id = op.get("owner_id").map(x => x.asInstanceOf[String]).getOrElse("")
+				     content += "receiver_id" -> toJson(receiver_id)
+				     content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
+				     content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
+				     content += "post_id" -> toJson(post_id)
+				     content += "post_item" -> toJson(op.get("items").map (x => 
+				                   x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+      
+				     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
+                                      "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+				 }
+			
+				 likeNotifycations(ori_posts.head)
 				QueryModule.queryLikes(data)
 			}
 		}
