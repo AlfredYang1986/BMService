@@ -139,10 +139,10 @@ object LoginModule {
 	
 	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
-
+		
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(provide_name + provide_token + time_span)
-		val auth_token = Sercurity.md5Hash(provide_name + provide_token + time_span)
+		val auth_token = Sercurity.md5Hash(provide_token + provide_name + time_span)
 					
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
@@ -166,10 +166,11 @@ object LoginModule {
 	 
 		_data_connection.getCollection("users") += new_builder.result
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token),
+		        "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_name), "screen_photo" -> toJson(provide_screen_photo)))))
+//		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+//				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo)))))
 	}
 
 	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
@@ -210,10 +211,11 @@ object LoginModule {
 			}
 		}
 		
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1), "isThird" -> toJson(1))))
+		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "auth_token"-> toJson(auth_token), "connect_result" -> toJson("success"),
+		        "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1), "isThird" -> toJson(1))))
 		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "connect_result" -> toJson("success")))))
+//		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+//				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "connect_result" -> toJson("success")))))
 	}
 	
 	def authWithThird(data : JsValue) : JsValue = {
@@ -227,7 +229,7 @@ object LoginModule {
 		val provide_screen_photo = (data \ "provide_screen_photo").asOpt[String].get
   
 		val users = from db() in "users" where ("third.provide_name" -> provide_name, "third.provide_uid" -> provide_uid) select (x => x)
-	
+		
 		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
 		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
 	}

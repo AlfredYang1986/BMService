@@ -1,12 +1,179 @@
-2016-01-29 12:41:08,894 - [INFO] - from play in pool-90-thread-5 
+2016-01-31 08:42:52,073 - [INFO] - from play in pool-4-thread-5 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2016-01-29 12:41:13,418 - [INFO] - from play in play-internal-execution-context-1 
+2016-01-31 08:51:19,809 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2016-01-29 12:41:13,447 - [INFO] - from play in play-internal-execution-context-1 
+2016-01-31 08:51:19,849 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2016-01-29 13:06:55,757 - [INFO] - from play in pool-90-thread-5 
+2016-01-31 09:08:27,327 - [INFO] - from play in play-internal-execution-context-2 
 Shutdown application default Akka system.
+
+2016-01-31 09:08:27,761 - [INFO] - from play in play-internal-execution-context-2 
+Starting application default Akka system.
+
+2016-01-31 09:08:27,768 - [INFO] - from play in play-internal-execution-context-2 
+Application started (Dev)
+
+2016-01-31 09:11:51,434 - [INFO] - from play in play-internal-execution-context-2 
+Shutdown application default Akka system.
+
+2016-01-31 09:11:51,721 - [INFO] - from play in play-internal-execution-context-2 
+Starting application default Akka system.
+
+2016-01-31 09:11:51,728 - [INFO] - from play in play-internal-execution-context-2 
+Application started (Dev)
+
+2016-01-31 09:20:56,604 - [INFO] - from play in play-internal-execution-context-3 
+Shutdown application default Akka system.
+
+2016-01-31 09:20:56,997 - [INFO] - from play in play-internal-execution-context-3 
+Starting application default Akka system.
+
+2016-01-31 09:20:57,004 - [INFO] - from play in play-internal-execution-context-3 
+Application started (Dev)
+
+2016-01-31 09:26:17,138 - [INFO] - from play in play-internal-execution-context-4 
+Shutdown application default Akka system.
+
+2016-01-31 09:26:17,504 - [INFO] - from play in play-internal-execution-context-4 
+Starting application default Akka system.
+
+2016-01-31 09:26:17,507 - [INFO] - from play in play-internal-execution-context-4 
+Application started (Dev)
+
+2016-01-31 09:31:34,412 - [INFO] - from play in play-internal-execution-context-5 
+Shutdown application default Akka system.
+
+2016-01-31 09:31:34,774 - [INFO] - from play in play-internal-execution-context-5 
+Starting application default Akka system.
+
+2016-01-31 09:31:34,778 - [INFO] - from play in play-internal-execution-context-5 
+Application started (Dev)
+
+2016-01-31 09:32:18,062 - [ERROR] - from com.notnoop.apns.internal.ApnsConnectionImpl in application-akka.actor.default-dispatcher-3 
+Couldn't connect to APNS server
+java.net.UnknownHostException: gateway.sandbox.push.apple.com
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:184) ~[na:1.8.0_65]
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392) ~[na:1.8.0_65]
+	at java.net.Socket.connect(Socket.java:589) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:668) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketImpl.<init>(SSLSocketImpl.java:427) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketFactoryImpl.createSocket(SSLSocketFactoryImpl.java:88) ~[na:1.8.0_65]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.getOrCreateSocket(ApnsConnectionImpl.java:268) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.sendMessage(ApnsConnectionImpl.java:327) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.sendMessage(ApnsConnectionImpl.java:312) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsServiceImpl.push(ApnsServiceImpl.java:46) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.AbstractApnsService.push(AbstractApnsService.java:56) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsServiceImpl.push(ApnsServiceImpl.java:1) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.AbstractApnsService.push(AbstractApnsService.java:1) [JavaAPNS.jar:na]
+	at module.notification.apnsNotification$$anonfun$notificationAll$3.apply(apnsNotification.scala:85) [classes/:na]
+	at module.notification.apnsNotification$$anonfun$notificationAll$3.apply(apnsNotification.scala:84) [classes/:na]
+	at scala.collection.immutable.List.foreach(List.scala:318) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at module.notification.apnsNotification$.notificationAll(apnsNotification.scala:84) [classes/:na]
+	at module.notification.apnsActor$$anonfun$receive$1.applyOrElse(apnsActor.scala:23) [classes/:na]
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:498) [akka-actor_2.10.jar:2.2.0]
+	at akka.actor.ActorCell.invoke(ActorCell.scala:456) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:237) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.Mailbox.run(Mailbox.scala:219) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:386) [akka-actor_2.10.jar:2.2.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-01-31 09:47:39,661 - [INFO] - from play in play-internal-execution-context-5 
+Shutdown application default Akka system.
+
+2016-01-31 09:47:39,928 - [INFO] - from play in play-internal-execution-context-5 
+Starting application default Akka system.
+
+2016-01-31 09:47:39,938 - [INFO] - from play in play-internal-execution-context-5 
+Application started (Dev)
+
+2016-01-31 09:48:44,426 - [INFO] - from play in play-internal-execution-context-5 
+Shutdown application default Akka system.
+
+2016-01-31 09:48:44,490 - [INFO] - from play in play-internal-execution-context-5 
+Starting application default Akka system.
+
+2016-01-31 09:48:44,498 - [INFO] - from play in play-internal-execution-context-5 
+Application started (Dev)
+
+2016-01-31 09:51:12,637 - [INFO] - from play in play-internal-execution-context-6 
+Shutdown application default Akka system.
+
+2016-01-31 09:51:12,992 - [INFO] - from play in play-internal-execution-context-6 
+Starting application default Akka system.
+
+2016-01-31 09:51:13,001 - [INFO] - from play in play-internal-execution-context-6 
+Application started (Dev)
+
+2016-01-31 09:53:29,563 - [INFO] - from play in play-internal-execution-context-7 
+Shutdown application default Akka system.
+
+2016-01-31 09:53:29,903 - [INFO] - from play in play-internal-execution-context-7 
+Starting application default Akka system.
+
+2016-01-31 09:53:29,917 - [INFO] - from play in play-internal-execution-context-7 
+Application started (Dev)
+
+2016-01-31 10:02:00,694 - [INFO] - from play in play-internal-execution-context-9 
+Shutdown application default Akka system.
+
+2016-01-31 10:02:01,027 - [INFO] - from play in play-internal-execution-context-9 
+Starting application default Akka system.
+
+2016-01-31 10:02:01,032 - [INFO] - from play in play-internal-execution-context-9 
+Application started (Dev)
+
+2016-01-31 10:03:05,525 - [INFO] - from play in play-internal-execution-context-9 
+Shutdown application default Akka system.
+
+2016-01-31 10:03:05,578 - [INFO] - from play in play-internal-execution-context-9 
+Starting application default Akka system.
+
+2016-01-31 10:03:05,583 - [INFO] - from play in play-internal-execution-context-9 
+Application started (Dev)
+
+2016-01-31 10:25:44,839 - [INFO] - from play in play-internal-execution-context-11 
+Shutdown application default Akka system.
+
+2016-01-31 10:25:45,360 - [INFO] - from play in play-internal-execution-context-11 
+Starting application default Akka system.
+
+2016-01-31 10:25:45,367 - [INFO] - from play in play-internal-execution-context-11 
+Application started (Dev)
+
+2016-01-31 10:26:28,637 - [ERROR] - from com.notnoop.apns.internal.ApnsConnectionImpl in application-akka.actor.default-dispatcher-3 
+Couldn't connect to APNS server
+java.net.UnknownHostException: gateway.sandbox.push.apple.com
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:184) ~[na:1.8.0_65]
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392) ~[na:1.8.0_65]
+	at java.net.Socket.connect(Socket.java:589) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:668) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketImpl.<init>(SSLSocketImpl.java:427) ~[na:1.8.0_65]
+	at sun.security.ssl.SSLSocketFactoryImpl.createSocket(SSLSocketFactoryImpl.java:88) ~[na:1.8.0_65]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.getOrCreateSocket(ApnsConnectionImpl.java:268) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.sendMessage(ApnsConnectionImpl.java:327) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsConnectionImpl.sendMessage(ApnsConnectionImpl.java:312) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsServiceImpl.push(ApnsServiceImpl.java:46) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.AbstractApnsService.push(AbstractApnsService.java:56) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.ApnsServiceImpl.push(ApnsServiceImpl.java:1) [JavaAPNS.jar:na]
+	at com.notnoop.apns.internal.AbstractApnsService.push(AbstractApnsService.java:1) [JavaAPNS.jar:na]
+	at module.notification.apnsNotification$$anonfun$notificationAll$3.apply(apnsNotification.scala:85) [classes/:na]
+	at module.notification.apnsNotification$$anonfun$notificationAll$3.apply(apnsNotification.scala:84) [classes/:na]
+	at scala.collection.immutable.List.foreach(List.scala:318) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at module.notification.apnsNotification$.notificationAll(apnsNotification.scala:84) [classes/:na]
+	at module.notification.apnsActor$$anonfun$receive$1.applyOrElse(apnsActor.scala:23) [classes/:na]
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:498) [akka-actor_2.10.jar:2.2.0]
+	at akka.actor.ActorCell.invoke(ActorCell.scala:456) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:237) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.Mailbox.run(Mailbox.scala:219) [akka-actor_2.10.jar:2.2.0]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:386) [akka-actor_2.10.jar:2.2.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) [casbah-alldep_2.10-2.7.0.jar:2.7.0]
 
