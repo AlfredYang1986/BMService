@@ -53,9 +53,10 @@ object TagModule {
 			
 		val f0 = Future(this.queryRecommandTags(data))
 		val f1 = Future(this.queryTagPreViewWithTagName(data))
+//		val f1 = Future(this.queryTagSearchWithInput(data))
 		
 		Await.result((f0 zip f1) map { x => 
-			val result0 = if ((x._1 \ "status").asOpt[String].get.equals("ok")) (true, (x._2 \ "recommands"))
+			val result0 = if ((x._1 \ "status").asOpt[String].get.equals("ok")) (true, (x._1 \ "recommands"))
 						  else (false, null)
 			val result1 = if ((x._2 \ "status").asOpt[String].get.equals("ok")) (true, (x._2 \ "preview"))
 						  else (false, null)
@@ -73,6 +74,27 @@ object TagModule {
 			toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
 		}.toList)))
 	}
+
+	def queryTagSearchWithInput(data : JsValue) : JsValue = {
+		
+	  val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val tag_name = (data \ "tag_name").asOpt[String].get
+		val date = (data \ "date").asOpt[Long].map(x => x).getOrElse(new Date().getTime)
+		
+		val str = "^" + tag_name
+		println(str)
+	  println("content" $regex str)
+		val test01 = from db() in "tags" where ("content" -> "time") select (x => x)
+		println(test01)
+		val test = from db() in "tags" where ("content" $regex ("^" + tag_name + "*$")) select (x => x)
+		println(test)
+		
+		Json.toJson(Map("status" -> toJson("ok"), "preview" -> toJson(
+  		(from db() in "tags" where ("content" $regex ("^" + tag_name))).select { x => 
+  		    toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
+  		    }.toList)))
+	}
 	
 	def queryTagPreViewWithTagName(data : JsValue) : JsValue = {
 	  
@@ -81,32 +103,41 @@ object TagModule {
 		val tag_name = (data \ "tag_name").asOpt[String].get
 		val date = (data \ "date").asOpt[Long].map(x => x).getOrElse(new Date().getTime)
 
-		def queryPreViewWithTagType(t : Integer) : JsValue = {
-			((from db() in "posts" where ("tags.content" -> tag_name, "tags.type" -> t)).selectTop(3)("date") { x => 
-				toJson(Map("post_id" -> toJson(x.getAs[String]("post_id").get), 
-				    "items" -> toJson(
-				        ((x.getAs[MongoDBList]("items").get.toSeq) map { y => y match {
-				          case item : BasicDBObject=>
-				        	toJson(Map("name" -> toJson(item.get("name").asInstanceOf[String]), "type" -> toJson(item.get("type").asInstanceOf[Number].intValue)))
-				          case _ => ???
-				        }}).toList
-				    )))
+    def getPreViewTagName(o : MongoDBObject) : String =
+		    o.getAs[MongoDBList]("tags").map { x => x.map { x =>
+		        x.asInstanceOf[BasicDBObject].get("content").asInstanceOf[String]}.filter (str => str.startsWith(tag_name)).head
+		    }.getOrElse("")
+		
+		def queryPreViewWithTagType(tag : String, t : Integer) : JsValue = {
+  			((from db() in "posts" where ("tags.content" $regex tag, "tags.type" -> t)).selectTop(3)("date") { x =>
+  				  toJson(Map(
+				        "post_id" -> toJson(x.getAs[String]("post_id").get), 
+    				    "items" -> toJson(
+		  		        ((x.getAs[MongoDBList]("items").get.toSeq) map { y => y match {
+				            case item : BasicDBObject=>
+				            	toJson(Map("name" -> toJson(item.get("name").asInstanceOf[String]), "type" -> toJson(item.get("type").asInstanceOf[Number].intValue)))
+				            case _ => ???
+				          }}).toList)))
 			}).toList match {
-			  case Nil => null 
-			  case x : List[JsValue] => toJson(Map("type" -> toJson(
-					  	if (t == 0) "time"
-					  	else "loction"
-					  ), "tag_name" -> toJson(tag_name), "content" -> toJson(x)))
+			    case Nil => null
+			    case x : List[JsValue] => toJson(Map("tag_name" -> toJson(tag), "type" -> toJson(
+			            if (t == 0) "time"
+			            else "location"
+                ), "content" -> toJson(x)))
 			}
 		}
 		
 		val user_check = from db() in "users" where ("user_id" -> user_id) select (x => x)
 		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
 		else {
+		  var result : List[JsValue] = Nil
+      val tag = ((from db() in "tags" where ("content" $regex ("^" + tag_name))).select(x => x.getAs[String]("content").get)).toList
+      tag.map { x => result = (queryPreViewWithTagType(x, tag_type_time.index) :: 
+				    	queryPreViewWithTagType(x, tag_type_location.index) :: Nil)
+				    	.filterNot(_ == null) ::: result}
+		    
 			toJson(Map("status" -> toJson("ok"), "preview" -> 
-				toJson((queryPreViewWithTagType(tag_type_time.index) :: 
-				    	queryPreViewWithTagType(tag_type_location.index) :: Nil)
-				    	.filterNot(_ == null))))
+				toJson(result)))
 		}
 	}
 }
