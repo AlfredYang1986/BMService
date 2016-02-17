@@ -55,7 +55,7 @@ object TagModule {
 		val f1 = Future(this.queryTagPreViewWithTagName(data))
 		
 		Await.result((f0 zip f1) map { x => 
-			val result0 = if ((x._1 \ "status").asOpt[String].get.equals("ok")) (true, (x._1 \ "recommands"))
+			val result0 = if ((x._1 \ "status").asOpt[String].get.equals("ok")) (true, (x._2 \ "recommands"))
 						  else (false, null)
 			val result1 = if ((x._2 \ "status").asOpt[String].get.equals("ok")) (true, (x._2 \ "preview"))
 						  else (false, null)
