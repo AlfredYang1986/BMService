@@ -18,8 +18,10 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 
 sealed abstract class tag_type(val index : Int, val dis : String)
-case object tag_type_time extends tag_type(0, "time tag")
-case object tag_type_location extends tag_type(1, "locationn tag")
+case object tag_type_location extends tag_type(0, "locationn tag")
+case object tag_type_time extends tag_type(1, "time tag")
+case object tag_type_tag extends tag_type(2, "tag tag")
+case object tag_type_brand extends tag_type(3, "brand tag")
 
 object TagModule {
 	def queryContentsWithTag(data : JsValue) : JsValue = {
@@ -121,8 +123,10 @@ object TagModule {
 			}).toList match {
 			    case Nil => null
 			    case x : List[JsValue] => toJson(Map("tag_name" -> toJson(tag), "type" -> toJson(
-			            if (t == 0) "time"
-			            else "location"
+			            if (t == 0) "location"
+			            else if (t == 1) "time"
+			            else if (t == 2) "tag"
+			            else "brand"
                 ), "content" -> toJson(x)))
 			}
 		}
@@ -132,8 +136,10 @@ object TagModule {
 		else {
 		  var result : List[JsValue] = Nil
       val tag = ((from db() in "tags" where ("content" $regex ("^" + tag_name))).select(x => x.getAs[String]("content").get)).toList
-      tag.map { x => result = (queryPreViewWithTagType(x, tag_type_time.index) :: 
-				    	queryPreViewWithTagType(x, tag_type_location.index) :: Nil)
+      tag.map { x => result = (queryPreViewWithTagType(x, tag_type_location.index) :: 
+				    	queryPreViewWithTagType(x, tag_type_time.index) ::
+				    	queryPreViewWithTagType(x, tag_type_tag.index) ::
+				    	queryPreViewWithTagType(x, tag_type_brand.index) :: Nil)
 				    	.filterNot(_ == null) ::: result}
 		    
 			toJson(Map("status" -> toJson("ok"), "preview" -> 
