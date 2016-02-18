@@ -87,6 +87,8 @@ POST	/connections/sentSMSInvitation				controllers.relationshipController.askPho
 # role tage module
 POST	/roletags/queryAllRoleTags					controllers.roleTagController.queryAllRoleTags	
 POST	/roletags/addRoleTag						controllers.roleTagController.addRoleTag
+POST	/roletags/queryRecommandRoleTags			controllers.roleTagController.queryRecommandRoleTags
+POST	/roletags/queryRoleTagPreViewWithRoleTag	controllers.roleTagController.queryRoleTagPreViewWithRoleTag
 
 # schools module
 POST	/schools/queryAllRoleTags					controllers.schoolsController.queryAllSchools

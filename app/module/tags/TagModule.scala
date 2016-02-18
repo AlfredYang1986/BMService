@@ -111,7 +111,7 @@ object TagModule {
 		    }.getOrElse("")
 		
 		def queryPreViewWithTagType(tag : String, t : Integer) : JsValue = {
-  			((from db() in "posts" where ("tags.content" $regex tag, "tags.type" -> t)).selectTop(3)("date") { x =>
+  			((from db() in "posts" where ("tags.content" -> tag, "tags.type" -> t)).selectTop(3)("date") { x =>
   				  toJson(Map(
 				        "post_id" -> toJson(x.getAs[String]("post_id").get), 
     				    "items" -> toJson(

@@ -8,6 +8,7 @@ import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
+import java.util.Date
 
 object RoleTagModule {
 	def queryAllRoleTags(data : JsValue) : JsValue = {
@@ -51,4 +52,36 @@ object RoleTagModule {
 	}
 	
 	def deleteRoleTags(data : JsValue) : JsValue = ???
+	
+	def queryRoleTagPreViewWithRoleTag(data : JsValue) : JsValue = {
+		val user_id = (data \ "user_id").asOpt[String].get
+		val auth_token = (data \ "auth_token").asOpt[String].get
+		val role_tag = (data \ "role_tag").asOpt[String].get
+		val date = (data \ "date").asOpt[Long].map(x => x).getOrElse(new Date().getTime)	    
+		
+	  def getPreViewRoleTag(o : MongoDBObject) : String = o.getAs[String]("role_tag").map (x => x).getOrElse("")
+	 
+	  def queryPreViewWithRoleTag(tag : String) : JsValue = {
+  		(from db() in "user_profile" where ("role_tag" -> tag)).selectTop(3)("date") { x =>
+  		    toJson(Map(
+  		            "user_id" -> toJson(x.getAs[String]("user_id").get),
+  		            "screen_name" -> toJson(x.getAs[String]("screen_name").get),
+  		            "screen_photo" -> toJson(x.getAs[String]("screen_photo").get)))
+  		}.toList
+  		match {
+  		    case Nil => null
+  		    case x : List[JsValue] => toJson(Map("role_tag" -> toJson(tag), "content" -> toJson(x)))
+  		    case _ => null
+  		}
+		}
+		
+		val user_check = from db() in "users" where ("user_id" -> user_id) select (x => x)
+		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
+		else {
+		  var result : List[JsValue] = Nil
+      val tag = ((from db() in "role_tags" where ("tag_name" $regex ("^" + role_tag))).select(x => x.getAs[String]("tag_name").get)).toList
+      tag.map (x => result = (queryPreViewWithRoleTag(x) :: Nil).filterNot(_ == null) ::: result)
+			toJson(Map("status" -> toJson("ok"), "preview" -> toJson(result)))
+		}
+  }
 }
