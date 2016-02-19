@@ -137,7 +137,7 @@ object GroupModule2 {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val group_id = (data \ "group_id").asOpt[Long].get
-		val joiner_id = (data \ "joiner_id").asOpt[String].get
+		val joiner_id = user_id
 		
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("group is not exist")
@@ -187,7 +187,6 @@ object GroupModule2 {
 
 	def queryGroupsWithID(group_id : Long, user_id : String) : JsValue = {
 
-	    println(group_id)
 	    (from db() in "groups" where ("group_id" -> group_id)).selectTop(1)("group_id") { x =>
 		  	var tmp : Map[String, JsValue] = Map.empty
   			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
