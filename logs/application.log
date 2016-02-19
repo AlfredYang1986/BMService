@@ -1,36 +1,242 @@
-2016-02-18 14:29:11,373 - [INFO] - from play in pool-23-thread-3 
+2016-02-19 11:33:33,072 - [INFO] - from play in pool-4-thread-3 
 Listening for HTTP on /0:0:0:0:0:0:0:0:9000
 
-2016-02-18 14:33:23,238 - [INFO] - from play in play-internal-execution-context-1 
+2016-02-19 11:38:01,650 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2016-02-18 14:33:23,266 - [INFO] - from play in play-internal-execution-context-1 
+2016-02-19 11:38:01,693 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
-2016-02-18 15:40:18,245 - [INFO] - from play in play-internal-execution-context-1 
+2016-02-19 13:37:09,594 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6p6kp28mk - Internal server error, for (POST) [/devices/registerUserDevice] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:11,194 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6p6kp2b6i - Internal server error, for (POST) [/login/online] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:14,217 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6p6kp2fio - Internal server error, for (GET) [/query/downloadFile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:16,292 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6p6kp2ikk - Internal server error, for (POST) [/group/createChatGroup] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:17,510 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6p6kp2kff - Internal server error, for (POST) [/profile/userProfile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:18,520 - [ERROR] - from application in New I/O worker #7 
+
+
+! @6p6kp2m2b - Internal server error, for (GET) [/query/downloadFile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:19,479 - [ERROR] - from application in New I/O worker #6 
+
+
+! @6p6kp2nd8 - Internal server error, for (GET) [/query/downloadFile] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:37:20,414 - [ERROR] - from application in New I/O worker #5 
+
+
+! @6p6kp2on7 - Internal server error, for (POST) [/group/joinChatGroup] ->
+
+play.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : String("")
+ required: Long]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14$$anonfun$apply$16.apply(PlayReloader.scala:304) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:304) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2$$anonfun$apply$14.apply(PlayReloader.scala:298) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:298) ~[na:na]
+	at play.PlayReloader$$anon$1$$anonfun$reload$2.apply(PlayReloader.scala:296) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at play.PlayReloader$$anon$1.reload(PlayReloader.scala:296) ~[na:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.2.6]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:102) ~[play_2.10.jar:2.2.6]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1361) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) ~[casbah-alldep_2.10-2.7.0.jar:2.7.0]
+
+2016-02-19 13:38:28,209 - [INFO] - from play in play-internal-execution-context-1 
 Shutdown application default Akka system.
 
-2016-02-18 15:40:18,731 - [INFO] - from play in play-internal-execution-context-1 
+2016-02-19 13:38:28,370 - [INFO] - from play in play-internal-execution-context-1 
 Starting application default Akka system.
 
-2016-02-18 15:40:18,737 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2016-02-18 15:42:14,872 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2016-02-18 15:42:14,948 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2016-02-18 15:42:14,959 - [INFO] - from play in play-internal-execution-context-1 
-Application started (Dev)
-
-2016-02-18 15:43:54,368 - [INFO] - from play in play-internal-execution-context-1 
-Shutdown application default Akka system.
-
-2016-02-18 15:43:54,423 - [INFO] - from play in play-internal-execution-context-1 
-Starting application default Akka system.
-
-2016-02-18 15:43:54,431 - [INFO] - from play in play-internal-execution-context-1 
+2016-02-19 13:38:28,379 - [INFO] - from play in play-internal-execution-context-1 
 Application started (Dev)
 
