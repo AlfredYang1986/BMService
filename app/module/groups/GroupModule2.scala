@@ -43,13 +43,14 @@ object GroupModule2 {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val group_name = (data \ "group_name").asOpt[String].get
 		val post_id = (data \ "post_id").asOpt[String].get
+		val owner_id = (data \ "owner_id").asOpt[String].get
 
 		var group_id : Long = -1
 		
 		def isChatGroupExisting : Boolean = 
 		    (from db() in "groups" where ("post_id" -> post_id) select (x => x.getAs[Long]("group_id").get)).toList match {
 		        case Nil => false
-		        case x : List[Long] => true
+		        case x : List[Long] => group_id = x.head; true
 		    }
 		
 		def createChatGroupImpl : JsValue = {
@@ -63,7 +64,7 @@ object GroupModule2 {
   			  val builder = MongoDBObject.newBuilder
   			  builder += "group_name" -> group_name
   			  builder += "group_id" -> group_id
-  			  builder += "owner_id" -> user_id
+  			  builder += "owner_id" -> owner_id 
   			  builder += "post_id" -> post_id
   			  builder += "found_date" -> new Date().getTime
   			  builder += "isActived" -> 1
@@ -186,6 +187,7 @@ object GroupModule2 {
 
 	def queryGroupsWithID(group_id : Long, user_id : String) : JsValue = {
 
+	    println(group_id)
 	    (from db() in "groups" where ("group_id" -> group_id)).selectTop(1)("group_id") { x =>
 		  	var tmp : Map[String, JsValue] = Map.empty
   			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
