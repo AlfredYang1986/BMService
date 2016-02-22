@@ -89,20 +89,18 @@ object TagModule {
 	  val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val tag_name = (data \ "tag_name").asOpt[String].get
-		val date = (data \ "date").asOpt[Long].map(x => x).getOrElse(new Date().getTime)
 		
-		val str = "^" + tag_name
-		println(str)
-	  println("content" $regex str)
-		val test01 = from db() in "tags" where ("content" -> "time") select (x => x)
-		println(test01)
-		val test = from db() in "tags" where ("content" $regex ("^" + tag_name + "*$")) select (x => x)
-		println(test)
-		
-		Json.toJson(Map("status" -> toJson("ok"), "preview" -> toJson(
-  		(from db() in "tags" where ("content" $regex ("^" + tag_name))).select { x => 
+		(data \ "tag_type").asOpt[Int].map { tag_type => 
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+  		  (from db() in "tags" where ("content" $regex ("(?i)" + tag_name), "type" -> tag_type)).select { x => 
   		    toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
-  		    }.toList)))
+  		  }.toList)))
+		}.getOrElse {
+			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+    		(from db() in "tags" where ("content" $regex ("(?i)" + tag_name))).select { x => 
+  		    toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
+  		  }.toList)))
+		}
 	}
 	
 	def queryTagPreViewWithTagName(data : JsValue) : JsValue = {
@@ -127,7 +125,7 @@ object TagModule {
 				            	toJson(Map("name" -> toJson(item.get("name").asInstanceOf[String]), "type" -> toJson(item.get("type").asInstanceOf[Number].intValue)))
 				            case _ => ???
 				          }}).toList)))
-			}).toList match {
+			  }).toList match {
 			    case Nil => null
 			    case x : List[JsValue] => toJson(Map("tag_name" -> toJson(tag), "type" -> toJson(
 			            if (t == 0) "location"

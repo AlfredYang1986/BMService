@@ -67,6 +67,7 @@ POST	/tags/queryContentsWithTag					controllers.tagController.queryContentsWithT
 POST	/tags/queryRecommandTags					controllers.tagController.queryRecommandTags
 POST	/tags/queryTagPreViewWithTagName			controllers.tagController.queryTagPreViewWithTagName
 POST	/tags/queryFoundSearchTagData				controllers.tagController.queryFoundSearchTagData
+POST	/tags/queryTagSearchWithInput				controllers.tagController.queryTagSearchWithInput
 
 # user search module
 POST	/users/queryRecommandUsers					controllers.userSearchController.queryRecommandUsers
