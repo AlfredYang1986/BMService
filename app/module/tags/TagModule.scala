@@ -71,10 +71,17 @@ object TagModule {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
+	
+		(data \ "tag_type").asOpt[Int].map { tp => 
+		  Json.toJson(Map("status" -> toJson("ok"), "recommands" -> toJson((from db() in "tags" where ("type" -> tp)).selectTop(10)("date"){ x => 
+			  toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
+  		}.toList))).asInstanceOf[JsValue]
 		
-		Json.toJson(Map("status" -> toJson("ok"), "recommands" -> toJson((from db() in "tags").selectTop(10)("date"){ x => 
-			toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
-		}.toList)))
+		}.getOrElse{
+			Json.toJson(Map("status" -> toJson("ok"), "recommands" -> toJson((from db() in "tags").selectTop(10)("date"){ x => 
+			  toJson(Map("tag_name" -> toJson(x.getAs[String]("content").get), "tag_type" -> toJson(x.getAs[Number]("type").get.intValue)))
+  		}.toList))).asInstanceOf[JsValue]
+		}
 	}
 
 	def queryTagSearchWithInput(data : JsValue) : JsValue = {
@@ -135,7 +142,7 @@ object TagModule {
 		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
 		else {
 		  var result : List[JsValue] = Nil
-      val tag = ((from db() in "tags" where ("content" $regex ("^" + tag_name))).select(x => x.getAs[String]("content").get)).toList
+      val tag = ((from db() in "tags" where ("content" $regex ("(?i)" + tag_name))).select(x => x.getAs[String]("content").get)).toList
       tag.map { x => result = (queryPreViewWithTagType(x, tag_type_location.index) :: 
 				    	queryPreViewWithTagType(x, tag_type_time.index) ::
 				    	queryPreViewWithTagType(x, tag_type_tag.index) ::
