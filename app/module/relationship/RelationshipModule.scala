@@ -252,7 +252,8 @@ object RelationshipModule {
 		if (lst.count == 0) {
 		  	tmp += "following" -> null
 		} else if (lst.count == 1) {
-			tmp = this.queryResult(lst.head, List("following"))
+//			tmp = this.queryResult(lst.head, List("following"))
+			tmp = this.queryResult2(lst.head, List("following"), user_id)
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
@@ -271,7 +272,8 @@ object RelationshipModule {
 		if (lst.count == 0) {
 		  	tmp += "followed" -> null
 		} else if (lst.count == 1) {
-			tmp = this.queryResult(lst.head, List("followed"))
+//			tmp = this.queryResult(lst.head, List("followed"))
+        tmp = this.queryResult2(lst.head, List("followed"), user_id)
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
@@ -290,7 +292,8 @@ object RelationshipModule {
 		if (lst.count == 0) {
 		  	tmp += "friends" -> null
 		} else if (lst.count == 1) {
-		  tmp = this.queryResult(lst.head, List("friends"))
+//		  tmp = this.queryResult(lst.head, List("friends"))
+		  tmp = this.queryResult2(lst.head, List("friends"), user_id)
 		  
 		} else {
 			ErrorCode.errorToJson("unknown error")
@@ -307,6 +310,21 @@ object RelationshipModule {
 		  		getOrElse(Unit)
 		  	
 		  	tmp += iter -> toJson(tmp_lst)
+		}
+		tmp
+	}
+	
+	def queryResult2(one : MongoDBObject, lst : List[String], user_id : String) : Map[String, JsValue] = {
+	  var tmp : Map[String, JsValue] = Map.empty
+		lst map { iter => 
+		  	(one.getAs[MongoDBList](iter).map { value => 
+		  		value.toList.asInstanceOf[List[String]].map { x =>
+		  		    toJson(Map("user_id" -> toJson(x),
+                    "relations" -> toJson(relationsBetweenUserAndPostowner(user_id, x).con)))
+		  	}}.getOrElse(Nil).asInstanceOf[List[JsValue]]) match {
+		  	    case Nil => Unit
+		  	    case x : List[JsValue] => tmp += iter -> toJson(x)
+		  	}
 		}
 		tmp
 	}

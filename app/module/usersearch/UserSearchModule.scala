@@ -33,12 +33,13 @@ object UserSearchModule {
 			  	    				  	case _ => ???
 			  	    				  }}).toList)))
 			  	  		}.toList
-				  	  
-			  	  	toJson(Map("user_id" -> toJson(id),
+			  	  		
+			  	  	  toJson(Map("user_id" -> toJson(id),
 			  	  			   "role_tag" -> toJson(x.getAs[String]("role_tag").get),
-				  			   "screen_name" -> toJson(x.getAs[String]("screen_name").get), 
-				  			   "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
-				  			   "preview" -> toJson(post_preview)))
+				  			     "screen_name" -> toJson(x.getAs[String]("screen_name").get), 
+				  			     "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
+				  			     "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con),
+				  			     "preview" -> toJson(post_preview)))
 			  }.toList )))
 		  case _ => null
 		}
