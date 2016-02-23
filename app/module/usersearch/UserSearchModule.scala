@@ -10,6 +10,8 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 //import module.common.helpOptions
 import java.util.Date
+import module.common.helpOptions
+import module.relationship._
 
 object UserSearchModule {
 	def queryRecommandUsers(data : JsValue) : JsValue = {
@@ -41,5 +43,34 @@ object UserSearchModule {
 		  case _ => null
 		}
 	}
-	def queryUsersWithRoleTag(data : JsValue) : JsValue = null
+
+	def queryUsersWithRoleTag(data : JsValue) : JsValue = ???
+	
+	def queryUsersPosts(data : JsValue) : JsValue = {
+	    
+	    val user_id = (data \ "user_id").asOpt[String].get
+	    val auth_token = (data \ "auth_token").asOpt[String].get
+	    val owner_id = (data \ "owner_id").asOpt[String].get
+	    
+	    val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0)
+	    val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20)
+	    val date = (data \ "data").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
+	   
+	    (from db() in "users" where ("user_id" -> user_id) select (x => x.getAs[String]("user_id").get)).toList match {
+	        case Nil => ErrorCode.errorToJson("user not existing")
+	        case head :: Nil => { 
+			        Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(
+	              (from db() in "posts" where ("owner_id" -> owner_id)).selectSkipTop(skip)(take)("date"){ x => 
+            		  	var tmp : Map[String, JsValue] = Map.empty
+            		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags")
+            		  	  .map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+            		  	  
+            		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, owner_id)
+            		  	tmp += "relations" -> toJson(con.con)
+            		  	tmp
+	              }.toList)))
+	        }
+	        case _ => ???
+	    }
+	}
 }
