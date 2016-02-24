@@ -10,4 +10,5 @@ object userSearchController extends Controller {
 	def queryRecommandUsers = Action (request => requestArgs(request)(UserSearchModule.queryRecommandUsers))
 	def queryUsersWithRoleTag = Action (request => requestArgs(request)(UserSearchModule.queryUsersWithRoleTag))
 	def queryUsersPosts = Action (request => requestArgs(request)(UserSearchModule.queryUsersPosts))
+	def queryUsersWithScreenName = Action (request => requestArgs(request)(UserSearchModule.queryUsersWithScreenName))
 }

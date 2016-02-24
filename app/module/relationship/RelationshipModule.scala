@@ -177,7 +177,8 @@ object RelationshipModule {
 		  
 		}.getOrElse(Unit)
 			
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("follow user success")))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("message" -> toJson("follow user success"), 
+		        "relations" -> toJson(this.relationsBetweenUserAndPostowner(user_id, follow_user_id).con)))))
 //		queryMutureFollowingUsers(data)
 	}
 
@@ -237,7 +238,8 @@ object RelationshipModule {
 		removefollowings(user_id, follow_user_id)
 		removefolloweds(follow_user_id, user_id)
 		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("unfollow user success")))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("message" -> toJson("follow user success"), 
+		        "relations" -> toJson(this.relationsBetweenUserAndPostowner(user_id, follow_user_id).con)))))
 //		queryMutureFollowingUsers(data)
 	}
 

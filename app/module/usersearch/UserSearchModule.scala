@@ -74,4 +74,30 @@ object UserSearchModule {
 	        case _ => ???
 	    }
 	}
+	
+	def queryUsersWithScreenName(data : JsValue) : JsValue = {
+	    
+	    val user_id = (data \ "user_id").asOpt[String].get
+	    val auth_token = (data \ "auth_token").asOpt[String].get
+	    val screen_name = (data \ "screen_name").asOpt[String].get
+	    
+	    val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0)
+	    val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20)
+	   
+	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+	        case Nil => ErrorCode.errorToJson("user not existing")
+	        case head :: Nil => {
+			      Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+	            (from db() in "user_profile" where ("screen_name" $regex ("(?i)" + screen_name))).selectSkipTop(skip)(take)("date"){ x => 
+	               val id = x.getAs[String]("user_id").get
+	               toJson(Map("user_id" -> toJson(id),
+	                         "screen_name" -> toJson(x.getAs[String]("screen_name").get),
+	                         "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
+	                         "role_tag" -> toJson(x.getAs[String]("role_tag").get),
+	                         "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)))
+	            }.toList)))
+	        }
+	        case _ => ???
+	    }
+	}
 }
