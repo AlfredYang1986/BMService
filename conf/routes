@@ -16,6 +16,7 @@ POST	/login/authWithPwd							controllers.loginController.authWithPwd
 POST	/login/signout								controllers.loginController.logout
 POST	/login/offline								controllers.loginController.offline
 POST	/login/online								controllers.loginController.online
+POST	/login/userLstInSystem						controllers.loginController.userLstInSystem
 
 # post module
 POST	/post/postContent							controllers.postController.postContent

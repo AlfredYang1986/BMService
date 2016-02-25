@@ -10,6 +10,7 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.sercurity.Sercurity
 import module.sms._
+import module.relationship._
 
 import module.profile.ProfileModule
 
@@ -301,7 +302,6 @@ object LoginModule {
 		val phoneNo = (data \ "phoneNo").asOpt[String].get
 		val pwd = (data \ "pwd").asOpt[String].get
 		
-		
 		val result = from db() in "users" where ("phoneNo" -> phoneNo, "pwd" -> pwd) select (x => x)
 		if (result.empty) ErrorCode.errorToJson("user not existing")
 		else {
@@ -346,5 +346,76 @@ object LoginModule {
 		if (!device_token.equals("")) module.notification.apnsNotification.unRegisterUserDevices(user_id, device_token)
 
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("logout success")))
+	}
+	
+	/**
+	 * user lst is in the sys with provider name
+	 */
+	def userLstInSystem(data : JsValue) : JsValue = {
+	    
+	    val user_id = (data \ "user_id").asOpt[String].get
+	    val auth_token = (data \ "auth_token").asOpt[String].get
+	    val user_lst = (data \ "lst").asOpt[List[String]].get
+	   
+	    def phoneConditionAcc(para : String) = "phoneNo" $eq para
+	    def weiboConditionAcc(para : String) = $and("third.provider_name" $eq "weibo", "third.provider_uid" $eq para)
+	    def wechatConditionAcc(para : String) = $and("third.provider_name" $eq "wechat", "third.provider_uid" $eq para)
+	    def qqConditionAcc(para : String) = $and("third.provider_name" $eq "qq", "third.provider_uid" $eq para)
+	   
+	    def matchConditions(pn : String) : String => DBObject = pn match {
+	          case "phone" => phoneConditionAcc
+	          case "weibo" => weiboConditionAcc
+	          case "wechat" => wechatConditionAcc
+	          case "qq" => qqConditionAcc
+	          case _ => ???
+	        }
+	    
+	    val conditions : List[String] => DBObject = (data \ "provider_name").asOpt[String].map { x => { 
+	        lst : List[String] => {
+	          var result : DBObject = null
+	          lst foreach ( iter => if (result == null) result = matchConditions(x)(iter)
+                  	              else result = $or(matchConditions(x)(iter), result))
+	          result
+	        }
+	    }}.getOrElse(lst => null)
+	   
+	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+	        case Nil => ErrorCode.errorToJson("user not existing")
+	        case head :: Nil => {
+	            var fc : DBObject = null
+	            var result : List[JsValue] = Nil
+	            (from db() in "users" where conditions select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
+  	              val id = y.getAs[String]("user_id").get
+	                
+	                if (fc == null) fc = ("user_id" $eq id)
+	                else $or("user_id" $eq id, fc)
+	                
+	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
+	            }
+	           
+  	          val result2 = (from db() in "user_profile" where fc select { x => {
+  	              val id = x.getAs[String]("user_id").get
+  	              toJson(Map(
+	                  "user_id" -> toJson(id),
+	                  "screen_name" -> toJson(x.getAs[String]("screen_name").get),
+	                  "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
+	                  "role_tag" -> toJson(x.getAs[String]("role_tag").get),
+	                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
+	            ))}}).toList
+	            
+	            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+  	            ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
+  	              toJson(Map(
+	                  "user_id" -> toJson((x._2 \ "user_id").asOpt[String].get),
+	                  "screen_name" -> toJson((x._2 \ "screen_name").asOpt[String].get),
+	                  "screen_photo" -> toJson((x._2 \ "screen_photo").asOpt[String].get),
+	                  "relations" -> toJson((x._2 \ "relations").asOpt[Int].get),
+	                  "role_tag" -> toJson((x._2 \ "role_tag").asOpt[String].get),
+  	                "phoneNo" -> toJson((x._1 \ "phoneNo").asOpt[String].get)
+    	            ))}
+    	          )))
+	        }
+	        case _ => ???
+	    }
 	}
 }
