@@ -375,8 +375,6 @@ object LoginModule {
 	          var result : DBObject = null
 	          lst foreach ( iter => if (result == null) result = matchConditions(x)(iter)
                   	              else result = $or(matchConditions(x)(iter), result))
-	          println("conditions")
-	          println(result)
 	          result
 	        }
 	    }}.getOrElse(lst => null)
@@ -388,19 +386,12 @@ object LoginModule {
 	            var result : List[JsValue] = Nil
 	            (from db() in "users" where conditions(user_lst) select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
   	              val id = y.getAs[String]("user_id").get
-	               
-  	              println(id)
-  	              
-	                if (fc == null) fc = ("user_id" $eq id)
+	                
+  	              if (fc == null) fc = ("user_id" $eq id)
 	                else $or("user_id" $eq id, fc)
 	                
 	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
 	            }
-	                println("fc is")
-	                println(fc)
-	           
-	            println("result 1 =")
-	            println(result)
 	           
   	          val result2 = (from db() in "user_profile" where fc select { x => {
   	              val id = x.getAs[String]("user_id").get
@@ -412,9 +403,6 @@ object LoginModule {
 	                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
 	            ))}}).toList
 	            
-	            println("result 2 =")
-	            println(result2)
-	           
 	            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
   	            ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
   	              toJson(Map(
