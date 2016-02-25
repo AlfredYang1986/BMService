@@ -378,7 +378,9 @@ object LoginModule {
 	          result
 	        }
 	    }}.getOrElse(lst => null)
-	   
+	  
+	    println(conditions)
+	    
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	        case Nil => ErrorCode.errorToJson("user not existing")
 	        case head :: Nil => {
@@ -392,6 +394,8 @@ object LoginModule {
 	                
 	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
 	            }
+	            
+	            println(result)
 	           
   	          val result2 = (from db() in "user_profile" where fc select { x => {
   	              val id = x.getAs[String]("user_id").get
@@ -403,6 +407,8 @@ object LoginModule {
 	                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
 	            ))}}).toList
 	            
+	            println(result2)
+	           
 	            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
   	            ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
   	              toJson(Map(
