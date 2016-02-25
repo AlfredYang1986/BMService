@@ -375,11 +375,11 @@ object LoginModule {
 	          var result : DBObject = null
 	          lst foreach ( iter => if (result == null) result = matchConditions(x)(iter)
                   	              else result = $or(matchConditions(x)(iter), result))
+	          println("conditions")
+	          println(result)
 	          result
 	        }
 	    }}.getOrElse(lst => null)
-	  
-	    println(conditions)
 	    
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	        case Nil => ErrorCode.errorToJson("user not existing")
@@ -394,7 +394,8 @@ object LoginModule {
 	                
 	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
 	            }
-	            
+	           
+	            println("result 1 =")
 	            println(result)
 	           
   	          val result2 = (from db() in "user_profile" where fc select { x => {
@@ -407,6 +408,7 @@ object LoginModule {
 	                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
 	            ))}}).toList
 	            
+	            println("result 2 =")
 	            println(result2)
 	           
 	            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
