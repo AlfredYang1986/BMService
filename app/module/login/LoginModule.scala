@@ -394,6 +394,8 @@ object LoginModule {
 	                
 	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
 	            }
+	                println("fc is")
+	                println(fc)
 	           
 	            println("result 1 =")
 	            println(result)
