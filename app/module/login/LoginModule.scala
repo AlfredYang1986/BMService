@@ -386,9 +386,11 @@ object LoginModule {
 	        case head :: Nil => {
 	            var fc : DBObject = null
 	            var result : List[JsValue] = Nil
-	            (from db() in "users" where conditions select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
+	            (from db() in "users" where conditions(user_lst) select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
   	              val id = y.getAs[String]("user_id").get
-	                
+	               
+  	              println(id)
+  	              
 	                if (fc == null) fc = ("user_id" $eq id)
 	                else $or("user_id" $eq id, fc)
 	                
