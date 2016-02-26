@@ -47,6 +47,7 @@ object ProfileModule {
 				builder += "posts_count" -> (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "cycle_count" -> (data \ "cycle_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
 	
 				result += "user_id" -> toJson(user_id)
@@ -69,7 +70,7 @@ object ProfileModule {
 					}.getOrElse(Unit)
 				}
 				
-				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin") foreach { x => 
+				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin", "gender") foreach { x => 
 					(data \ x).asOpt[Int].map { value =>
 						user += x -> new Integer(value)
 						result += x -> toJson(value)
@@ -89,9 +90,13 @@ object ProfileModule {
 		if (re.empty) null 
 		else {
 			var tmp = Map.empty[String, JsValue]
-			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
-					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
-			
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
+			        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
+			        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+					.foreach { x => 
+					    tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
+                  if (str.equals("gender")) toJson(0)
+                  else toJson(""))}
 			tmp
 		}
 	}
@@ -108,16 +113,20 @@ object ProfileModule {
 		builder += "posts_count" -> 0
 		builder += "cycle_count" -> 0
 		builder += "isLogin" -> 0
+		builder += "gender" -> 0
 		builder += "signature" -> ""
 
 		val re = builder.result
 		_data_connection.getCollection("user_profile") += re //builder.result
 		
 		var tmp = Map.empty[String, JsValue]
-		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
-//				.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
-				.map(x => tmp += x -> helpOptions.opt_2_js(Option(re.get(x)), x))
-	
+		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
+		        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
+		        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+				.foreach { x => 
+				    tmp += x -> helpOptions.opt_2_js_2(Option(re.get(x)), x)(str =>
+                  if (str.equals("gender")) toJson(0)
+                  else toJson(""))}
 		tmp
 	}
 	
@@ -140,8 +149,12 @@ object ProfileModule {
 			// 2. 
 			else {
 				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" :: "cycle_count" :: "isLogin" :: Nil)
-					.map(x => tmp += x -> helpOptions.opt_2_js(re.head.get(x), x))
+				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
+				        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
+				        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+					.foreach { x => tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
+                  if (str.equals("gender")) toJson(0)
+                  else toJson(""))}
 					
 				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))

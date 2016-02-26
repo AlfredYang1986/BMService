@@ -116,7 +116,7 @@ object TagModule {
 		    }.getOrElse("")
 		
 		def queryPreViewWithTagType(tag : String, t : Integer) : JsValue = {
-  			((from db() in "posts" where ("tags.content" -> tag, "tags.type" -> t)).selectTop(3)("date") { x =>
+  			((from db() in "posts" where ("tags" $elemMatch($and("content" $eq tag, "type" $eq t.intValue)))).selectTop(3)("date") { x =>
   				  toJson(Map(
 				        "post_id" -> toJson(x.getAs[String]("post_id").get), 
     				    "items" -> toJson(
@@ -127,12 +127,7 @@ object TagModule {
 				          }}).toList)))
 			  }).toList match {
 			    case Nil => null
-			    case x : List[JsValue] => toJson(Map("tag_name" -> toJson(tag), "type" -> toJson(
-			            if (t == 0) "location"
-			            else if (t == 1) "time"
-			            else if (t == 2) "tag"
-			            else "brand"
-                ), "content" -> toJson(x)))
+			    case x : List[JsValue] => println(x); toJson(Map("tag_name" -> toJson(tag), "type" -> toJson(t.intValue), "content" -> toJson(x)))
 			}
 		}
 		
@@ -141,6 +136,7 @@ object TagModule {
 		else {
 		  var result : List[JsValue] = Nil
       val tag = ((from db() in "tags" where ("content" $regex ("(?i)" + tag_name))).select(x => x.getAs[String]("content").get)).toList
+      println(tag)
       tag.map { x => result = (queryPreViewWithTagType(x, tag_type_location.index) :: 
 				    	queryPreViewWithTagType(x, tag_type_time.index) ::
 				    	queryPreViewWithTagType(x, tag_type_tag.index) ::
