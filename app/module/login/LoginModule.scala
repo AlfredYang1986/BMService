@@ -11,8 +11,13 @@ import com.mongodb.casbah.Imports._
 import module.sercurity.Sercurity
 import module.sms._
 import module.relationship._
-
 import module.profile.ProfileModule
+
+import scala.concurrent.Await
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits._
+import akka.util.Timeout
+import scala.concurrent.duration._
 
 object LoginModule {
   
@@ -378,42 +383,55 @@ object LoginModule {
 	          result
 	        }
 	    }}.getOrElse(lst => null)
+	   
+	    def userLstInSystemAcc(lst : List[String]) : List[JsValue] = {
+          var fc : DBObject = null
+          var result : List[JsValue] = Nil
+          (from db() in "users" where conditions(lst) select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
+	            val id = y.getAs[String]("user_id").get
+                
+	            if (fc == null) fc = ("user_id" $eq id)
+              else $or("user_id" $eq id, fc)
+                
+              result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
+          }
+          println(result)
+           
+	        val result2 = (from db() in "user_profile" where fc select { x => {
+	            val id = x.getAs[String]("user_id").get
+	            toJson(Map(
+                  "user_id" -> toJson(id),
+                  "screen_name" -> toJson(x.getAs[String]("screen_name").get),
+                  "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
+                  "role_tag" -> toJson(x.getAs[String]("role_tag").get),
+                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
+              ))}}).toList
+              
+          println(result2)
+            
+	        ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
+	            println(x)
+	            toJson(Map(
+                  "user_id" -> toJson((x._2 \ "user_id").asOpt[String].get),
+                  "screen_name" -> toJson((x._2 \ "screen_name").asOpt[String].get),
+                  "screen_photo" -> toJson((x._2 \ "screen_photo").asOpt[String].get),
+                  "relations" -> toJson((x._2 \ "relations").asOpt[Int].get),
+                  "role_tag" -> toJson((x._2 \ "role_tag").asOpt[String].get),
+	                "phoneNo" -> toJson((x._1 \ "phoneNo").asOpt[String].get)
+  	          ))}
+      }
 	    
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	        case Nil => ErrorCode.errorToJson("user not existing")
 	        case head :: Nil => {
-	            var fc : DBObject = null
-	            var result : List[JsValue] = Nil
-	            (from db() in "users" where conditions(user_lst) select (x => x/*.getAs[String]("user_id").get*/)).toList foreach { y =>
-  	              val id = y.getAs[String]("user_id").get
-	                
-  	              if (fc == null) fc = ("user_id" $eq id)
-	                else $or("user_id" $eq id, fc)
-	                
-	                result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
-	            }
-	           
-  	          val result2 = (from db() in "user_profile" where fc select { x => {
-  	              val id = x.getAs[String]("user_id").get
-  	              toJson(Map(
-	                  "user_id" -> toJson(id),
-	                  "screen_name" -> toJson(x.getAs[String]("screen_name").get),
-	                  "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
-	                  "role_tag" -> toJson(x.getAs[String]("role_tag").get),
-	                  "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
-	            ))}}).toList
+	            val iter = user_lst.distinct.grouped(20)
+	            var result : List[Future[List[JsValue]]] = Nil
+	            iter foreach { x => result = Future(userLstInSystemAcc(x)) :: result }
 	            
-	            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
-  	            ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
-  	              toJson(Map(
-	                  "user_id" -> toJson((x._2 \ "user_id").asOpt[String].get),
-	                  "screen_name" -> toJson((x._2 \ "screen_name").asOpt[String].get),
-	                  "screen_photo" -> toJson((x._2 \ "screen_photo").asOpt[String].get),
-	                  "relations" -> toJson((x._2 \ "relations").asOpt[Int].get),
-	                  "role_tag" -> toJson((x._2 \ "role_tag").asOpt[String].get),
-  	                "phoneNo" -> toJson((x._1 \ "phoneNo").asOpt[String].get)
-    	            ))}
-    	          )))
+	            var result0 : List[List[JsValue]] = Nil
+	            result foreach { x => result0 = Await.result (x map {y => println(y); y}, Timeout(1 second).duration).asInstanceOf[List[JsValue]] :: result0 }
+	            
+  	          toJson(Map("status" -> toJson("ok"), "result" -> toJson(result0.filterNot(_.isEmpty) flatMap(x => x))))
 	        }
 	        case _ => ???
 	    }
