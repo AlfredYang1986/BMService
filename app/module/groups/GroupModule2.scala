@@ -56,8 +56,6 @@ object GroupModule2 {
 		def createChatGroupImpl : JsValue = {
 			val result = Await.result((ddn ? DDNCreateChatGroup("roomName" -> toJson(group_name))).mapTo[JsValue], timeout.duration)
 
-			println(123)
-			println(result)
   		(result \ "status").asOpt[Int].map { status => status match {
   		  case 200 => {		// success
   			  // get group_id
