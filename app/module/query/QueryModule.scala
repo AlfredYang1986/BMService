@@ -144,7 +144,6 @@ object QueryModule {
 		  var conditions : DBObject = null
 		  (from db() in "user_push" where ("user_id" -> user_id)).selectSkipTop(skip)(take)("data") { x => 
 		      x.getAs[MongoDBList]("push").map { lst =>
-		           println(lst)
 		           lst.toList foreach { iter =>
 		                 val post_id = iter.asInstanceOf[String]
 		                 if (conditions == null) conditions = "post_id" $eq post_id
