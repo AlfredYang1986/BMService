@@ -110,6 +110,61 @@ object QueryModule {
 
 		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("comments_count" -> toJson(size), "comments" -> toJson(xls)))))
 	}
+
+	def queryPush(data : JsValue) : JsValue = {
+	    val post_id = (data \ "post_id").asOpt[String].get
+  		val auth_token = (data \ "auth_token").asOpt[String].get
+		  val user_id = (data \ "user_id").asOpt[String].get
+		
+		  val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
+		  val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
+		  val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(50)
+	   
+		  val likes = (from db() in "post_push" where ("post_id" -> post_id)).select(x => x.get("push").get.asInstanceOf[DBObject])
+  		var xls : List[JsValue] = Nil
+  		val size = likes.head.size
+  		if (skip < size) 
+  			likes.head.asInstanceOf[BasicDBList].filter(x => x.asInstanceOf[BasicDBObject].get("push_date").asInstanceOf[Number].longValue < date).subList(skip, Math.min(size, skip + take)).toSeq.map { x => 
+  				var tmp : Map[String, JsValue] = Map.empty
+  				List("push_owner_id", "push_owner_name", "push_owner_photo", "push_date") map (iter => tmp += iter -> helpOptions.opt_2_js(Option(x.asInstanceOf[BasicDBObject].get(iter)), iter))
+  				xls = xls :+ toJson(tmp)
+  			}
+  
+  		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("push_count" -> toJson(size), "push" -> toJson(xls)))))
+	}
+	
+	def queryUserPush(data : JsValue) : JsValue = {
+	    val user_id = (data \ "user_id").asOpt[String].get
+	    val auth_token = (data \ "auth_token").asOpt[String].get
+	    
+      val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
+		  val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
+		  val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(20)
+		 
+		  var conditions : DBObject = null
+		  (from db() in "user_push" where ("user_id" -> user_id)).selectSkipTop(skip)(take)("data") { x => 
+		      x.getAs[MongoDBList]("push").map { lst =>
+		           println(lst)
+		           lst.toList foreach { iter =>
+		                 val post_id = iter.asInstanceOf[String]
+		                 if (conditions == null) conditions = "post_id" $eq post_id
+		                 else conditions = $or("post_id" $eq post_id, conditions)
+		           }
+		      }.getOrElse(Unit)
+	    }
+	    
+		  var xls : List[JsValue] = Nil
+		  (from db() in "posts" where conditions).select { x => 
+		  	  var tmp : Map[String, JsValue] = Map.empty
+		  	  List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+		  	
+		  	  val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
+		  	  tmp += "relations" -> toJson(con.con)
+		  	  xls = xls :+ toJson(tmp)
+		  }
+
+		  Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
+	}
 	
 	def queryLikes(data : JsValue) : JsValue = {
 	

@@ -15,6 +15,7 @@ object helpOptions {
 				case "tags" => List("type", "content", "offsetX", "offsetY")
 				case "comments" => List("comment_owner_id", "comment_owner_name", "comment_date", "comment_content", "comment_owner_photo")
 				case "likes" => List("like_owner_id", "like_owner_name", "like_owner_photo", "like_date")
+				case "push" => List("push_owner_id", "push_owner_name", "push_owner_photo", "push_date")
 				case "gourps" => List("group_id", "group_name", "group_found_time")
 				case "sub_groups" => List("sub_group_id", "sub_group_name", "sub_group_found_time", "sub_group_update_time")
 			}
