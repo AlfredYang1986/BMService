@@ -136,8 +136,7 @@ object TagModule {
 		else {
 		  var result : List[JsValue] = Nil
       val tag = ((from db() in "tags" where ("content" $regex ("(?i)" + tag_name))).select(x => x.getAs[String]("content").get)).toList
-      println(tag)
-      tag.map { x => result = (queryPreViewWithTagType(x, tag_type_location.index) :: 
+      tag.distinct.map { x => result = (queryPreViewWithTagType(x, tag_type_location.index) :: 
 				    	queryPreViewWithTagType(x, tag_type_time.index) ::
 				    	queryPreViewWithTagType(x, tag_type_tag.index) ::
 				    	queryPreViewWithTagType(x, tag_type_brand.index) :: Nil)
