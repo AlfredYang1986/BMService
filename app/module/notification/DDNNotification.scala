@@ -48,15 +48,15 @@ object DDNNotification {
 	}
 	
 	/**
-	 * create chat group
+	 * create chat room
 	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
-     * "roomName": "test room1",   // chat room name 
-     * "head": null,               // chat room photo
-     * "roomType": 1,              // 1 => normal chat room (text, image and voice) 2 =>  
-     * "scope": 0,                 // 0 => application 1 => developer 
-     * "maxUserNumber": 10         // maximum users
+   * "roomName": "test room1",   // chat room name 
+   * "head": null,               // chat room photo
+   * "roomType": 1,              // 1 => normal chat room (text, image and voice) 2 =>  
+   * "scope": 0,                 // 0 => application 1 => developer 
+   * "maxUserNumber": 10         // maximum users
 	 */
-	def createChatGroup(pm : Map[String, JsValue]) : JsValue= {
+	def createChatRoom(pm : Map[String, JsValue]) : JsValue= {
 		var pushMsg = pm
 		
 		pushMsg += "appkey" -> app_key
@@ -68,15 +68,50 @@ object DDNNotification {
 	}	
 
 	/**
-	 * dismiss chat group 
+	 * dismiss chat room
 	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
-     * "roomId": 340900
+   * "roomId": 340900
 	 */
-	def dismissChatGroup(pm : Map[String, JsValue]) : JsValue= {
+	def dismissChatRoom(pm : Map[String, JsValue]) : JsValue= {
 		var pushMsg = pm
 		
 		pushMsg += "appkey" -> app_key
 		
 		HTTP(XMPP + "DelIMRoom").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + XMPP_access_token)).post(toJson(pushMsg)) 
+	}
+	
+	/**
+	 * create Group
+	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
+   * "groupName": "test1",               //群名称
+   * "groupHead":null,                   //群头像, 图片二进制流用base64编码生成的字符串
+   * "isPrivate": 1,                     //是否为私有群, 0为公开群，1为私有群, 默认值 0
+   * "ownerAccount": "test_acount1",     //管理员帐号
+   * "needVerify": 0,                    //是否需要验证, 0为自由加入，1为需要群主验证, 默认值 0
+   * "groupInfo": "test test test"       //群信息
+   */
+	def createChatGroup(pm : Map[String, JsValue]) : JsValue= {
+		var pushMsg = pm
+	
+		pushMsg += "appkey" -> app_key
+		pushMsg += "isPrivate" -> toJson(0) 
+		pushMsg += "needVerify" -> toJson(0)
+		pushMsg += "groupInfo" -> toJson("")
+		pushMsg += "groupHead" -> toJson("")
+		pushMsg += "ownerAccount" -> notification_account
+		
+		HTTP(XMPP + "CreateGroup").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + XMPP_access_token)).post(toJson(pushMsg)) 
+	}
+	/** 
+	 *  dismiss chat group
+	 * "appkey": "2e6ca10c-a293-41a5-8c9d-5bdc5e768184",
+   * "roomId": 340900
+	 */
+		def dismissChatGroup(pm : Map[String, JsValue]) : JsValue= {
+		var pushMsg = pm
+		
+		pushMsg += "appkey" -> app_key
+		
+		HTTP(XMPP + "DismissGroup").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + XMPP_access_token)).post(toJson(pushMsg)) 
 	}
 }
