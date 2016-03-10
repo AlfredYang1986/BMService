@@ -54,14 +54,11 @@ object GroupModule2 {
 		    }
 		
 		def createChatGroupImpl : JsValue = {
-//			val result = Await.result((ddn ? DDNCreateChatRoom("roomName" -> toJson(group_name))).mapTo[JsValue], timeout.duration)
 			val result = Await.result((ddn ? DDNCreateChatGroup("groupName" -> toJson(group_name))).mapTo[JsValue], timeout.duration)
 
-			println(result)
   		(result \ "status").asOpt[Int].map { status => status match {
   		  case 200 => {		// success
   			  // get group_id
-//  			  val group_id = ((result \ "entity").asOpt[JsValue].get \ "roomId").asOpt[Long].get
   			  val group_id = ((result \ "entity").asOpt[JsValue].get \ "groupId").asOpt[Long].get
   			  
   			  val builder = MongoDBObject.newBuilder
@@ -69,6 +66,12 @@ object GroupModule2 {
   			  builder += "group_id" -> group_id
   			  builder += "owner_id" -> owner_id 
   			  builder += "post_id" -> post_id
+  			  
+  			  builder += "post_thumb" -> (from db() in "posts" where ("post_id" -> post_id) select { x => 
+                            			      x.getAs[MongoDBList]("items").map (lst => lst.toSeq.filter {iter =>
+                            			           iter.asInstanceOf[BasicDBObject].getAs[Int]("type").get == 0}.head).getOrElse(???)
+                          	    		  }).toList.head.asInstanceOf[DBObject].get("name")
+                          	    		  
   			  builder += "found_date" -> new Date().getTime
   			  builder += "isActived" -> 1
   	
@@ -85,7 +88,7 @@ object GroupModule2 {
   		  case _ => ErrorCode.errorToJson("create chat group error")		// error or no response
   		}}.getOrElse(ErrorCode.errorToJson("create chat group error"))	    
 		}
-
+  			      
 		if (isChatGroupExisting) Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 		else createChatGroupImpl
 	}
@@ -192,6 +195,7 @@ object GroupModule2 {
 	  		x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
 		  	x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
 			  x.getAs[String]("post_id").map (y => tmp += "post_id" -> toJson(y)).getOrElse(Unit)
+			  x.getAs[String]("post_thumb").map (y => tmp += "post_thumb" -> toJson(y)).getOrElse(Unit)
 			  x.getAs[MongoDBList]("joiners").map { y => 
 			  	tmp += "joiners_count" -> toJson(y.length)
 			
@@ -219,6 +223,7 @@ object GroupModule2 {
 			x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
 			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("post_id").map (y => tmp += "post_id" -> toJson(y)).getOrElse(Unit)
+			x.getAs[String]("post_thumb").map (y => tmp += "post_thumb" -> toJson(y)).getOrElse(Unit)
 			x.getAs[MongoDBList]("joiners").map { y => 
 			  	tmp += "joiners_count" -> toJson(y.length)
 			  	
