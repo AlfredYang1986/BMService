@@ -142,7 +142,7 @@ object UserSearchModule {
 	    val auth_token = (data \ "auth_token").asOpt[String].get
 	    val query_id = (data \ "query_id").asOpt[String].get
 	    
-	    (from db() in "user_profile" where("user_id" -> user_id) select (x => x)).toList match {
+	    (from db() in "user_profile" where("user_id" -> query_id) select (x => x)).toList match {
 	        case Nil => ErrorCode.errorToJson("user not existing")
 	        case head :: Nil => {
 			        Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(
