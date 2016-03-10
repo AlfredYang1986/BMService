@@ -135,4 +135,21 @@ object UserSearchModule {
 		  case _ => null
 		}
 	}
+	
+	def queryUserScreenWithId(data : JsValue) : JsValue = {
+	    
+	    val user_id = (data \ "user_id").asOpt[String].get
+	    val auth_token = (data \ "auth_token").asOpt[String].get
+	    val query_id = (data \ "query_id").asOpt[String].get
+	    
+	    (from db() in "user_profile" where("user_id" -> user_id) select (x => x)).toList match {
+	        case Nil => ErrorCode.errorToJson("user not existing")
+	        case head :: Nil => {
+			        Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+			            head.getAs[String]("screen_name").get         
+			        )))
+	        }
+	        case _ => ???
+	    }
+	}
 }

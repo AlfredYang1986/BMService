@@ -79,6 +79,7 @@ POST	/users/queryUsersWithRoleTag				controllers.userSearchController.queryUsers
 POST	/users/queryUsersPosts						controllers.userSearchController.queryUsersPosts
 POST	/users/queryUsersWithScreenName				controllers.userSearchController.queryUsersWithScreenName
 POST	/users/queryRecommandUsersWithRoleTag		controllers.userSearchController.queryRecommandUsersWithRoleTag
+POST	/users/queryUserScreenWithId				controllers.userSearchController.queryUserScreenWithId
 
 # notification module
 POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices
