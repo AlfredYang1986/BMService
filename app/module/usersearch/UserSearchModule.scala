@@ -25,8 +25,12 @@ object UserSearchModule {
 			  Json.toJson(Map("status" -> toJson("ok"), "recommandUsers" -> toJson(
 			  (from db() in "user_profile").selectSkipTop(skip)(take)("user_id") { x => 
 			  	  val id = x.getAs[String]("user_id").get
-//			  	  val post_preview = (from db() in "posts" where ("owner_id" -> id)).selectSkipTop(skip)(take)("date"){ y => 
-			  	  val post_preview = (from db() in "posts" where ("owner_id" -> id)).selectTop(3)("date"){ y => 
+			  	  val screen_name = x.getAs[String]("screen_name").get
+			  	  val role_tag = x.getAs[String]("role_tag").get
+			  	  
+			  	  if (screen_name.equals("") && role_tag.equals("")) null
+			  	  else {
+			  	    val post_preview = (from db() in "posts" where ("owner_id" -> id)).selectTop(3)("date"){ y => 
 			  	      toJson(Map("post_id" -> toJson(y.getAs[String]("post_id").get), 
 			  	    		  "items" -> toJson(((y.getAs[MongoDBList]("items").get.toSeq) map { y => y match {
 			  	    				  	case item : BasicDBObject=>
@@ -36,12 +40,13 @@ object UserSearchModule {
 			  	  		}.toList
 			  	  		
 			  	  	  toJson(Map("user_id" -> toJson(id),
-			  	  			   "role_tag" -> toJson(x.getAs[String]("role_tag").get),
-				  			     "screen_name" -> toJson(x.getAs[String]("screen_name").get), 
+			  	  			   "role_tag" -> toJson(role_tag),
+				  			     "screen_name" -> toJson(screen_name),
 				  			     "screen_photo" -> toJson(x.getAs[String]("screen_photo").get),
 				  			     "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con),
 				  			     "preview" -> toJson(post_preview)))
-			  }.toList )))
+			  	  }
+			  }.toList.filterNot (_ == null))))
 		  case _ => null
 		}
 	}
