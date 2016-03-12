@@ -10,6 +10,7 @@ import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import module.common.helpOptions
 import module.relationship._
+import module.login.LoginModule
 
 import akka.actor.{Actor, Props}
 import play.api.libs.concurrent.Akka
@@ -23,21 +24,29 @@ object ProfileModule {
 	 * update user profile, call by client
 	 */
 	def updateUserProfile(data : JsValue) : JsValue = {
-	    
+	   
 		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
 		val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse("")
 		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
+		
+		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
 
 		if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
 			var result : Map[String, JsValue] = Map.empty
-      (data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
+      
+			(data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
       (data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
-			if (reVal.empty) {
+		
+      if (reVal.empty && createWhenNotExist != 0) {
+			    
+			  val c_r =  LoginModule.authCreateUserWithPhone(data)
+			  val c_r_user_id = ((c_r \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
+			    
 				val builder = MongoDBObject.newBuilder
-				builder += "user_id" -> user_id
+				builder += "user_id" -> c_r_user_id
 				builder += "screen_name" -> screen_name
 				builder += "screen_photo" -> screen_photo
 				builder += "role_tag" -> role_tag
@@ -46,11 +55,11 @@ object ProfileModule {
 				builder += "friends_count" -> (data \ "friends_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "posts_count" -> (data \ "posts_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "cycle_count" -> (data \ "cycle_count").asOpt[Int].map(x => x).getOrElse(0)
-				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(0)
+				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(1)
 				builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
 	
-				result += "user_id" -> toJson(user_id)
+				result += "user_id" -> toJson(c_r_user_id)
 				result += "screen_name" -> toJson(screen_name)
 				result += "screen_photo" -> toJson(screen_photo)
 				result += "role_tag" -> toJson(role_tag)
@@ -76,7 +85,7 @@ object ProfileModule {
 						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
-			
+		
 				result += "user_id" -> toJson(user_id)
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))

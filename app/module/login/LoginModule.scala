@@ -111,7 +111,8 @@ object LoginModule {
 						 * 1. this phone is not reg
 						 * 		create a new auth_token and connect to this phone number
 						 */
-						this.authCreateNewUserWithPhone(phoneNo)
+//						this.authCreateNewUserWithPhone(phoneNo)
+						this.authCreateTmpUserForRegisterProcess(phoneNo)
 
 					} else {
 					  	/**
@@ -125,7 +126,7 @@ object LoginModule {
 
 						var tmp = ProfileModule.queryUserProfile(user_id)
 						if (tmp == null) {
-							tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
+//							tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
 						
 							tmp += "message" -> toJson("new user")		// phone is already reg
 							tmp += "phoneNo" -> toJson(phoneNo)
@@ -266,6 +267,31 @@ object LoginModule {
 			this.authCreateNewUserWithPhone(phoneNo)
 		}
 	}
+
+	private def authCreateTmpUserForRegisterProcess(phoneNo : String) : JsValue = {
+		val new_builder = MongoDBObject.newBuilder
+
+		val time_span = Sercurity.getTimeSpanWithMillSeconds
+		val user_id = Sercurity.md5Hash(phoneNo + time_span)
+		val auth_token = Sercurity.md5Hash(user_id + time_span)
+
+		new_builder  += "user_id" -> user_id
+		new_builder  += "auth_token" -> auth_token
+		new_builder  += "phoneNo" -> phoneNo
+						
+		val new_third_builder = MongoDBList.newBuilder
+		new_builder  += "third" -> new_third_builder.result
+		
+		(from db() in "reg_users" where ("phoneNo" -> phoneNo) select (x => x)).toList match {
+		    case Nil => _data_connection.getCollection("reg_users") += new_builder.result
+		    case head :: Nil => _data_connection.getCollection("reg_user").update(head, new_builder.result)
+		}
+		
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map(
+		    "user_id" -> user_id,
+		    "auth_token" -> auth_token,
+		    "phoneNo" -> phoneNo))))	    
+	}
 	
 	private def authCreateNewUserWithPhone(phoneNo : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
@@ -286,21 +312,24 @@ object LoginModule {
 					
 		_data_connection.getCollection("users") += new_builder.result
 		
-		var tmp = ProfileModule.queryUserProfile(user_id)
-	
-		if (tmp == null) {
-			tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
-			tmp += "phoneNo" -> toJson(phoneNo)
-			tmp += "auth_token" -> toJson(auth_token)
-		  
-		} else {
-			tmp += "phoneNo" -> toJson(phoneNo)
-			tmp += "auth_token" -> toJson(auth_token)
-		}
+//		var tmp = ProfileModule.queryUserProfile(user_id)
+//	
+//		if (tmp == null) {
+//			tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
+//			tmp += "phoneNo" -> toJson(phoneNo)
+//			tmp += "auth_token" -> toJson(auth_token)
+//		  
+//		} else {
+//			tmp += "phoneNo" -> toJson(phoneNo)
+//			tmp += "auth_token" -> toJson(auth_token)
+//		}
 
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
+//		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "isLogin" -> toJson(1))))
 		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map(
+		    "user_id" -> user_id,
+		    "auth_token" -> auth_token,
+		    "phoneNo" -> phoneNo))))
 	}
 	
 	def authWithPwd(data : JsValue) : JsValue = {
