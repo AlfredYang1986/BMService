@@ -26,6 +26,7 @@ object ProfileModule {
 	def updateUserProfile(data : JsValue) : JsValue = {
 	   
 		var user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
+		var auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
 		val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse("")
 		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
@@ -42,8 +43,11 @@ object ProfileModule {
       
       if (reVal.empty) { 
 			   
-          if (createWhenNotExist != 0) 
-            user_id =  ((LoginModule.authCreateUserWithPhone(data) \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
+        if (createWhenNotExist != 0) {
+            val cn = LoginModule.authCreateUserWithPhone(data)
+            user_id =  ((cn \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
+            auth_token =  ((cn \ "result").asOpt[JsValue].get \ "auth_token").asOpt[String].get
+        }
 			    
 				val builder = MongoDBObject.newBuilder
 				builder += "user_id" -> user_id // c_r_user_id
@@ -60,6 +64,7 @@ object ProfileModule {
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
 	
 				result += "user_id" -> toJson(user_id) //toJson(c_r_user_id)
+				result += "auth_token" -> toJson(auth_token) //toJson(c_r_user_id)
 				result += "screen_name" -> toJson(screen_name)
 				result += "screen_photo" -> toJson(screen_photo)
 				result += "role_tag" -> toJson(role_tag)

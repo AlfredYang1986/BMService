@@ -146,9 +146,7 @@ object LoginModule {
 	
 	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
 
-	    println("new user")
-	    
-	    val new_builder = MongoDBObject.newBuilder
+	  val new_builder = MongoDBObject.newBuilder
 		
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(provide_name + provide_token + time_span)
@@ -176,7 +174,6 @@ object LoginModule {
 	 
 		_data_connection.getCollection("users") += new_builder.result
 	
-		println("create profile")
 		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token),
 		        "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "isLogin" -> toJson(1))))
 		
@@ -186,22 +183,17 @@ object LoginModule {
 
 	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
 
-	    println("existing user")
-	    println(user)
-	    
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
 		val user_id = user.get("user_id").get.asInstanceOf[String]
 		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
 		var name = user.get("name").get.asInstanceOf[String]
 		
-	   println("all args")
-	    
 		if (name == "") {
 			name = provide_name
 			user += ("name") -> name
 		}
 		val tmp = third_list.find(x => x.asInstanceOf[BasicDBObject].get("provide_name") ==  provide_name)
-		println(tmp)	
+		
 		tmp match {
 			case Some(x) => {
 				  x.asInstanceOf[BasicDBObject] += ("provide_name") -> provide_name
@@ -232,8 +224,11 @@ object LoginModule {
 		
 //		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 //				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo), "connect_result" -> toJson("success")))))
-		
-		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(ProfileModule.queryUserProfile(user_id))))
+	
+		var result = ProfileModule.queryUserProfile(user_id)
+		result += "auth_token" -> toJson(auth_token)
+		println(result)
+		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
 	}
 	
 	def authWithThird(data : JsValue) : JsValue = {

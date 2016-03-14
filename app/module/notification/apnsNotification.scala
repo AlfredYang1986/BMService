@@ -20,12 +20,14 @@ object apnsNotification {
 		val deviceList = from db() in "devices" where ("user_id" -> user_id) select (x => x)
 		if (!deviceList.empty) {
 			val dl = deviceList.head
-			dl.get("devices").map { x => 
-				  	if (x.asInstanceOf[BasicDBList].contains(device_token)) {
-				  		x.asInstanceOf[BasicDBList].remove(device_token)
-				  		_data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), dl)
-				  	}
-				}.getOrElse (throw new Exception)
+			dl += "devices" -> MongoDBList.newBuilder.result
+      _data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), dl)
+//			dl.get("devices").map { x =>
+//				  	if (x.asInstanceOf[BasicDBList].contains(device_token)) {
+//				  		x.asInstanceOf[BasicDBList].remove(device_token)
+//				  		_data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), dl)
+//				  	}
+//				}.getOrElse (throw new Exception)
 		}
 	}
 	
@@ -34,39 +36,64 @@ object apnsNotification {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val device_token = (data \ "device_token").asOpt[String].map (x => x).getOrElse("")
-
+		
+		/** 
+		 * uuid
+		 */
+		val device_uuid = (data \ "device_uuid").asOpt[String].get
+		val device_system = (data \ "device_system").asOpt[String].get
+	
+		def createDevice : MongoDBObject = {
+		    val device_builder = MongoDBObject.newBuilder
+		    device_builder += "sys" -> device_system
+		    device_builder += "uuid" -> device_uuid
+		    device_builder += "apns" -> device_token
+		
+		    device_builder.result
+		}
+		
 		/**
 		 * check user is existing or not 
 		 * check token is validate or not
 		 */
-		val rel = from db() in "users" where ("user_id" -> user_id) select (x => x)
-		if (rel.empty) ErrorCode.errorToJson("user not existing")
-		else {
-			val deviceList = from db() in "devices" where ("user_id" -> user_id) select (x => x)
-			if (deviceList.empty) {
-				val builder = MongoDBObject.newBuilder
-				builder += "user_id" -> user_id
-				
-				val builder_list = MongoDBList.newBuilder
-				if (device_token != "")	builder_list += device_token
-				builder += "devices" -> builder_list.result
-				
-				_data_connection.getCollection("devices") += builder.result
-				
-			} else {
-				val dl = deviceList.head
-				dl.get("devices").map { x => 
-				  	if (!x.asInstanceOf[BasicDBList].contains(device_token)) {
-				  		val builder_list = x.asInstanceOf[BasicDBList]
-				  		if (device_token != "")	builder_list += device_token
-				  		dl += "devices" -> builder_list
-				  		_data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), dl)
-				  	}
-				}.getOrElse (throw new Exception)
-			}
+		(from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+		    case Nil => ErrorCode.errorToJson("user not existing")
+		    case head :: Nil => {
+		        println(123)
+		        (from db() in "devices" where ("user_id" -> user_id) select (x => x)).toList match {
+		            case Nil => {
+		                val builder = MongoDBObject.newBuilder
+		                builder += "user_id" -> user_id
+		                
+		                val builder_list = MongoDBList.newBuilder
+		                builder_list += createDevice
+		                builder += "devices" -> builder_list.result
 
-			Json.toJson(Map("status" -> toJson("ok")))
+		                println(builder.result)
+		                
+		                _data_connection.getCollection("devices") += builder.result
+		            }
+		            case head :: Nil => {
+            				head.get("devices").map { x => 
+            				    
+            				    x.asInstanceOf[BasicDBList].toList foreach { iter =>
+            				        if (iter.asInstanceOf[BasicDBObject].get("sys").equals("ios")) {
+            				            iter.asInstanceOf[MongoDBObject] += "uuid" -> device_uuid
+            				            iter.asInstanceOf[MongoDBObject] += "apns" -> device_token
+            				        }
+            				    }
+            				    
+  		                println(head)
+                      _data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), head)
+            				}.getOrElse (throw new Exception)
+		            }
+		            case _ => ???
+		        }
+		    }
+		    case _ => ???
 		}
+		
+    Json.toJson(Map("status" -> toJson("ok")))
 	}
 	
 	def notificationAll = {
@@ -75,7 +102,7 @@ object apnsNotification {
 		(from db() in "devices" select (x => x)).toList.foreach { iter =>
 			iter.get("devices").map { lst =>
 			  	lst.asInstanceOf[BasicDBList].foreach { device =>
-			  	  	deviceList = device.asInstanceOf[String] :: deviceList
+			  	  	deviceList = device.asInstanceOf[BasicDBObject].get("apns").asInstanceOf[String] :: deviceList
 			  	}
 			}.getOrElse(Unit)
 		}
@@ -105,7 +132,8 @@ object apnsNotification {
 		(from db() in "devices" where ("user_id" -> to) select (x => x)).toList.foreach { iter =>
 			iter.get("devices").map { lst =>
 			  	lst.asInstanceOf[BasicDBList].foreach { device =>
-			  	  	deviceList = device.asInstanceOf[String] :: deviceList
+			  	  	deviceList = device.asInstanceOf[BasicDBObject].get("apns").asInstanceOf[String] :: deviceList
+//			  	  	deviceList = device.asInstanceOf[String] :: deviceList
 			  	}
 			}.getOrElse(Unit)
 		}

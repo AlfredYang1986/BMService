@@ -228,6 +228,15 @@ object PostModule {
 			}
 		}
 	}
+	
+	def isPush(user_id : String, post_id : String) : Boolean = {
+	    (from db() in "user_push" where ("user_id" -> user_id) select { x => 
+	        x.getAs[MongoDBList]("push").map (lst => lst.toList.asInstanceOf[List[String]].contains(post_id)).getOrElse(false)
+	    }).toList match {
+	        case Nil => false
+	        case head :: Nil => head
+	    }
+	}
 
 	def postPush(data : JsValue) : JsValue = {
 	    /**
@@ -347,6 +356,15 @@ object PostModule {
               QueryModule.queryPush(data)
 	        }
 	        case _ => ???
+	    }
+	}
+
+	def isLiked(user_id : String, post_id : String) : Boolean = {
+	    (from db() in "user_likes" where ("user_id" -> user_id) select { x => 
+	        x.getAs[MongoDBList]("likes").map (lst => lst.toList.asInstanceOf[List[String]].contains(post_id)).getOrElse(false)
+	    }).toList match {
+	        case Nil => false
+	        case head :: Nil => head
 	    }
 	}
 	

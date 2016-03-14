@@ -9,13 +9,13 @@ import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 import java.util.Date
-
 import module.common.files.fop
 import module.common.helpOptions
-
 import module.relationship.RelationshipModule
-
 import scala.collection.JavaConversions._
+import module.groups.GroupModule2
+import module.post.PostModule
+import module.profile.ProfileModule
 
 object QueryModule {
 	/**
@@ -37,6 +37,21 @@ object QueryModule {
 		  	
 		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
 		  	tmp += "relations" -> toJson(con.con)
+		  
+		  	val post_id = x.getAs[String]("post_id").get
+		  	val (photo_list, group_chat_count) = GroupModule2.queryPhotoListAndCount(post_id)
+	  	  tmp += "group_chat_count" -> toJson(group_chat_count)
+	  	  tmp += "group_user_list" -> toJson(photo_list)
+		  
+	  	  val isThumbup = PostModule.isLiked(user_id, post_id)
+	  	  tmp += "isLiked" -> toJson(isThumbup)
+
+	  	  val isPush = PostModule.isPush(user_id, post_id)
+	  	  tmp += "isPush" -> toJson(isPush)
+	  	  
+	  	  val role_tag = ProfileModule.queryUserProfile(user_id).get("role_tag").get
+	  	  tmp += "role_tag" -> toJson(role_tag)
+	  	  
 		  	xls = xls :+ toJson(tmp)
 		}
 
@@ -77,7 +92,22 @@ object QueryModule {
 		  	 * add post owner relations to the query user
 		  	 */
 		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
-		  	tmp += "relations" -> toJson(con.con)
+		  	tmp += "relations" -> toJson(con.con)		  	
+		 
+		  	val post_id = x.getAs[String]("post_id").get
+		  	val (photo_list, group_chat_count) = GroupModule2.queryPhotoListAndCount(post_id)
+	  	  tmp += "group_chat_count" -> toJson(group_chat_count)
+	  	  tmp += "group_user_list" -> toJson(photo_list)
+
+	  	  val isThumbup = PostModule.isLiked(user_id, post_id)
+	  	  tmp += "isLiked" -> toJson(isThumbup)
+
+	  	  val isPush = PostModule.isPush(user_id, post_id)
+	  	  tmp += "isPush" -> toJson(isPush)
+	  	  
+	  	  val role_tag = ProfileModule.queryUserProfile(user_id).get("role_tag").get
+	  	  tmp += "role_tag" -> toJson(role_tag)
+
 		  	xls = xls :+ toJson(tmp)
 		}	
 

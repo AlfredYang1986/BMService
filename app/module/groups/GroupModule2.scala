@@ -236,4 +236,16 @@ object GroupModule2 {
 		}
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(rel.toList)))
 	}
+	
+	def queryPhotoListAndCount(post_id : String) : (List[JsValue], Int) = {
+	    (from db() in "groups" where ("post_id" -> post_id) select { x => 
+	        x.getAs[MongoDBList]("joiners").map { y => 
+	           (y.toList.take(3).map ( z => toJson(z.asInstanceOf[String])), y.count(_ => true))
+	        }.getOrElse((Nil, 0))
+	    }).toList match {
+	        case Nil => (Nil, 0)
+	        case head :: Nil => head
+	        case _ => ???
+	    }
+	}
 }
