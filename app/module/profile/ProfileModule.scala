@@ -25,28 +25,28 @@ object ProfileModule {
 	 */
 	def updateUserProfile(data : JsValue) : JsValue = {
 	   
-		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
+		var user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
 		val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse("")
 		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
 		
 		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
-
-		if (user_id == "") ErrorCode.errorToJson("user not existing")
+  
+    if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
 			var result : Map[String, JsValue] = Map.empty
       
 			(data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
       (data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
-		
-      if (reVal.empty && createWhenNotExist != 0) {
-			    
-			  val c_r =  LoginModule.authCreateUserWithPhone(data)
-			  val c_r_user_id = ((c_r \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
+      
+      if (reVal.empty) { 
+			   
+          if (createWhenNotExist != 0) 
+            user_id =  ((LoginModule.authCreateUserWithPhone(data) \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
 			    
 				val builder = MongoDBObject.newBuilder
-				builder += "user_id" -> c_r_user_id
+				builder += "user_id" -> user_id // c_r_user_id
 				builder += "screen_name" -> screen_name
 				builder += "screen_photo" -> screen_photo
 				builder += "role_tag" -> role_tag
@@ -59,7 +59,7 @@ object ProfileModule {
 				builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
 	
-				result += "user_id" -> toJson(c_r_user_id)
+				result += "user_id" -> toJson(user_id) //toJson(c_r_user_id)
 				result += "screen_name" -> toJson(screen_name)
 				result += "screen_photo" -> toJson(screen_photo)
 				result += "role_tag" -> toJson(role_tag)
