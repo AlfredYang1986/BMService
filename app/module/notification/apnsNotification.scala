@@ -59,7 +59,6 @@ object apnsNotification {
 		(from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 		    case Nil => ErrorCode.errorToJson("user not existing")
 		    case head :: Nil => {
-		        println(123)
 		        (from db() in "devices" where ("user_id" -> user_id) select (x => x)).toList match {
 		            case Nil => {
 		                val builder = MongoDBObject.newBuilder

@@ -127,6 +127,7 @@ object EmailModule {
     	email.setSubject("Dongda Privacy")
     	email.setMsg(content)
     	email.addTo("alfredyang@altlys.com")
+    	email.addTo("alfredyang@blackmirror.tech")
     	email.send
   }
  

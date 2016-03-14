@@ -227,7 +227,6 @@ object LoginModule {
 	
 		var result = ProfileModule.queryUserProfile(user_id)
 		result += "auth_token" -> toJson(auth_token)
-		println(result)
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
 	}
 	
@@ -430,7 +429,6 @@ object LoginModule {
                 
               result = toJson(Map("user_id" -> toJson(id), "phoneNo" -> toJson(y.getAs[String]("phoneNo")))) :: result
           }
-          println(result)
            
 	        val result2 = (from db() in "user_profile" where fc select { x => {
 	            val id = x.getAs[String]("user_id").get
@@ -441,11 +439,8 @@ object LoginModule {
                   "role_tag" -> toJson(x.getAs[String]("role_tag").get),
                   "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(user_id, id).con)
               ))}}).toList
-              
-          println(result2)
             
 	        ((result.sortBy (x => (x \ "user_id").asOpt[String].get)) zip (result2.sortBy (x => (x \ "user_id").asOpt[String].get))) map { x =>
-	            println(x)
 	            toJson(Map(
                   "user_id" -> toJson((x._2 \ "user_id").asOpt[String].get),
                   "screen_name" -> toJson((x._2 \ "screen_name").asOpt[String].get),
@@ -464,7 +459,7 @@ object LoginModule {
 	            iter foreach { x => result = Future(userLstInSystemAcc(x)) :: result }
 	            
 	            var result0 : List[List[JsValue]] = Nil
-	            result foreach { x => result0 = Await.result (x map {y => println(y); y}, Timeout(1 second).duration).asInstanceOf[List[JsValue]] :: result0 }
+	            result foreach { x => result0 = Await.result (x map (y => y), Timeout(1 second).duration).asInstanceOf[List[JsValue]] :: result0 }
 	            
   	          toJson(Map("status" -> toJson("ok"), "result" -> toJson(result0.filterNot(_.isEmpty) flatMap(x => x))))
 	        }
