@@ -4,8 +4,8 @@ import play.api.mvc._
 
 import module.notification.apnsNotification
 
-import controllers.common.requestArgsQuery.{requestArgs}
+import controllers.common.requestArgsQuery.{requestArgs, requestArgsWithAuthCheck}
 
 object apnsNotificationController extends Controller {
-	def registerUserDevices = Action (request => requestArgs(request)(apnsNotification.registerUserDevices))
+	def registerUserDevices = Action (request => requestArgsWithAuthCheck(request)(apnsNotification.registerUserDevices))
 }
