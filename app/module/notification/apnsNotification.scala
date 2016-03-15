@@ -31,7 +31,8 @@ object apnsNotification {
 		}
 	}
 	
-	def registerUserDevices(data : JsValue) : JsValue = {
+//	def registerUserDevices(data : JsValue) : JsValue = {
+	def registerUserDevices(data : JsValue)(cur : MongoDBObject) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -56,9 +57,9 @@ object apnsNotification {
 		 * check user is existing or not 
 		 * check token is validate or not
 		 */
-		(from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
-		    case Nil => ErrorCode.errorToJson("user not existing")
-		    case head :: Nil => {
+//		(from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+//		    case Nil => ErrorCode.errorToJson("user not existing")
+//		    case head :: Nil => {
 		        (from db() in "devices" where ("user_id" -> user_id) select (x => x)).toList match {
 		            case Nil => {
 		                val builder = MongoDBObject.newBuilder
@@ -68,7 +69,6 @@ object apnsNotification {
 		                builder_list += createDevice
 		                builder += "devices" -> builder_list.result
 
-		                println(builder.result)
 		                _data_connection.getCollection("devices") += builder.result
 		            }
 		            case head :: Nil => {
@@ -81,15 +81,14 @@ object apnsNotification {
             				            println(hd)
             				        }
             				    }
-  		                println(head)
                       _data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), head)
             				}.getOrElse (throw new Exception)
 		            }
 		            case _ => ???
 		        }
-		    }
-		    case _ => ???
-		}
+//		    }
+//		    case _ => ???
+//		}
 		
     Json.toJson(Map("status" -> toJson("ok")))
 	}
