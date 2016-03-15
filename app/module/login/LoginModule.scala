@@ -129,6 +129,7 @@ object LoginModule {
 							tmp += "message" -> toJson("new user")		// phone is already reg
 							tmp += "phoneNo" -> toJson(phoneNo)
 							tmp += "auth_token" -> toJson(auth_token)
+							tmp += "user_id" -> toJson(user_id)
 						} else {
 							tmp += "message" -> toJson("already login")		// phone is already reg
 							tmp += "phoneNo" -> toJson(phoneNo)
