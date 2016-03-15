@@ -33,7 +33,8 @@ object ProfileModule {
 		
 		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
 		val createNewAuthToken= (data \ "refresh_token").asOpt[Int].map(x => x).getOrElse(0)
-  
+ 
+		println(data)
     if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)

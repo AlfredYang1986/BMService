@@ -282,6 +282,7 @@ object LoginModule {
 	}
 	
 	def refreshAuthToken(user_id : String, uuid : String) : String = {
+	    println("refresh_token")
 		  (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
   		    case head :: Nil => {
   		        val auth_token = Sercurity.md5Hash(user_id + uuid + Sercurity.getTimeSpanWithMillSeconds)
