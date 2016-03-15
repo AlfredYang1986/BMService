@@ -121,9 +121,10 @@ object LoginModule {
 						val auth_token = cur.get("auth_token").get.asInstanceOf[String]
 						val user_id = cur.get("user_id").get.asInstanceOf[String]
 
-						var tmp = ProfileModule.queryUserProfile(user_id)
+						var tmp : Map[String, JsValue] = ProfileModule.queryUserProfile(user_id)
 						if (tmp == null) {
 //							tmp = ProfileModule.creatUserProfile(user_id, phoneNo)
+						    tmp = Map.empty
 						
 							tmp += "message" -> toJson("new user")		// phone is already reg
 							tmp += "phoneNo" -> toJson(phoneNo)
