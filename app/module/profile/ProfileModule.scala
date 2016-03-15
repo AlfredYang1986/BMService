@@ -24,7 +24,6 @@ object ProfileModule {
 	 * update user profile, call by client
 	 */
 	def updateUserProfile(data : JsValue) : JsValue = {
-	   
 		var user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
 		var auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
 		val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse("")
@@ -34,7 +33,6 @@ object ProfileModule {
 		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
 		val createNewAuthToken= (data \ "refresh_token").asOpt[Int].map(x => x).getOrElse(0)
  
-		println(data)
     if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
@@ -44,11 +42,8 @@ object ProfileModule {
       (data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
 
       if (createNewAuthToken != 0) {
-            println("refresh token")
-            println("old :" + auth_token)
             auth_token = LoginModule.refreshAuthToken(user_id, (data \ "uuid").asOpt[String].get)
             result += "auth_token" -> toJson(auth_token)
-            println("new :" + auth_token)
       }
       
 			if (reVal.empty) { 
