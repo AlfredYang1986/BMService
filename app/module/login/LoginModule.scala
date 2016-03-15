@@ -289,7 +289,7 @@ object LoginModule {
         			_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
 		          auth_token
   		    }
-  		    case _ => ???
+  		    case _ => ""
   		}
 	}
 
