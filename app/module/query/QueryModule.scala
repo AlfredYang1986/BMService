@@ -21,7 +21,8 @@ object QueryModule {
 	/**
 	 * for the initial stage, only can query yours data
 	 */
-	def queryHomeContent(data : JsValue) : JsValue = {
+//	def queryHomeContent(data : JsValue) : JsValue = {
+	def queryHomeContent(data : JsValue)(cur : MongoDBObject) : JsValue = {
 
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -58,7 +59,8 @@ object QueryModule {
 		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
 	
-	def queryContentWithConditions(data : JsValue) : JsValue = {
+//	def queryContentWithConditions(data : JsValue) : JsValue = {
+	def queryContentWithConditions(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	  
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
@@ -163,7 +165,8 @@ object QueryModule {
   		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(Map("push_count" -> toJson(size), "push" -> toJson(xls)))))
 	}
 	
-	def queryUserPush(data : JsValue) : JsValue = {
+//	def queryUserPush(data : JsValue) : JsValue = {
+	def queryUserPush(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	    val user_id = (data \ "user_id").asOpt[String].get
 	    val auth_token = (data \ "auth_token").asOpt[String].get
 	    
@@ -195,7 +198,8 @@ object QueryModule {
 		  Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
 	
-	def queryLikes(data : JsValue) : JsValue = {
+//	def queryLikes(data : JsValue) : JsValue = {
+	def queryLikes(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	
 		val post_id = (data \ "post_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get

@@ -69,19 +69,18 @@ object apnsNotification {
 		                builder += "devices" -> builder_list.result
 
 		                println(builder.result)
-		                
 		                _data_connection.getCollection("devices") += builder.result
 		            }
 		            case head :: Nil => {
             				head.get("devices").map { x => 
-            				    
-            				    x.asInstanceOf[BasicDBList].toList foreach { iter =>
-            				        if (iter.asInstanceOf[BasicDBObject].get("sys").equals("ios")) {
-            				            iter.asInstanceOf[MongoDBObject] += "uuid" -> device_uuid
-            				            iter.asInstanceOf[MongoDBObject] += "apns" -> device_token
+            				    x.asInstanceOf[BasicDBList].toList.filter (iter => iter.asInstanceOf[BasicDBObject].get("sys").equals("ios")) match {
+            				        case Nil => x.asInstanceOf[BasicDBList] += createDevice
+            				        case hd :: Nil => {
+            				            hd.asInstanceOf[DBObject] += "uuid" -> device_uuid
+            				            hd.asInstanceOf[DBObject] += "apns" -> device_token
+            				            println(hd)
             				        }
             				    }
-            				    
   		                println(head)
                       _data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), head)
             				}.getOrElse (throw new Exception)

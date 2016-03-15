@@ -49,7 +49,8 @@ object RelationshipModule {
 	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
 	val apn = Akka.system(play.api.Play.current).actorOf(Props[apnsActor])
 	
-	def follow(data : JsValue) : JsValue = {
+//	def follow(data : JsValue) : JsValue = {
+	def follow(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -149,7 +150,7 @@ object RelationshipModule {
 		query_users += "auth_token" -> toJson(auth_token)
 		query_users += "query_list" -> toJson(List(follow_user_id, user_id))
 		
-		(ProfileModule.multipleUserProfile(toJson(query_users)) \ "result").asOpt[List[JsValue]].map { lst =>
+		(ProfileModule.multipleUserProfile(toJson(query_users))(cur) \ "result").asOpt[List[JsValue]].map { lst =>
 			lst.foreach { x => 
 				if ((x \ "user_id").asOpt[String].get.equals(user_id)) {
 				  
@@ -182,7 +183,8 @@ object RelationshipModule {
 //		queryMutureFollowingUsers(data)
 	}
 
-	def unfollow(data : JsValue) : JsValue = {
+//	def unfollow(data : JsValue) : JsValue = {
+	def unfollow(data : JsValue)(cur : MongoDBObject) : JsValue = {
 			
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -243,7 +245,8 @@ object RelationshipModule {
 //		queryMutureFollowingUsers(data)
 	}
 
-	def queryFollowingUsers(data : JsValue) : JsValue = {
+//	def queryFollowingUsers(data : JsValue) : JsValue = {
+	def queryFollowingUsers(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -263,7 +266,8 @@ object RelationshipModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 	}
 
-	def queryFollowedUsers(data : JsValue) : JsValue = {
+//	def queryFollowedUsers(data : JsValue) : JsValue = {
+	def queryFollowedUsers(data : JsValue)(cur : MongoDBObject) : JsValue = {
  
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -359,7 +363,8 @@ object RelationshipModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result.con)))
 	} 
 	
-	def askPhoneAddressBookFriendsJoin(data : JsValue) : JsValue = {
+//	def askPhoneAddressBookFriendsJoin(data : JsValue) : JsValue = {
+	def askPhoneAddressBookFriendsJoin(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	 
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get

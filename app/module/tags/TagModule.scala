@@ -51,10 +51,10 @@ object TagModule {
 		}
 	}
 
-	def queryFoundSearchTagData(data : JsValue) : JsValue = {
+	def queryFoundSearchTagData(data : JsValue)(cur : MongoDBObject) : JsValue = {
 			
 		val f0 = Future(this.queryRecommandTags(data))
-		val f1 = Future(this.queryTagPreViewWithTagName(data))
+		val f1 = Future(this.queryTagPreViewWithTagName(data)(cur))
 //		val f1 = Future(this.queryTagSearchWithInput(data))
 		
 		Await.result((f0 zip f1) map { x => 
@@ -69,8 +69,8 @@ object TagModule {
 	
 	def queryRecommandTags(data : JsValue) : JsValue = {
 		
-		val user_id = (data \ "user_id").asOpt[String].get
-		val auth_token = (data \ "auth_token").asOpt[String].get
+//		val user_id = (data \ "user_id").asOpt[String].get
+//		val auth_token = (data \ "auth_token").asOpt[String].get
 	
 		(data \ "tag_type").asOpt[Int].map { tp => 
 		  Json.toJson(Map("status" -> toJson("ok"), "recommands" -> toJson((from db() in "tags" where ("type" -> tp)).selectTop(10)("date"){ x => 
@@ -86,8 +86,8 @@ object TagModule {
 
 	def queryTagSearchWithInput(data : JsValue) : JsValue = {
 		
-	  val user_id = (data \ "user_id").asOpt[String].get
-		val auth_token = (data \ "auth_token").asOpt[String].get
+//	  val user_id = (data \ "user_id").asOpt[String].get
+//		val auth_token = (data \ "auth_token").asOpt[String].get
 		val tag_name = (data \ "tag_name").asOpt[String].get
 		
 		(data \ "tag_type").asOpt[Int].map { tag_type => 
@@ -103,7 +103,7 @@ object TagModule {
 		}
 	}
 	
-	def queryTagPreViewWithTagName(data : JsValue) : JsValue = {
+	def queryTagPreViewWithTagName(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	  
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get

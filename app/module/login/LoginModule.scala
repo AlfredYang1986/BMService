@@ -21,16 +21,17 @@ import scala.concurrent.duration._
 
 object LoginModule {
   
-	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
-	def isUserExist(user_id : String) : Boolean = !((from db() in "users" where ("user_id" -> user_id) select (x => x)).empty)
+//	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
+//	def isUserExist(user_id : String) : Boolean = !((from db() in "users" where ("user_id" -> user_id) select (x => x)).empty)
 	
-	def authUpdateDetails(data : JsValue) : JsValue = {
+	def authUpdateDetails(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id= (data \ "user_id").asOpt[String].get
 	
 		val rel = from db() in "users" where ("user_id" -> user_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
 		else {
+//		println(cur)
 			val user = rel.head
 			List("name", "phoneNo", "email", "pwd") foreach { x => 
 //			List("phoneNo", "email") foreach { x => 
@@ -85,6 +86,7 @@ object LoginModule {
 	def authComfirm(data : JsValue) : JsValue = {
 
 		val phoneNo = (data \ "phoneNo").asOpt[String].get
+		val uuid = (data \ "uuid").asOpt[String].get
 		val code = (data \ "code").asOpt[String].get.toInt
 		val reg_token = (data \ "reg_token").asOpt[String].get
 		
@@ -112,7 +114,7 @@ object LoginModule {
 						 * 		create a new auth_token and connect to this phone number
 						 */
 //						this.authCreateNewUserWithPhone(phoneNo)
-						this.authCreateTmpUserForRegisterProcess(phoneNo)
+						this.authCreateTmpUserForRegisterProcess(phoneNo, uuid)
 
 					} else {
 					  	/**
@@ -144,7 +146,7 @@ object LoginModule {
 		}
 	}
 	
-	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
+	private def createNewUserWithProviderDetails(provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String, uuid : String) : JsValue = {
 
 	  val new_builder = MongoDBObject.newBuilder
 		
@@ -158,6 +160,7 @@ object LoginModule {
 		new_builder  += "email" -> ""
 		new_builder  += "name" -> provide_screen_name
 		new_builder  += "pwd" -> "12345"
+		new_builder  += "devices" -> MongoDBList.newBuilder.result
 		
 		val new_third_builder = MongoDBList.newBuilder
 
@@ -181,7 +184,7 @@ object LoginModule {
 //				toJson(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo)))))
 	}
 
-	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String) : JsValue = {
+	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String, uuid : String) : JsValue = {
 
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
 		val user_id = user.get("user_id").get.asInstanceOf[String]
@@ -239,11 +242,13 @@ object LoginModule {
 		val provide_uid = (data \ "provide_uid").asOpt[String].get
 		val provide_screen_name = (data \ "provide_screen_name").asOpt[String].get
 		val provide_screen_photo = (data \ "provide_screen_photo").asOpt[String].get
+		
+		val uuid = (data \ "uuid").asOpt[String].get
   
 		val users = from db() in "users" where ("third.provide_name" -> provide_name, "third.provide_uid" -> provide_uid) select (x => x)
 		
-		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
-		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo)
+		if (users.empty) this.createNewUserWithProviderDetails(provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo, uuid)
+		else  this.connectUserWithProviderDetails(users.head, provide_name, provide_token, provide_uid, provide_screen_name, provide_screen_photo, uuid)
 	}
 
 	def connectWithThird(data : JsValue) : JsValue = authWithThird(data)
@@ -251,13 +256,14 @@ object LoginModule {
 	def authCreateUserWithPhone(data : JsValue) : JsValue = {
 
 	  val phoneNo = (data \ "phoneNo").asOpt[String].get
+	  val uuid = (data \ "uuid").asOpt[String].get
 
 		val users = from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)
 		if (users.empty) {
 			/**
 			 * 2. if phoneNo is not, then create one directly
 			 */
-		  	authCreateNewUserWithPhone(phoneNo)
+		  	authCreateNewUserWithPhone(phoneNo, uuid)
 			
 		} else {
 			/**
@@ -269,16 +275,16 @@ object LoginModule {
 			user += "phoneNo" -> ""
 			_data_connection.getCollection("users").update(DBObject("phoneNo" -> phoneNo), user)
 		
-			this.authCreateNewUserWithPhone(phoneNo)
+			this.authCreateNewUserWithPhone(phoneNo, uuid)
 		}
 	}
 
-	private def authCreateTmpUserForRegisterProcess(phoneNo : String) : JsValue = {
+	private def authCreateTmpUserForRegisterProcess(phoneNo : String, uuid : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(phoneNo + time_span)
-		val auth_token = Sercurity.md5Hash(user_id + time_span)
+		val auth_token = Sercurity.md5Hash(user_id + uuid +time_span)
 
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
@@ -298,12 +304,12 @@ object LoginModule {
 		    "phoneNo" -> phoneNo))))	    
 	}
 	
-	private def authCreateNewUserWithPhone(phoneNo : String) : JsValue = {
+	private def authCreateNewUserWithPhone(phoneNo : String, uuid : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(phoneNo + time_span)
-		val auth_token = Sercurity.md5Hash(user_id + time_span)
+		val auth_token = Sercurity.md5Hash(user_id + uuid + time_span)
 
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
@@ -311,6 +317,7 @@ object LoginModule {
 		new_builder  += "pwd" -> "12345"
 		new_builder  += "email" -> ""
 		new_builder  += "name" -> ""
+		new_builder  += "devices" -> MongoDBList.newBuilder.result
 						
 		val new_third_builder = MongoDBList.newBuilder
 		new_builder  += "third" -> new_third_builder.result
@@ -359,7 +366,8 @@ object LoginModule {
 	 *   	0	=> logout
 	 *    	1	=> online 
 	 */
-	def userOffline(data : JsValue) : JsValue = {
+//	def userOffline(data : JsValue) : JsValue = {
+	def userOffline(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	 	val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		
@@ -367,7 +375,8 @@ object LoginModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("offline success"))) 
 	}
 	
-	def userOnline(data : JsValue) : JsValue = {
+//	def userOnline(data : JsValue) : JsValue = {
+	def userOnline(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	 	val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		
@@ -375,7 +384,8 @@ object LoginModule {
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("online success"))) 
 	}
 	
-	def logout(data : JsValue) : JsValue = {
+//	def logout(data : JsValue) : JsValue = {
+	def logout(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val device_token = (data \ "device_token").asOpt[String].map (x => x).getOrElse("")
@@ -390,7 +400,8 @@ object LoginModule {
 	/**
 	 * user lst is in the sys with provider name
 	 */
-	def userLstInSystem(data : JsValue) : JsValue = {
+//	def userLstInSystem(data : JsValue) : JsValue = {
+	def userLstInSystem(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	    
 	    val user_id = (data \ "user_id").asOpt[String].get
 	    val auth_token = (data \ "auth_token").asOpt[String].get
@@ -451,9 +462,9 @@ object LoginModule {
   	          ))}
       }
 	    
-	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
-	        case Nil => ErrorCode.errorToJson("user not existing")
-	        case head :: Nil => {
+//	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+//	        case Nil => ErrorCode.errorToJson("user not existing")
+//	        case head :: Nil => {
 	            val iter = user_lst.distinct.grouped(20)
 	            var result : List[Future[List[JsValue]]] = Nil
 	            iter foreach { x => result = Future(userLstInSystemAcc(x)) :: result }
@@ -462,8 +473,8 @@ object LoginModule {
 	            result foreach { x => result0 = Await.result (x map (y => y), Timeout(1 second).duration).asInstanceOf[List[JsValue]] :: result0 }
 	            
   	          toJson(Map("status" -> toJson("ok"), "result" -> toJson(result0.filterNot(_.isEmpty) flatMap(x => x))))
-	        }
-	        case _ => ???
-	    }
+//	        }
+//	        case _ => ???
+//	    }
 	}
 }

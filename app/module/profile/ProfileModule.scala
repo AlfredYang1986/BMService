@@ -148,15 +148,12 @@ object ProfileModule {
 	 *  input: query_user_id, query_auth_token, owner_user_id
 	 *  output: profile details
 	 */
-	def userProfile(data : JsValue) : JsValue = {
-		
-		val query_user_id = (data \ "query_user_id").asOpt[String].map(x => x).getOrElse("")
-		val query_auth_token = (data \ "query_auth_token").asOpt[String].map(x => x).getOrElse("")
+	def userProfile(data : JsValue)(cur : MongoDBObject) : JsValue = {
+	   
+		val query_user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
+		val query_auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
 		val owner_user_id = (data \ "owner_user_id").asOpt[String].map(x => x).getOrElse("")
 	 
-		if (query_user_id == "" || query_auth_token == "") ErrorCode.errorToJson("token not valid")
-		else if (owner_user_id == "")  ErrorCode.errorToJson("user not existing")
-		else {
 			// 1. TODO: check query_user_id and query_auth_token and is validate
 			val re = from db() in "user_profile" where ("user_id" -> owner_user_id) select (x => x) 
 			if (re.count != 1) ErrorCode.errorToJson("user not existing")
@@ -173,7 +170,6 @@ object ProfileModule {
 				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}
-		}
 	}
 	
 	def updateFollowingCount(count : Int, user_id : String) = {
@@ -206,7 +202,8 @@ object ProfileModule {
 	/**
 	 * mutiple user profile
 	 */
-	def multipleUserProfile(data : JsValue) : JsValue = {
+//	def multipleUserProfile(data : JsValue) : JsValue = {
+	def multipleUserProfile(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -242,7 +239,8 @@ object ProfileModule {
 		}
 	}
 	
-	def recommendUserProfile(data : JsValue) : JsValue = {
+//	def recommendUserProfile(data : JsValue) : JsValue = {
+	def recommendUserProfile(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		

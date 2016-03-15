@@ -90,7 +90,8 @@ object EmailModule {
   def sendEmail(data : JsValue) : JsValue = {
 	  val user_email = (data \ "email").asOpt[String].get
 	  
-	  this.send(new EmailMessage("Dongda Privacy", "", "yangyuanpig@163.com", "resource/email_content", "", null, 60.second, 1))
+//	  this.send(new EmailMessage("Dongda Privacy", "", "yangyuanpig@163.com", "resource/email_content", "", null, 60.second, 1))
+    emailServiceActor ! user_email
 	  Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("send email success")))
   }
   
@@ -129,6 +130,33 @@ object EmailModule {
     	email.addTo("alfredyang@altlys.com")
     	email.addTo("alfredyang@blackmirror.tech")
     	email.send
+  }
+  
+  private def sendEmailToSync(to : String) {
+    	val br = new BufferedReader(new InputStreamReader(new FileInputStream("resource/email_content"), "utf8"))
+    	var content = ""
+    	var line : String = br.readLine
+    	while (line != null) {
+    		content += "\n" + line
+    		line = br.readLine
+    	}
+        
+        val email = new SimpleEmail
+    // for gmail
+    //    email.setHostName("smtp.googlemail.com")
+    //    	   .setSmtpPort(465);
+       
+    // for 163    
+        	email.setHostName("smtp.163.com")
+        	email.setSmtpPort(25)
+        	email.setAuthenticator(new DefaultAuthenticator("yangyuanpig", "Abcde196125"))
+        	email.setSSLOnConnect(true)
+        	email.setFrom("yangyuanpig@163.com")
+        	email.setSubject("Dongda Privacy")
+        	email.setMsg(content)
+    //    	email.addTo("alfredyang@altlys.com")
+        	email.addTo(to)
+        	email.send
   }
  
   /**
@@ -185,6 +213,11 @@ object EmailModule {
         email.deliveryAttempts = email.deliveryAttempts + 1
         log.debug("Atempting to deliver message")
         sendEmailSync(email)
+        log.debug("Message delivered")
+      }
+      case to : String => {
+        log.debug("Atempting to deliver message")
+        sendEmailToSync(to)
         log.debug("Message delivered")
       }
       case unexpectedMessage: Any => {

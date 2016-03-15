@@ -24,7 +24,8 @@ object RoleTagModule {
 		      	toJson(x.getAs[String]("tag_name").get)).toList)))
 	}
 	
-	def addRoleTags(data : JsValue) : JsValue = {
+//	def addRoleTags(data : JsValue) : JsValue = {
+	def addRoleTags(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	  
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
@@ -53,7 +54,8 @@ object RoleTagModule {
 	
 	def deleteRoleTags(data : JsValue) : JsValue = ???
 	
-	def queryRoleTagPreViewWithRoleTag(data : JsValue) : JsValue = {
+//	def queryRoleTagPreViewWithRoleTag(data : JsValue) : JsValue = {
+	def queryRoleTagPreViewWithRoleTag(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val role_tag = (data \ "role_tag").asOpt[String].get
@@ -75,13 +77,13 @@ object RoleTagModule {
   		}
 		}
 		
-		val user_check = from db() in "users" where ("user_id" -> user_id) select (x => x)
-		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
-		else {
+//		val user_check = from db() in "users" where ("user_id" -> user_id) select (x => x)
+//		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
+//		else {
 		  var result : List[JsValue] = Nil
       val tag = ((from db() in "role_tags" where ("tag_name" $regex ("^" + role_tag))).select(x => x.getAs[String]("tag_name").get)).toList
       tag.map (x => result = (queryPreViewWithRoleTag(x) :: Nil).filterNot(_ == null) ::: result)
 			toJson(Map("status" -> toJson("ok"), "preview" -> toJson(result)))
-		}
+//		}
   }
 }

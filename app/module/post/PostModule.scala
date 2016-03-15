@@ -37,7 +37,8 @@ object PostModule {
     
 	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
     
-	def postContent(data : JsValue) : JsValue = {
+//	def postContent(data : JsValue) : JsValue = {
+	def postContent(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	 
 		/**
 		 * item list store in database
@@ -106,11 +107,11 @@ object PostModule {
 		/**
 		 * check the token is validate or not
 		 */
-		if (!LoginModule.isAuthTokenValidate(auth_token)) {
-			ErrorCode.errorToJson("auth token not valid")
-		} else if (!LoginModule.isUserExist(user_id)) {
-			ErrorCode.errorToJson("unknown user")
-		} else {
+//		if (!LoginModule.isAuthTokenValidate(auth_token)) {
+//			ErrorCode.errorToJson("auth token not valid")
+//		} else if (!LoginModule.isUserExist(user_id)) {
+//			ErrorCode.errorToJson("unknown user")
+//		} else {
 			/**
 			 * save all the data to database
 			 */
@@ -146,7 +147,7 @@ object PostModule {
 				
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> 
 							toJson(Map("post_result" -> toJson(true)))))
-		}
+//		}
 	}
 	
 	def uploadFile(data : MultipartFormData[TemporaryFile]) : JsValue = fop.uploadFile(data)
@@ -238,7 +239,8 @@ object PostModule {
 	    }
 	}
 
-	def postPush(data : JsValue) : JsValue = {
+//	def postPush(data : JsValue) : JsValue = {
+	def postPush(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	    /**
 	     * get arguments
 	     */
@@ -339,9 +341,9 @@ object PostModule {
                                       "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
 	    }
 	    
-	    from db() in "users" where ("user_id" -> user_id) select (x => x) toList match {
-	        case Nil => ErrorCode.errorToJson("token not valid")
-	        case head :: Nil => {
+//	    from db() in "users" where ("user_id" -> user_id) select (x => x) toList match {
+//	        case Nil => ErrorCode.errorToJson("token not valid")
+//	        case head :: Nil => {
         	    val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
         	                                    (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
         	                                    x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
@@ -354,9 +356,9 @@ object PostModule {
         	            user_name,
         	            user_photo)
               QueryModule.queryPush(data)
-	        }
-	        case _ => ???
-	    }
+//	        }
+//	        case _ => ???
+//	    }
 	}
 
 	def isLiked(user_id : String, post_id : String) : Boolean = {
@@ -368,7 +370,8 @@ object PostModule {
 	    }
 	}
 	
-	def postLike(data : JsValue) : JsValue = {
+//	def postLike(data : JsValue) : JsValue = {
+	def postLike(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	
 		  def resentLikedCount = 6
 	  
@@ -493,7 +496,7 @@ object PostModule {
 				 }
 			
 				 likeNotifycations(ori_posts.head)
-				QueryModule.queryLikes(data)
+				QueryModule.queryLikes(data)(cur)
 			}
 		}
 	}
