@@ -32,16 +32,25 @@ object ProfileModule {
 		val role_tag = (data \ "role_tag").asOpt[String].map(x => x).getOrElse("")
 		
 		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
+		val createNewAuthToken= (data \ "refresh_token").asOpt[Int].map(x => x).getOrElse(0)
   
     if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
 			var result : Map[String, JsValue] = Map.empty
-      
+     
 			(data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
       (data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
+
+      if (createNewAuthToken != 0) {
+            println("refresh token")
+            println("old :" + auth_token)
+            auth_token = LoginModule.refreshAuthToken(user_id, (data \ "uuid").asOpt[String].get)
+            result += "auth_token" -> toJson(auth_token)
+            println("new :" + auth_token)
+      }
       
-      if (reVal.empty) { 
+			if (reVal.empty) { 
 			   
         if (createWhenNotExist != 0) {
             val cn = LoginModule.authCreateUserWithPhone(data)

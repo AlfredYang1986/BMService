@@ -21,9 +21,6 @@ import scala.concurrent.duration._
 
 object LoginModule {
   
-//	def isAuthTokenValidate(token : String) : Boolean = !((from db() in "users" where ("auth_token" -> token) select (x => x)).empty)
-//	def isUserExist(user_id : String) : Boolean = !((from db() in "users" where ("user_id" -> user_id) select (x => x)).empty)
-	
 	def authUpdateDetails(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id= (data \ "user_id").asOpt[String].get
@@ -31,7 +28,6 @@ object LoginModule {
 		val rel = from db() in "users" where ("user_id" -> user_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("auth token not valid")
 		else {
-//		println(cur)
 			val user = rel.head
 			List("name", "phoneNo", "email", "pwd") foreach { x => 
 //			List("phoneNo", "email") foreach { x => 
@@ -40,7 +36,6 @@ object LoginModule {
 				}.getOrElse(Unit)
 			}
 			_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user)
-			
 			Json.toJson(Map("status" -> toJson("ok")))
 		}
 	}
@@ -52,8 +47,8 @@ object LoginModule {
 		/**
 		 * generate code
 		 */
-		val code = 11111 // fake one
-//		val code = scala.util.Random.nextInt(90000) + 10000
+		val code = 1111 // fake one
+//		val code = scala.util.Random.nextInt(9000) + 1000
 
 		/**
 		 * generate a reg token
@@ -152,7 +147,7 @@ object LoginModule {
 		
 		val time_span = Sercurity.getTimeSpanWithMillSeconds
 		val user_id = Sercurity.md5Hash(provide_name + provide_token + time_span)
-		val auth_token = Sercurity.md5Hash(provide_token + provide_name + time_span)
+		val auth_token = Sercurity.md5Hash(user_id + uuid + time_span)
 					
 		new_builder  += "user_id" -> user_id
 		new_builder  += "auth_token" -> auth_token
@@ -187,6 +182,13 @@ object LoginModule {
 	private def connectUserWithProviderDetails(user: MongoDBObject, provide_name: String, provide_token: String, provide_uid: String, provide_screen_name: String, provide_screen_photo : String, uuid : String) : JsValue = {
 
 		val auth_token = user.get("auth_token").get.asInstanceOf[String]
+	    /**
+	     * need change auth_token
+	     */
+//		val time_span = Sercurity.getTimeSpanWithMillSeconds
+//		val auth_token = Sercurity.md5Hash(provide_token + provide_name + time_span) //user.get("auth_token").get.asInstanceOf[String]
+//		user += "auth_token" -> auth_token
+		
 		val user_id = user.get("user_id").get.asInstanceOf[String]
 		val third_list = user.get("third").get.asInstanceOf[BasicDBList]
 		var name = user.get("name").get.asInstanceOf[String]
@@ -205,7 +207,7 @@ object LoginModule {
 				  x.asInstanceOf[BasicDBObject] += ("provide_screen_name") -> provide_screen_name
 				  x.asInstanceOf[BasicDBObject] += ("provide_screen_photo") -> provide_screen_photo
 
-				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
+				  _data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user)
 			}
 			
 			case None => {
@@ -218,7 +220,7 @@ object LoginModule {
 				  builder += ("provide_screen_photo") -> provide_screen_photo
 				  third_list += builder.result
 
-				  _data_connection.getCollection("users").update(DBObject("auth_token" -> auth_token), user)
+				  _data_connection.getCollection("users").update(DBObject("user_id" -> user_id), user)
 			}
 		}
 		
@@ -277,6 +279,18 @@ object LoginModule {
 		
 			this.authCreateNewUserWithPhone(phoneNo, uuid)
 		}
+	}
+	
+	def refreshAuthToken(user_id : String, uuid : String) : String = {
+		  (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+  		    case head :: Nil => {
+  		        val auth_token = Sercurity.md5Hash(user_id + uuid + Sercurity.getTimeSpanWithMillSeconds)
+		          head += "auth_token" -> auth_token
+        			_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
+		          auth_token
+  		    }
+  		    case _ => ???
+  		}
 	}
 
 	private def authCreateTmpUserForRegisterProcess(phoneNo : String, uuid : String) : JsValue = {
