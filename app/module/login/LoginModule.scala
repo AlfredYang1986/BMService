@@ -41,7 +41,7 @@ object LoginModule {
 	}
   
 	def authWithPhone(data : JsValue) : JsValue = {
-	
+
 		val phoneNo = (data \ "phoneNo").asOpt[String].get
 		
 		/**
@@ -490,5 +490,12 @@ object LoginModule {
 //	        }
 //	        case _ => ???
 //	    }
+	}
+	
+	/**
+	 * pint test
+	 */
+	def pingTest(data : JsValue)(cur : MongoDBObject) : JsValue = {
+	    toJson(Map("status" -> toJson("ok")))
 	}
 }

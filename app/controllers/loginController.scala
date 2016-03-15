@@ -22,4 +22,6 @@ object loginController extends Controller {
 	def offline = Action (request => requestArgsWithAuthCheck(request)(LoginModule.userOffline))
 	def online = Action (request => requestArgsWithAuthCheck(request)(LoginModule.userOnline))
 	def userLstInSystem = Action (request => requestArgsWithAuthCheck(request)(LoginModule.userLstInSystem))
+	
+	def pingTest = Action (request => requestArgsWithAuthCheck(request)(LoginModule.pingTest))
 }
