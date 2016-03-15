@@ -78,7 +78,6 @@ object apnsNotification {
             				        case hd :: Nil => {
             				            hd.asInstanceOf[DBObject] += "uuid" -> device_uuid
             				            hd.asInstanceOf[DBObject] += "apns" -> device_token
-            				            println(hd)
             				        }
             				    }
                       _data_connection.getCollection("devices").update(DBObject("user_id" -> user_id), head)

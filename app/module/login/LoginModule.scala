@@ -4,6 +4,11 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
 import play.api.http.Writeable
+import play.api.libs.iteratee._
+import play.api.libs.concurrent._
+import play.api.mvc.MultipartFormData
+import play.api.libs.Files.TemporaryFile
+
 import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
@@ -12,15 +17,23 @@ import module.sercurity.Sercurity
 import module.sms._
 import module.relationship._
 import module.profile.ProfileModule
+import module.notification._
 
 import scala.concurrent.Await
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
-import akka.util.Timeout
 import scala.concurrent.duration._
+
+import akka.actor.Actor
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.actor.ActorRef
 
 object LoginModule {
   
+	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
+	
 	def authUpdateDetails(data : JsValue)(cur : MongoDBObject) : JsValue = {
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id= (data \ "user_id").asOpt[String].get
@@ -284,12 +297,42 @@ object LoginModule {
 	}
 	
 	def refreshAuthToken(user_id : String, uuid : String) : String = {
-	    println("refresh_token")
+	   
+	    def pushNotifycationsImpl = {
+	        var content : Map[String, JsValue] = Map.empty
+				  content += "type" -> toJson(module.common.AcitionType.loginOtherDevice.index)
+				  content += "uuid" -> toJson(uuid)
+				  content += "user_id" -> toJson(user_id)
+      
+				  ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id).distinct), "isSave" -> toJson(1), 
+                                      "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+	    }
+	    
+	    /**
+			 * push notifycations to the user
+			 */					
+			def pushNotifycations = //pushNotifycationsImpl
+			    (from db() in "devices" where ("user_id" -> user_id) select (x => x)).toList match { 
+			        case head :: Nil => {
+			            head.getAs[BasicDBList]("devices").filter (iter => iter.asInstanceOf[BasicDBObject].getAs[String]("sys").get.equals("ios")).toList match {    
+			                case hd :: Nil => {
+			                    println(hd.asInstanceOf[DBObject].getAs[String]("uuid").get)
+			                    println(uuid)
+			                    if (!hd.asInstanceOf[DBObject].getAs[String]("uuid").get.equals(uuid))
+			                        pushNotifycationsImpl
+			                }
+			                case _ => Unit
+			            }
+			        }
+			        case _ => Unit
+    			}
+	    
 		  (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
   		    case head :: Nil => {
   		        val auth_token = Sercurity.md5Hash(user_id + uuid + Sercurity.getTimeSpanWithMillSeconds)
 		          head += "auth_token" -> auth_token
         			_data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
+        			pushNotifycations
 		          auth_token
   		    }
   		    case _ => ""
