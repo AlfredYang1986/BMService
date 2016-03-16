@@ -339,6 +339,14 @@ object LoginModule {
   		}
 	}
 
+	def authCreateTmpUserForRegisterProcess(data : JsValue) : JsValue = {
+	    val phoneNo = (data \ "phoneNo").asOpt[String].get
+	    val uuid = (data \ "uuid").asOpt[String].get
+	   
+	    println(data)
+	    authCreateTmpUserForRegisterProcess(phoneNo, uuid)
+	}
+	
 	private def authCreateTmpUserForRegisterProcess(phoneNo : String, uuid : String) : JsValue = {
 		val new_builder = MongoDBObject.newBuilder
 

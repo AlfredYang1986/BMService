@@ -18,6 +18,7 @@ POST	/login/offline								controllers.loginController.offline
 POST	/login/online								controllers.loginController.online
 POST	/login/userLstInSystem						controllers.loginController.userLstInSystem
 POST	/login/pingtest 							controllers.loginController.pingTest
+POST	/login/authCreateTmpUserWithPhone 			controllers.loginController.authCreateTmpUserWithPhone
 
 # post module
 POST	/post/postContent							controllers.postController.postContent

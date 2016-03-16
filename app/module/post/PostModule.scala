@@ -311,13 +311,37 @@ object PostModule {
     				ul.get("push").map { x =>
     					if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[String].equals(post_id))) {
     						x.asInstanceOf[BasicDBList].add(0, post_id)
-    						_data_connection.getCollection("user_push").update(DBObject("user_id" -> user_id), ul);
+    						_data_connection.getCollection("user_push").update(DBObject("user_id" -> user_id), ul)
     					}
     					else Unit
     				}.getOrElse(Unit)
     			}
 	    }
-	   
+	  
+//	    def updateUserProfile(op : MongoDBObject) = {
+//	        (from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
+//	            case head :: Nil => {
+//	                head.getAs[Number]("push_count").
+//	                
+//    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+//	            }
+//	            case _ => ???
+//	        }
+	       
+//	        val owner_id = op.getAs[String]("owner_id").get
+//	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
+//	            case head :: Nil =>  {
+//	                 head.getAs[Number]("been_pushed").map { x =>
+//	                     val a = x.intValue + 1
+//	                     println(a.asInstanceOf[Number])
+////	                     head += "been_pushed" ->
+//	                 }.getOrElse(head += "been_pushed" -> 0.asInstanceOf[AnyRef])
+//	                
+//    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+//	            }
+//	            case _ => ???
+//	        }
+//	    }
 	    
 	    /**
 				* push notifycations to the user
@@ -348,13 +372,12 @@ object PostModule {
         	                                    (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
         	                                    x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
         	                                  }).head
-        	                                 
+        	                       
+        	    val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head
         	    addPushDatabase(user_name, user_photo)
         	    addUserPushDatabase
-        	    pushNotifycations(
-        	            (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head,
-        	            user_name,
-        	            user_photo)
+        	    pushNotifycations(op, user_name, user_photo)
+//    	        updateUserProfile(op)
               QueryModule.queryPush(data)
 //	        }
 //	        case _ => ???

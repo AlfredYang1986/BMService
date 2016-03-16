@@ -167,6 +167,7 @@ object QueryModule {
 	
 //	def queryUserPush(data : JsValue) : JsValue = {
 	def queryUserPush(data : JsValue)(cur : MongoDBObject) : JsValue = {
+	    
 	    val user_id = (data \ "user_id").asOpt[String].get
 	    val auth_token = (data \ "auth_token").asOpt[String].get
 	    
@@ -179,23 +180,26 @@ object QueryModule {
 		      x.getAs[MongoDBList]("push").map { lst =>
 		           lst.toList foreach { iter =>
 		                 val post_id = iter.asInstanceOf[String]
+		                 println(post_id)
 		                 if (conditions == null) conditions = "post_id" $eq post_id
 		                 else conditions = $or("post_id" $eq post_id, conditions)
 		           }
 		      }.getOrElse(Unit)
 	    }
-	    
+	   
 		  var xls : List[JsValue] = Nil
-		  (from db() in "posts" where conditions).select { x => 
-		  	  var tmp : Map[String, JsValue] = Map.empty
-		  	  List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
-		  	
-		  	  val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
-		  	  tmp += "relations" -> toJson(con.con)
-		  	  xls = xls :+ toJson(tmp)
-		  }
+	    if (conditions != null) {
+	       	(from db() in "posts" where conditions).select { x => 
+    		  	  var tmp : Map[String, JsValue] = Map.empty
+    		  	  List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
+    		  	
+    		  	  val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
+    		  	  tmp += "relations" -> toJson(con.con)
+    		  	  xls = xls :+ toJson(tmp)
+    		  } 
+	    }
 
-		  Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
+	    Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
 	
 //	def queryLikes(data : JsValue) : JsValue = {
