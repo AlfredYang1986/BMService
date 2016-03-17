@@ -343,7 +343,6 @@ object LoginModule {
 	    val phoneNo = (data \ "phoneNo").asOpt[String].get
 	    val uuid = (data \ "uuid").asOpt[String].get
 	   
-	    println(data)
 	    authCreateTmpUserForRegisterProcess(phoneNo, uuid)
 	}
 	

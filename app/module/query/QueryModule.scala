@@ -201,6 +201,12 @@ object QueryModule {
 
 	    Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls)))
 	}
+
+	def queryUserLikesCount(user_id : String) : Integer =
+	    (from db() in "user_likes" where ("user_id" -> user_id) select (x => x.getAs[MongoDBList]("likes").get)) toList match {
+	        case head :: Nil => head.count (_ => true)
+	        case _ => 0
+	    }
 	
 //	def queryLikes(data : JsValue) : JsValue = {
 	def queryLikes(data : JsValue)(cur : MongoDBObject) : JsValue = {

@@ -177,8 +177,10 @@ object PostModule {
 		
 		if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
 		else {
-			val user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
-			val user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
+		   val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
+        	                               (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
+        	                               x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
+        	                           }).head
 			
 			/**
 			 * add commment to comments table
@@ -259,89 +261,77 @@ object PostModule {
     			push_builder.result
 	    }
 	    
-	    def addPushDatabase(name : String, photo : String) = {
-	        /**
-    			 * add like to likes table
-    			 */
-    			val ori_likes = from db() in "post_push" where ("post_id" -> post_id) select (x => x)
-    			if (ori_likes.empty) {
-    				  val like = createPush(user_id, name, photo)
-    				
-    				  val like_list_builder = MongoDBList.newBuilder
-    				  like_list_builder += like
-    				
-    				  val post_builder = MongoDBObject.newBuilder
-    				  post_builder += "post_id" -> post_id
-    				  post_builder += "push" -> like_list_builder.result
+      /**
+    	 * add like to push table
+    	 */
+	    def addPushDatabase(name : String, photo : String) =
+	        (from db() in "post_push" where ("post_id" -> post_id) select (x => x)).toList match {
+	            case Nil => {
+	                val like = createPush(user_id, name, photo)
+        				
+        				  val like_list_builder = MongoDBList.newBuilder
+        				  like_list_builder += like
+        				
+        				  val post_builder = MongoDBObject.newBuilder
+        				  post_builder += "post_id" -> post_id
+        				  post_builder += "push" -> like_list_builder.result
+        			
+        				  _data_connection.getCollection("post_push") += post_builder.result
+	            }
+	            case head :: Nil => {
+	                val like = createPush(user_id, name, photo)
     			
-    				  _data_connection.getCollection("post_push") += post_builder.result
-    			} else {
-    				  val like = createPush(user_id, name, photo)
-    			
-    				  val ori = ori_likes.head
-    				  ori.get("push").map { x => 
-      				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("push_owner_id").get.equals(user_id))) {
-      				  		  x.asInstanceOf[BasicDBList].add(0, like)
-      				  		  _data_connection.getCollection("post_push").update(DBObject("post_id" -> post_id), ori);
-      				  	}
-      				  	else Unit
-    				  }.getOrElse(Unit)
-  			}
-	    }
+        				  val ori = head
+        				  ori.get("push").map { x => 
+          				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("push_owner_id").get.equals(user_id))) {
+          				  		  x.asInstanceOf[BasicDBList].add(0, like)
+          				  		  _data_connection.getCollection("post_push").update(DBObject("post_id" -> post_id), ori);
+          				  	}
+          				  	else Unit
+        				  }.getOrElse(Unit)
+	            }
+	            case _ => ???
+	        }
 	    
-	    def addUserPushDatabase = {
-    	    /**
-    			 * refresh user like post table
-    			 */
-    			val user_push = from db() in "user_push" where ("user_id" -> user_id) select (x => x)
-    			if (user_push.empty) {
-    			  
-    				val ul = MongoDBObject.newBuilder
-    				ul += "user_id" -> user_id
-    			  
-    				val user_push_list = MongoDBList.newBuilder
-    				user_push_list += post_id
-    			
-    				ul += "push" -> user_push_list.result
-    				_data_connection.getCollection("user_push") += ul.result
-    			  
-    			} else {
-    			 
-    				val ul = user_push.head
-    				ul.get("push").map { x =>
-    					if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[String].equals(post_id))) {
-    						x.asInstanceOf[BasicDBList].add(0, post_id)
-    						_data_connection.getCollection("user_push").update(DBObject("user_id" -> user_id), ul)
-    					}
-    					else Unit
-    				}.getOrElse(Unit)
-    			}
-	    }
+      /**
+    	 * refresh user push post table
+    	 */
+	    def addUserPushDatabase =
+	        (from db() in "user_push" where ("user_id" -> user_id) select (x => x)).toList match {
+	            case Nil => {
+	                val ul = MongoDBObject.newBuilder
+          				ul += "user_id" -> user_id
+          			  
+          				val user_push_list = MongoDBList.newBuilder
+          				user_push_list += post_id
+          			
+          				ul += "push" -> user_push_list.result
+          				_data_connection.getCollection("user_push") += ul.result 
+	            }
+	            case head :: Nil => {
+	                val ul = head
+          				ul.get("push").map { x =>
+          					if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[String].equals(post_id))) {
+          						x.asInstanceOf[BasicDBList].add(0, post_id)
+          						_data_connection.getCollection("user_push").update(DBObject("user_id" -> user_id), ul)
+          					}
+          					else Unit
+          				}.getOrElse(Unit) 
+	            }
+	            case _ => ???
+	        }
 	  
-//	    def updateUserProfile(op : MongoDBObject) = {
-//	        (from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
-//	            case head :: Nil => {
-//	                head.getAs[Number]("push_count").
-//	                
-//    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
-//	            }
-//	            case _ => ???
-//	        }
-	       
-//	        val owner_id = op.getAs[String]("owner_id").get
-//	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
-//	            case head :: Nil =>  {
-//	                 head.getAs[Number]("been_pushed").map { x =>
-//	                     val a = x.intValue + 1
-//	                     println(a.asInstanceOf[Number])
-////	                     head += "been_pushed" ->
-//	                 }.getOrElse(head += "been_pushed" -> 0.asInstanceOf[AnyRef])
-//	                
-//    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
-//	            }
-//	            case _ => ???
-//	        }
-//	    }
+	    def updateUserProfile(owner_id : String) = 
+	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
+	            case head :: Nil =>  {
+	                 head.getAs[Number]("been_pushed").map { x =>
+	                     head += "been_pushed" -> (x.intValue + 1).asInstanceOf[Number]
+	                 }.getOrElse(head += "been_pushed" -> 1.asInstanceOf[Number])
+	                
+    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+	            }
+	            case _ => ???
+	        }
 	    
 	    /**
 				* push notifycations to the user
@@ -364,24 +354,28 @@ object PostModule {
 				     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
                                       "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
 	    }
-	    
-//	    from db() in "users" where ("user_id" -> user_id) select (x => x) toList match {
-//	        case Nil => ErrorCode.errorToJson("token not valid")
-//	        case head :: Nil => {
-        	    val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
-        	                                    (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
-        	                                    x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
-        	                                  }).head
-        	                       
-        	    val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head
-        	    addPushDatabase(user_name, user_photo)
-        	    addUserPushDatabase
-        	    pushNotifycations(op, user_name, user_photo)
-//    	        updateUserProfile(op)
-              QueryModule.queryPush(data)
-//	        }
-//	        case _ => ???
-//	    }
+
+			def pushImpl = {
+			    val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
+	                                          (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
+	                                           x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
+	                                      }).head
+	                       
+          val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head
+          addPushDatabase(user_name, user_photo)
+          addUserPushDatabase
+          pushNotifycations(op, user_name, user_photo)
+          updateUserProfile(op.getAs[String]("owner_id").get)
+			}
+			
+			(from db() in "post_push" where ("post_id" -> post_id) select (x => x.getAs[MongoDBList]("push").get)).toList match {
+			    case head :: Nil => {
+			        if (head.toList.asInstanceOf[List[BasicDBObject]].filter(iter => iter.get("push_owner_id").asInstanceOf[String].equals(user_id)).isEmpty)
+			            pushImpl
+			    }
+			    case Nil => pushImpl
+			}
+      QueryModule.queryPush(data)
 	}
 
 	def isLiked(user_id : String, post_id : String) : Boolean = {
@@ -411,116 +405,324 @@ object PostModule {
   		/**
   		 * get arguments
   		 */
-  		val post_id = (data \ "post_id").asOpt[String].map(x => x).getOrElse("")
-  		val user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse("")
-  		val auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse("")
-	
-  		var user_name = ""
-  		var user_photo = ""
+  		val post_id = (data \ "post_id").asOpt[String].get
+  		val user_id = (data \ "user_id").asOpt[String].get
+  		val auth_token = (data \ "auth_token").asOpt[String].get
+
+      /**
+    	 * add like to likes table
+    	 */
+  		def addLikeDatabase(user_name : String, user_photo : String) = 
+  		    (from db() in "post_likes" where ("post_id" -> post_id) select (x => x)).toList match {
+  		        case Nil => {
+  		            val like = createLike(user_id, user_name, user_photo)
+    				
+        				  val like_list_builder = MongoDBList.newBuilder
+        				  like_list_builder += like
+        				
+        				  val post_builder = MongoDBObject.newBuilder
+        				  post_builder += "post_id" -> post_id
+        				  post_builder += "likes" -> like_list_builder.result
+        			
+        				  _data_connection.getCollection("post_likes") += post_builder.result
+  		        }
+  		        case head :: Nil => {
+      		        val like = createLike(user_id, user_name, user_photo)
+        			
+        				  val ori = head
+        				  ori.get("likes").map { x => 
+          				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("like_owner_id").get.equals(user_id))) {
+          				  		  x.asInstanceOf[BasicDBList].add(0, like)
+          				  		  _data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), ori);
+          				  	}
+          				  	else Unit
+        				  }.getOrElse(Unit)    
+  		        }
+  		        case _ => ???
+  		    }
+
+  		/**
+    	 * refresh user like post table
+    	 */
+  		def addUserLikeDatabase =
+  		    (from db() in "user_likes" where ("user_id" -> user_id) select (x => x)).toList match {
+  		        case Nil => {
+        		      val ul = MongoDBObject.newBuilder
+          				ul += "user_id" -> user_id
+          			  
+          				val user_like_list = MongoDBList.newBuilder
+          				user_like_list += post_id
+          			
+          				ul += "likes" -> user_like_list.result
+          				_data_connection.getCollection("user_likes") += ul.result  
+  		        }
+  		        case head :: Nil => {
+        		      val ul = head
+          				ul.get("likes").map { x =>
+          					if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[String].equals(post_id))) {
+          						x.asInstanceOf[BasicDBList].add(0, post_id)
+          						_data_connection.getCollection("user_likes").update(DBObject("user_id" -> user_id), ul);
+          					}
+          					else Unit
+          				}.getOrElse(Unit) 
+  		        }
+  		        case _ => ???
+  		    }
   		
-		  if (post_id == "" || user_id == "" || auth_token == "") ErrorCode.errorToJson("token not valid")
-		  else {
-    			user_name = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""))).head
-    			user_photo = (from db() in "user_profile" where ("user_id" -> user_id) select (x => x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))).head
-    		  		
-    			/**
-    			 * add like to likes table
-    			 */
-    			val ori_likes = from db() in "post_likes" where ("post_id" -> post_id) select (x => x)
-    			if (ori_likes.empty) {
-    				  val like = createLike(user_id, user_name, user_photo)
-    				
-    				  val like_list_builder = MongoDBList.newBuilder
-    				  like_list_builder += like
-    				
-    				  val post_builder = MongoDBObject.newBuilder
-    				  post_builder += "post_id" -> post_id
-    				  post_builder += "likes" -> like_list_builder.result
-    			
-    				  _data_connection.getCollection("post_likes") += post_builder.result
-    			} else {
-    				  val like = createLike(user_id, user_name, user_photo)
-    			
-    				  val ori = ori_likes.head
-    				  ori.get("likes").map { x => 
-      				  	if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[DBObject].getAs[String]("like_owner_id").get.equals(user_id))) {
-      				  		  x.asInstanceOf[BasicDBList].add(0, like)
-      				  		  _data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), ori);
-      				  	}
-      				  	else Unit
-    				  }.getOrElse(Unit)
-  			}
-		
-			/**
-			 * refresh user like post table
-			 */
-			val user_likes = from db() in "user_likes" where ("user_id" -> user_id) select (x => x)
-			if (user_likes.empty) {
-			  
-				val ul = MongoDBObject.newBuilder
-				ul += "user_id" -> user_id
-			  
-				val user_like_list = MongoDBList.newBuilder
-				user_like_list += post_id
-			
-				ul += "likes" -> user_like_list.result
-				_data_connection.getCollection("user_likes") += ul.result
-			  
-			} else {
-			 
-				val ul = user_likes.head
-				ul.get("likes").map { x =>
-					if (!x.asInstanceOf[BasicDBList].exists(iter => iter.asInstanceOf[String].equals(post_id))) {
-						x.asInstanceOf[BasicDBList].add(0, post_id)
-						_data_connection.getCollection("user_likes").update(DBObject("user_id" -> user_id), ul);
-					}
-					else Unit
-				}.getOrElse(Unit)
-			}
-			
-			/**
-			 * refresh main post table resent 
-			 */
-			val ori_posts = from db() in "posts" where ("post_id" -> post_id) select (x => x)
-			if (ori_posts.empty) ErrorCode.errorToJson("post token not vaild")
-			else {
-				val ori_post = ori_posts.head
-				ori_post.get("likes_count").map { x => 
-				  	val tmp : Number = x.asInstanceOf[Number].intValue + 1
-				  	ori_post += "likes_count" -> tmp
-				}.getOrElse(Unit)
-				
-				ori_post.get("likes").map { x => 
-					val new_likes = (from db() in "post_likes" where ("post_id" -> post_id)).select(x => x.get("likes").get.asInstanceOf[DBObject])
-					ori_post += "likes" -> new_likes.head.asInstanceOf[BasicDBList].take(resentLikedCount)
-				}.getOrElse(Unit)
-				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post);
-			
-				/**
-				 * push notifycations to the user
-				 */					
-				 def likeNotifycations(op : MongoDBObject) = {			
-				     var content : Map[String, JsValue] = Map.empty
-				     content += "type" -> toJson(module.common.AcitionType.like.index)
-				     content += "sender_screen_name" -> toJson(user_name)
-				     content += "sender_screen_photo" -> toJson(user_photo)
-				     content += "sender_id" -> toJson(user_id)
-				     content += "date" -> toJson(new Date().getTime)
-				     val receiver_id = op.get("owner_id").map(x => x.asInstanceOf[String]).getOrElse("")
-				     content += "receiver_id" -> toJson(receiver_id)
-				     content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
-				     content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
-				     content += "post_id" -> toJson(post_id)
-				     content += "post_item" -> toJson(op.get("items").map (x => 
-				                   x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
-      
-				     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
-                                      "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
-				 }
-			
-				 likeNotifycations(ori_posts.head)
-				QueryModule.queryLikes(data)(cur)
-			}
-		}
+  		/**
+			 * push notifycations to the user
+			 */					
+		 def likeNotifycations(op : MongoDBObject, user_name : String, user_photo : String) = {			
+		     var content : Map[String, JsValue] = Map.empty
+		     content += "type" -> toJson(module.common.AcitionType.like.index)
+		     content += "sender_screen_name" -> toJson(user_name)
+		     content += "sender_screen_photo" -> toJson(user_photo)
+		     content += "sender_id" -> toJson(user_id)
+		     content += "date" -> toJson(new Date().getTime)
+		     val receiver_id = op.get("owner_id").map(x => x.asInstanceOf[String]).getOrElse("")
+		     content += "receiver_id" -> toJson(receiver_id)
+		     content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
+		     content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
+		     content += "post_id" -> toJson(post_id)
+		     content += "post_item" -> toJson(op.get("items").map (x => 
+		                   x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+  
+		     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
+                                  "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		 }
+  	
+     /**
+  	  * refresh main post table resent 
+  	  * not need for now
+  	  */
+//		 def refreshMainPostTableForResent = {
+//  			val ori_posts = from db() in "posts" where ("post_id" -> post_id) select (x => x)
+//  			if (ori_posts.empty) ErrorCode.errorToJson("post token not vaild")
+//  			else {
+//  				val ori_post = ori_posts.head
+//  				ori_post.get("likes_count").map { x => 
+//  				  	val tmp : Number = x.asInstanceOf[Number].intValue + 1
+//  				  	ori_post += "likes_count" -> tmp
+//  				}.getOrElse(Unit)
+//  				
+//  				ori_post.get("likes").map { x => 
+//  					val new_likes = (from db() in "post_likes" where ("post_id" -> post_id)).select(x => x.get("likes").get.asInstanceOf[DBObject])
+//  					ori_post += "likes" -> new_likes.head.asInstanceOf[BasicDBList].take(resentLikedCount)
+//  				}.getOrElse(Unit)
+//  				_data_connection.getCollection("posts").update(DBObject("post_id" -> post_id), ori_post); 
+//		 }
+	
+		 	def updateUserProfile(owner_id : String) = 
+	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
+	            case head :: Nil =>  {
+	                 head.getAs[Number]("been_liked").map { x =>
+	                     head += "been_liked" -> (x.intValue + 1).asInstanceOf[Number]
+	                 }.getOrElse(head += "been_liked" -> 1.asInstanceOf[Number])
+	                
+    					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+	            }
+	            case _ => ???
+	        }
+		 
+		 def likeImpl = {
+		   	 val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
+                                          (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
+                                           x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
+                                       }).head
+                     
+         val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head			
+    		 addLikeDatabase(user_name, user_photo)
+      	 addUserLikeDatabase
+    		 likeNotifycations(op, user_name , user_photo)
+		   	 updateUserProfile(op.getAs[String]("owner_id").get)
+		 }
+		 
+		 (from db() in "post_likes" where ("post_id" -> post_id) select (x => x.getAs[MongoDBList]("likes").get)).toList match {
+			    case head :: Nil => {
+			        if (head.toList.asInstanceOf[List[BasicDBObject]].filter(iter => iter.get("like_owner_id").asInstanceOf[String].equals(user_id)).isEmpty)
+			            likeImpl
+			    }
+			    case Nil => likeImpl
+			} 
+		 
+		  QueryModule.queryLikes(data)(cur)
 	}
+	
+	  def postUnlike(data : JsValue)(cur : MongoDBObject) : JsValue = {
+        /**
+    		 * get arguments
+    		 */
+    		val post_id = (data \ "post_id").asOpt[String].get
+    		val user_id = (data \ "user_id").asOpt[String].get
+    		val auth_token = (data \ "auth_token").asOpt[String].get
+	      
+    		def removeLikeDatabase =
+    		    (from db() in "post_likes" where ("post_id" -> post_id) select (x => x)).toList match {
+    		        case head :: Nil => {
+    		            val lst = head.getAs[MongoDBList]("likes").get
+    		            val tmp = lst.filterNot (iter => iter.asInstanceOf[BasicDBObject].get("like_owner_id").asInstanceOf[String].equals(user_id)) 
+    		            head += "likes" -> tmp
+    		            
+          			    _data_connection.getCollection("post_likes").update(DBObject("post_id" -> post_id), head);
+    		        }
+    		        case Nil => Unit
+    		        case _ => ???
+    		    }
+    		
+    		def removeUserLikeDatabase =
+    		    (from db() in "user_likes" where ("user_id" -> user_id) select (x => x)) toList match {
+    		        case head :: Nil => {
+    		            val lst = head.getAs[MongoDBList]("likes").get
+    		            val tmp = lst.filterNot (iter => iter.asInstanceOf[String].equals(post_id))
+    		            head += "likes" -> tmp
+    		            
+          			    _data_connection.getCollection("user_likes").update(DBObject("user_id" -> user_id), head);
+    		        }
+    		        case Nil => Unit
+    		        case _ => ???
+    		    }
+    	
+    		def unlikeNotifycations(op : MongoDBObject, user_name : String, user_photo : String) = {			
+           var content : Map[String, JsValue] = Map.empty
+           content += "type" -> toJson(module.common.AcitionType.unlike.index)
+           content += "sender_screen_name" -> toJson(user_name)
+           content += "sender_screen_photo" -> toJson(user_photo)
+           content += "sender_id" -> toJson(user_id)
+           content += "date" -> toJson(new Date().getTime)
+           val receiver_id = op.get("owner_id").map(x => x.asInstanceOf[String]).getOrElse("")
+           content += "receiver_id" -> toJson(receiver_id)
+           content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
+           content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
+           content += "post_id" -> toJson(post_id)
+           content += "post_item" -> toJson(op.get("items").map (x => 
+                             x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+          
+           ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
+                                  "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		    }
+    		
+    		def updateUserProfile(owner_id : String) = 
+  	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
+  	            case head :: Nil =>  {
+  	                 head.getAs[Number]("been_liked").map { x =>
+  	                     head += "been_liked" -> (x.intValue - 1).asInstanceOf[Number]
+  	                 }.getOrElse(head += "been_liked" -> 0.asInstanceOf[Number])
+  	                
+      					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+  	            }
+  	            case _ => ???
+  	        }
+    		
+    		def unlikeImpl = {
+    		   val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
+                                          (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
+                                           x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
+                                       }).head
+    		    
+           val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head			
+      		 removeLikeDatabase
+        	 removeUserLikeDatabase
+      		 unlikeNotifycations(op, user_name , user_photo)
+  		   	 updateUserProfile(op.getAs[String]("owner_id").get)
+    		}
+    	
+    	  (from db() in "post_likes" where ("post_id" -> post_id) select (x => x.getAs[MongoDBList]("likes").get)).toList match {
+			      case head :: Nil => {
+			          if (!head.toList.asInstanceOf[List[BasicDBObject]].filter(iter => iter.get("like_owner_id").asInstanceOf[String].equals(user_id)).isEmpty)
+			            unlikeImpl
+			      }
+			      case Nil => unlikeImpl
+			  } 
+		 
+		    QueryModule.queryLikes(data)(cur)
+	  }
+	   
+	  def postUnpush (data : JsValue)(cur : MongoDBObject) : JsValue = {
+	      /**
+    		 * get arguments
+    		 */
+    		val post_id = (data \ "post_id").asOpt[String].get
+    		val user_id = (data \ "user_id").asOpt[String].get
+    		val auth_token = (data \ "auth_token").asOpt[String].get
+	      
+    		def removePushDatabase =
+    		    (from db() in "post_push" where ("post_id" -> post_id) select (x => x)).toList match {
+    		        case head :: Nil => {
+    		            val lst = head.getAs[MongoDBList]("push").get
+    		            val tmp = lst.filterNot (iter => iter.asInstanceOf[BasicDBObject].get("push_owner_id").asInstanceOf[String].equals(user_id)) 
+    		            head += "push" -> tmp
+    		            
+          			    _data_connection.getCollection("push_likes").update(DBObject("post_id" -> post_id), head);
+    		        }
+    		        case Nil => Unit
+    		        case _ => ???
+    		    }
+    		
+    		def removeUserPushDatabase =
+    		    (from db() in "user_push" where ("user_id" -> user_id) select (x => x)) toList match {
+    		        case head :: Nil => {
+    		            val lst = head.getAs[MongoDBList]("push").get
+    		            val tmp = lst.filterNot (iter => iter.asInstanceOf[String].equals(post_id))
+    		            head += "push" -> tmp
+    		            
+          			    _data_connection.getCollection("user_push").update(DBObject("user_id" -> user_id), head);
+    		        }
+    		        case Nil => Unit
+    		        case _ => ???
+    		    }
+    		
+    		def unpushNotifycations(op : MongoDBObject, user_name : String, user_photo : String) = {			
+           var content : Map[String, JsValue] = Map.empty
+           content += "type" -> toJson(module.common.AcitionType.unlike.index)
+           content += "sender_screen_name" -> toJson(user_name)
+           content += "sender_screen_photo" -> toJson(user_photo)
+           content += "sender_id" -> toJson(user_id)
+           content += "date" -> toJson(new Date().getTime)
+           val receiver_id = op.get("owner_id").map(x => x.asInstanceOf[String]).getOrElse("")
+           content += "receiver_id" -> toJson(receiver_id)
+           content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
+           content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
+           content += "post_id" -> toJson(post_id)
+           content += "post_item" -> toJson(op.get("items").map (x => 
+                             x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+          
+           ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
+                                  "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		    }
+    		
+    		def updateUserProfile(owner_id : String) = 
+  	        (from db() in "user_profile" where ("user_id" -> owner_id) select (x => x)).toList match {
+  	            case head :: Nil =>  {
+  	                 head.getAs[Number]("been_pushed").map { x =>
+  	                     head += "been_pushed" -> (x.intValue - 1).asInstanceOf[Number]
+  	                 }.getOrElse(head += "been_pushed" -> 0.asInstanceOf[Number])
+  	                
+      					    _data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+  	            }
+  	            case _ => ???
+  	        }
+    		
+    		def unpushImpl = {
+    		   val (user_name, user_photo) = (from db() in "user_profile" where ("user_id" -> user_id) select { x => 
+                                          (x.get("screen_name").map(y => y.asInstanceOf[String]).getOrElse(""),
+                                           x.get("screen_photo").map(y => y.asInstanceOf[String]).getOrElse(""))
+                                       }).head
+    		    
+           val op = (from db() in "posts" where ("post_id" -> post_id) select (x => x)).head			
+      		 removePushDatabase
+        	 removeUserPushDatabase
+      		 unpushNotifycations(op, user_name , user_photo)
+  		   	 updateUserProfile(op.getAs[String]("owner_id").get)
+    		}
+	       
+	      (from db() in "post_push" where ("post_id" -> post_id) select (x => x.getAs[MongoDBList]("push").get)).toList match {
+			      case head :: Nil => {
+			          if (!head.toList.asInstanceOf[List[BasicDBObject]].filter(iter => iter.get("push_owner_id").asInstanceOf[String].equals(user_id)).isEmpty)
+			            unpushImpl
+			      }
+			      case Nil => unpushImpl
+			  } 
+		 
+		    QueryModule.queryPush(data)
+	  }
 }

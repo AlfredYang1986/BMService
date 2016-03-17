@@ -11,6 +11,7 @@ import com.mongodb.casbah.Imports._
 import module.common.helpOptions
 import module.relationship._
 import module.login.LoginModule
+import module.query.QueryModule
 
 import akka.actor.{Actor, Props}
 import play.api.libs.concurrent.Akka
@@ -111,7 +112,7 @@ object ProfileModule {
 			var tmp = Map.empty[String, JsValue]
 			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
 			        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-			        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+			        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked" :: Nil)
 					.foreach { x => 
 					    tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
                   if (str.equals("gender")) toJson(0)
@@ -167,12 +168,14 @@ object ProfileModule {
 				var tmp = Map.empty[String, JsValue]
 				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
 				        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-				        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+				        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked" :: Nil)
 					.foreach { x => tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
                   if (str.equals("gender")) toJson(0)
                   else toJson(""))}
 					
 				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
+			  tmp += "likes_count" -> toJson(QueryModule.queryUserLikesCount(query_user_id).intValue)
+				
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(tmp)))
 			}
 	}

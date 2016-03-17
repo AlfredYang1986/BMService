@@ -26,6 +26,8 @@ POST	/post/uploadFile							controllers.postController.uploadFile
 POST	/post/postComment							controllers.postController.postComment
 POST	/post/postLike								controllers.postController.postLike
 POST	/post/postPush								controllers.postController.postPush
+POST	/post/postUnlike							controllers.postController.postUnlike
+POST	/post/postUnpush					 		controllers.postController.postUnpush
 
 # query module
 GET		/query/downloadFile/*name					controllers.queryController.downloadFile(name)
