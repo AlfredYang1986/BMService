@@ -8,7 +8,8 @@ import com.mongodb.casbah.Imports._
 object helpOptions {
 	def opt_2_js(value : Option[AnyRef], key : String) : JsValue = { 
 		def opt_str_2_js(value : String) : JsValue = toJson(value)
-		def opt_val_2_js(value : Number) : JsValue = toJson(value.longValue())
+		def opt_val_2_js(value : Number) : JsValue = if (value.isInstanceOf[java.lang.Double]) toJson(value.doubleValue)
+		                                             else toJson(value.longValue)
 		def opt_map_2_js(value : BasicDBList, key : String) : JsValue = {
 			def key2List : List[String] = key match {
 				case "items" => List("type", "name")
@@ -36,7 +37,7 @@ object helpOptions {
 		}
 	 
 		value.map ( x => x match {
-			case str : String => opt_str_2_js(str)
+			  case str : String => opt_str_2_js(str)
 		  	case list : BasicDBList => opt_map_2_js(list, key)
 		  	case n : Number => opt_val_2_js(n)
 		  	case _ => ??? 
@@ -45,7 +46,8 @@ object helpOptions {
 	
 	def opt_2_js_2(value : Option[AnyRef], key : String)(func : String => JsValue) : JsValue = { 
 		def opt_str_2_js(value : String) : JsValue = toJson(value)
-		def opt_val_2_js(value : Number) : JsValue = toJson(value.longValue())
+		def opt_val_2_js(value : Number) : JsValue = if (value.isInstanceOf[java.lang.Double]) toJson(value.doubleValue)
+		                                             else toJson(value.longValue)
 		def opt_map_2_js(value : BasicDBList, key : String) : JsValue = {
 			def key2List : List[String] = key match {
 				case "items" => List("type", "name")
@@ -70,9 +72,9 @@ object helpOptions {
 			}
 			Json.toJson(xls)
 		}
-	 
+	
 		value.map ( x => x match {
-			case str : String => opt_str_2_js(str)
+			  case str : String => opt_str_2_js(str)
 		  	case list : BasicDBList => opt_map_2_js(list, key)
 		  	case n : Number => opt_val_2_js(n)
 		  	case _ => ??? 
