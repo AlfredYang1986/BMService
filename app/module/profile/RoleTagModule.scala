@@ -81,7 +81,7 @@ object RoleTagModule {
 //		if (user_check.count == 0) ErrorCode.errorToJson("user not existing")
 //		else {
 		  var result : List[JsValue] = Nil
-      val tag = ((from db() in "role_tags" where ("tag_name" $regex ("^" + role_tag))).select(x => x.getAs[String]("tag_name").get)).toList
+      val tag = ((from db() in "role_tags" where ("tag_name" $regex ("(?!)" + role_tag))).select(x => x.getAs[String]("tag_name").get)).toList
       tag.map (x => result = (queryPreViewWithRoleTag(x) :: Nil).filterNot(_ == null) ::: result)
 			toJson(Map("status" -> toJson("ok"), "preview" -> toJson(result)))
 //		}
