@@ -49,7 +49,8 @@ object QueryModule {
 
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
-	  	  
+	  	 
+	  	  println(ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get))
 	  	  tmp += "role_tag" -> toJson((ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)).get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
 	  	  
 		  	xls = xls :+ toJson(tmp)
@@ -106,6 +107,7 @@ object QueryModule {
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
 	  	
+	  	  println(ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get))
 	  	  tmp += "role_tag" -> toJson((ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)).get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
 
 		  	xls = xls :+ toJson(tmp)
