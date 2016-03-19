@@ -50,8 +50,9 @@ object QueryModule {
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
 	  	 
-	  	  println(ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get))
-	  	  tmp += "role_tag" -> toJson((ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)).get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
+	  	  val profile = ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)
+	  	  if (profile == null) tmp += "role_tag" -> toJson("")
+	  	  else tmp += "role_tag" -> toJson(profile.get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
 	  	  
 		  	xls = xls :+ toJson(tmp)
 		}
@@ -107,9 +108,9 @@ object QueryModule {
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
 	  
-	  	  println(tmp.get("owner_id").get.asOpt[String].get)
-	  	  println(ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get))
-	  	  tmp += "role_tag" -> toJson((ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)).get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
+	  	  val profile = ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)
+	  	  if (profile == null) tmp += "role_tag" -> toJson("")
+	  	  else tmp += "role_tag" -> toJson(profile.get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
 
 		  	xls = xls :+ toJson(tmp)
 		}	
