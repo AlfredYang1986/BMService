@@ -240,11 +240,17 @@ object GroupModule2 {
 	def queryPhotoListAndCount(post_id : String) : (List[JsValue], Int) = {
 	    (from db() in "groups" where ("post_id" -> post_id) select { x => 
 	        x.getAs[MongoDBList]("joiners").map { y => 
-	           (y.toList.take(3).map ( z => toJson(z.asInstanceOf[String])), y.count(_ => true))
+	           (y.toList.take(3).map ( z => z.asInstanceOf[String]), y.count(_ => true))
 	        }.getOrElse((Nil, 0))
 	    }).toList match {
 	        case Nil => (Nil, 0)
-	        case head :: Nil => head
+	        case (lst, count) :: Nil => {
+	            var conditions : DBObject = null
+	            lst.foreach ( iter => if (conditions == null) conditions = "user_id" $eq iter
+	                                  else conditions = $or("user_id" $eq iter, conditions))
+	                                  
+	            ((from db() in "user_profile" where conditions select (x => toJson(x.getAs[String]("screen_photo").get))).toList, count)
+	        }
 	        case _ => ???
 	    }
 	}
