@@ -107,7 +107,7 @@ object QueryModule {
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
 	  	  
-	  	  val role_tag = ProfileModule.queryUserProfile(user_id).get("role_tag").get
+	  	  val role_tag = ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)
 	  	  tmp += "role_tag" -> toJson(role_tag)
 
 		  	xls = xls :+ toJson(tmp)
