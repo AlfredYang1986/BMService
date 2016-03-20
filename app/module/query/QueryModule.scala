@@ -172,13 +172,14 @@ object QueryModule {
 	    
 	    val user_id = (data \ "user_id").asOpt[String].get
 	    val auth_token = (data \ "auth_token").asOpt[String].get
-	    
+	   
+	    val owner_id = (data \ "owner_id").asOpt[String].get
       val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
 		  val skip = (data \ "skip").asOpt[Int].map(x => x).getOrElse(0)
 		  val take = (data \ "take").asOpt[Int].map(x => x).getOrElse(20)
 		 
 		  var conditions : DBObject = null
-		  (from db() in "user_push" where ("user_id" -> user_id)).selectSkipTop(skip)(take)("data") { x => 
+		  (from db() in "user_push" where ("user_id" -> owner_id)).selectSkipTop(skip)(take)("data") { x => 
 		      x.getAs[MongoDBList]("push").map { lst =>
 		           lst.toList foreach { iter =>
 		                 val post_id = iter.asInstanceOf[String]
