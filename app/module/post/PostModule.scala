@@ -348,10 +348,12 @@ object PostModule {
 				     content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
 				     content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
 				     content += "post_id" -> toJson(post_id)
-				     content += "post_item" -> toJson(op.get("items").map (x => 
-				                   x.asInstanceOf[BasicDBList].toList.filter (iter => 
-				                         iter.asInstanceOf[BasicDBObject].get("type").asInstanceOf[Number].intValue == 1)
-				                         .head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+				     content += "post_item" -> toJson(op.get("items").map {x => 
+				                   println(x)
+				                   x.asInstanceOf[BasicDBList].toList.filter {iter => 
+				                         println(iter)
+				                         iter.asInstanceOf[BasicDBObject].get("type").asInstanceOf[Number].intValue == 1}
+				                         .head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse("")})
 //				                   x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
       
 				     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
@@ -487,10 +489,14 @@ object PostModule {
 		     content += "receiver_screen_name" -> toJson(op.get("owner_name").map(x => x.asInstanceOf[String]).getOrElse(""))
 		     content += "receiver_screen_photo" -> toJson(op.get("owner_photo").map(x => x.asInstanceOf[String]).getOrElse(""))
 		     content += "post_id" -> toJson(post_id)
-				 content += "post_item" -> toJson(op.get("items").map (x => 
-				                   x.asInstanceOf[BasicDBList].toList.filter (iter => 
-				                         iter.asInstanceOf[BasicDBObject].get("type").asInstanceOf[Number].intValue == 1)
-				                         .head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
+				 content += "post_item" -> toJson(op.get("items").map {x => 
+				                   println(123)
+				                   println(x)
+				                   x.asInstanceOf[BasicDBList].toList.filter {iter =>
+				                         println(456)
+				                         println(iter)
+				                         iter.asInstanceOf[BasicDBObject].get("type").asInstanceOf[Number].intValue == 1}
+				                         .head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse("")})
 //				                   x.asInstanceOf[BasicDBList].head.asInstanceOf[BasicDBObject].get("name").asInstanceOf[String]).getOrElse(""))
   
 		     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
