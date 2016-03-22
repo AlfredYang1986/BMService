@@ -8,7 +8,7 @@ import controllers.common.requestArgsQuery.{requestArgs, requestArgsWithAuthChec
 
 object roleTagController extends Controller {
 	def queryAllRoleTags = Action (request => requestArgs(request)(RoleTagModule.queryAllRoleTags))
-	def addRoleTag = Action (request => requestArgsWithAuthCheck(request)(RoleTagModule.addRoleTags))
+	def addRoleTag = Action (request => requestArgs(request)(RoleTagModule.addRoleTags))
 	def queryRecommandRoleTags = Action (request => requestArgs(request)(RoleTagModule.queryAllRoleTags))
 	def queryRoleTagPreViewWithRoleTag = Action (request => requestArgsWithAuthCheck(request)(RoleTagModule.queryRoleTagPreViewWithRoleTag))
 }

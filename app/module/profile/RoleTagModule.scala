@@ -24,11 +24,11 @@ object RoleTagModule {
 		      	toJson(x.getAs[String]("tag_name").get)).toList)))
 	}
 	
-//	def addRoleTags(data : JsValue) : JsValue = {
-	def addRoleTags(data : JsValue)(cur : MongoDBObject) : JsValue = {
+	def addRoleTags(data : JsValue) : JsValue = {
+//	def addRoleTags(data : JsValue)(cur : MongoDBObject) : JsValue = {
 	  
-		val user_id = (data \ "user_id").asOpt[String].get
-		val auth_token = (data \ "auth_token").asOpt[String].get
+//		val user_id = (data \ "user_id").asOpt[String].get
+//		val auth_token = (data \ "auth_token").asOpt[String].get
 		
 		val tag_name = (data \ "tag_name").asOpt[String].get
 	  
