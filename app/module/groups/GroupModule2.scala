@@ -88,9 +88,14 @@ object GroupModule2 {
   		  case _ => ErrorCode.errorToJson("create chat group error")		// error or no response
   		}}.getOrElse(ErrorCode.errorToJson("create chat group error"))	    
 		}
-  			      
-		if (isChatGroupExisting) Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
+  			     
+		if (isChatGroupExisting) 
+		    joinChatGroup(toJson(Map("user_id" -> toJson(user_id), 
+		            "auth_token" -> toJson(auth_token), "group_id" -> toJson(group_id))))
 		else createChatGroupImpl
+		
+//		if (isChatGroupExisting) Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
+//		else createChatGroupImpl
 	}
 	def updateChatGroup(data : JsValue) : JsValue = {
 
