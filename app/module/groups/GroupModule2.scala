@@ -29,8 +29,8 @@ import akka.actor.ActorRef
 import module.notification.{ DDNActor, DDNCreateChatGroup, DDNDismissChatGroup }
 import scala.concurrent.Future
 import scala.concurrent.Await
-
 import module.profile.ProfileModule
+import Decoder.BASE64Encoder
 
 object GroupModule2 {
 
@@ -53,8 +53,10 @@ object GroupModule2 {
 		        case x : List[Long] => group_id = x.head; true
 		    }
 		
+		lazy val encode = new BASE64Encoder().encode(group_name.getBytes)
+		
 		def createChatGroupImpl : JsValue = {
-			val result = Await.result((ddn ? DDNCreateChatGroup("groupName" -> toJson(group_name))).mapTo[JsValue], timeout.duration)
+			val result = Await.result((ddn ? DDNCreateChatGroup("groupName" -> toJson(encode))).mapTo[JsValue], timeout.duration)
 
   		(result \ "status").asOpt[Int].map { status => status match {
   		  case 200 => {		// success
