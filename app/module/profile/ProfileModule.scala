@@ -86,7 +86,10 @@ object ProfileModule {
 //					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
 					  		user += x -> value
 					  		result += x -> toJson(value)
-//					  	}
+					  		if (x == "role_tag") {
+					  		    RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))    
+					  		}
+//					    }
 					}.getOrElse(Unit)
 				}
 				
