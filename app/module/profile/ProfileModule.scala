@@ -74,6 +74,7 @@ object ProfileModule {
 				result += "screen_name" -> toJson(screen_name)
 				result += "screen_photo" -> toJson(screen_photo)
 				result += "role_tag" -> toJson(role_tag)
+        RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))    
 			
 				_data_connection.getCollection("user_profile") += builder.result
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
