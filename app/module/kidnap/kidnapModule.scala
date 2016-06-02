@@ -58,12 +58,15 @@ object kidnapModule {
   	            location += "longtitude" -> (loc \ "longtitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
   	        }.getOrElse(throw new Exception("wrong input"))
   	        service_builder += "location" -> location.result
-  	       
+  	        
+  	        service_builder += "comments" -> MongoDBList.newBuilder.result
   	        (data \ "title").asOpt[String].map (tmp => service_builder += "title" -> tmp).getOrElse(throw new Exception("wrong input"))
   	        (data \ "description").asOpt[String].map (tmp => service_builder += "description" -> tmp).getOrElse("")
   	        (data \ "capacity").asOpt[Int].map (tmp => service_builder += "capacity" -> tmp).getOrElse(0.intValue)
+  	        (data \ "price").asOpt[Float].map (tmp => service_builder += "price" -> tmp).getOrElse(0.floatValue)
 
   	        service_builder += "status" -> kidnapServiceStatus.offine.t
+  	        service_builder += "rate" -> 0.floatValue
   	        
   	        service_builder += "reserve1" -> ""
   	        service_builder += "reserve2" -> ""
@@ -110,6 +113,7 @@ object kidnapModule {
             (data \ "title").asOpt[String].map (x => origin += "title" -> x).getOrElse(Unit)
             (data \ "description").asOpt[String].map (x => origin += "description" -> x).getOrElse(Unit)
             (data \ "capacity").asOpt[Int].map (x => origin += "capacity" -> x.asInstanceOf[Number]).getOrElse(Unit)
+            (data \ "price").asOpt[Float].map (x => origin += "price" -> x.asInstanceOf[Number]).getOrElse(Unit)
 
             (data \ "location").asOpt[JsValue].map { loc =>
                 val location = MongoDBObject.newBuilder
