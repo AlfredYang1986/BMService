@@ -23,6 +23,7 @@ object kidnapServiceStatus {
     case object none extends kidnapServiceStatusDefines(0, "none")
     case object offine extends kidnapServiceStatusDefines(1, "offine")
     case object online extends kidnapServiceStatusDefines(2, "online")
+    case object removed extends kidnapServiceStatusDefines(3, "removed")
 }
 
 sealed abstract class kidnapServiceStatusDefines(val t : Int, val des : String)
@@ -37,11 +38,8 @@ class kidnapActor extends Actor {
   	implicit val timeout = Timeout(2 second)
  
   	def receive = {
-        case push(data, origin) => {
-              
-        }
-        
-        case pop(data, origin) => {
+        case push(data, origin) => sender ! kidnapModule.pushKidnapServiceImpl(data, origin)
+        case pop(data, origin) => sender ! kidnapModule.popKidnapServiceImpl(data, origin)
           
         }
         
@@ -78,6 +76,14 @@ class kidnapNoneProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
 class kidnapOfflineProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
   	def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
     def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+}
+
+class kidnapRemovedProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
+  	def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
 }
 
 class kidnapOnlineProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
