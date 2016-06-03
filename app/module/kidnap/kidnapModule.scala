@@ -26,7 +26,7 @@ object kidnapModule {
                             case head :: Nil => (head.getAs[Number]("status").get.intValue, head)
                             case _ => null
                           }
-          case None => null
+          case None => (kidnapServiceStatus.none.t, null)
         }
     }
   
@@ -36,7 +36,6 @@ object kidnapModule {
   	}
   	
   	def pushKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : JsValue = {
-  	  
   	    try {
       	    val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("user not existing"))
   	        val service_id = Sercurity.md5Hash(owner_id + Sercurity.getTimeSpanWithMillSeconds)
@@ -168,6 +167,62 @@ object kidnapModule {
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
             toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
+  	      
+  	    } catch {
+  	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+  	    }
+  	}
+  	
+  	def DB2JsValue(x : MongoDBObject) : JsValue = 
+  	    if (x == null) ErrorCode.errorToJson("service not existing")
+  	    else toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get),
+  	               "title" -> toJson(x.getAs[String]("title").get),
+  	               "description" -> toJson(x.getAs[String]("description").get),
+  	               "capacity" -> toJson(x.getAs[Number]("capacity").get.intValue),
+  	               "price" -> toJson(x.getAs[Number]("price").get.floatValue),
+  	               "owner_id" -> toJson(x.getAs[String]("owner_id").get),
+  	               "offer_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("start").get.longValue),
+  	                                          "end" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("end").get.longValue))),
+  	               "location" -> toJson(Map("latitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("latitude").get.floatValue),
+  	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue)))
+  	               ))
+  
+  	def queryKidnapServiceDetail(data : JsValue) : JsValue = {
+  	    try {
+  	        val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("service not existing"))
+  	     
+      	    toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+      	        (from db() in "kidnap" where ("service_id" -> service_id) select (DB2JsValue(_))).head)))
+  	      
+  	    } catch {
+  	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+  	    }
+  	}
+  	               
+  	def searchKidnapService(data : JsValue) : JsValue = {
+  	    try {
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	       
+  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+      	        (from db() in "kidnap" where ("status" -> kidnapServiceStatus.online.t)).
+      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
+  	      
+  	    } catch {
+  	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+  	    }
+  	}
+  	
+  	def mineKidnapService(data : JsValue) : JsValue = {
+  	    try {
+  	        val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	       
+  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+      	        (from db() in "kidnap" where ("owner_id" -> owner_id)).
+      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
   	      
   	    } catch {
   	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)

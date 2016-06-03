@@ -40,57 +40,46 @@ class kidnapActor extends Actor {
   	def receive = {
         case push(data, origin) => sender ! kidnapModule.pushKidnapServiceImpl(data, origin)
         case pop(data, origin) => sender ! kidnapModule.popKidnapServiceImpl(data, origin)
-          
-        }
-        
-        case update(data, origin) => {
-          
-        }
-        
-        case publish(data, origin) => {
-          
-        }
-        
-        case revert(data, origin) => {
-          
-        }
+        case update(data, origin) => sender ! kidnapModule.updateKidnapServiceImpl(data, origin)
+        case publish(data, origin) => sender ! kidnapModule.publishKidnapServiceImpl(data, origin)
+        case revert(data, origin) => sender ! kidnapModule.revertKidnapServiceImpl(data, origin)
     }
 }
 
 case class kidnapProp(val kidnap : ActorRef) {
   	implicit val timeout = Timeout(2 second)
-  	def push(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? push(data, origin)).mapTo[JsValue], timeout.duration)  
-  	def pop(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? pop(data, origin)).mapTo[JsValue], timeout.duration)  
-  	def update(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? update(data, origin)).mapTo[JsValue], timeout.duration)  
-  	def publish(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? publish(data, origin)).mapTo[JsValue], timeout.duration)  
-  	def revert(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? revert(data, origin)).mapTo[JsValue], timeout.duration)  
+  	def push(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? module.kidnap.push(data, origin)).mapTo[JsValue], timeout.duration)
+  	def pop(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? module.kidnap.pop(data, origin)).mapTo[JsValue], timeout.duration)  
+  	def update(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? module.kidnap.update(data, origin)).mapTo[JsValue], timeout.duration)  
+  	def publish(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? module.kidnap.publish(data, origin)).mapTo[JsValue], timeout.duration)  
+  	def revert(data : JsValue, origin : MongoDBObject) : JsValue = Await.result((kidnap ? module.kidnap.revert(data, origin)).mapTo[JsValue], timeout.duration)  
 }
 
-class kidnapNoneProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
-    def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+class kidnapNoneProp(kidnap : ActorRef) extends kidnapProp(kidnap) {
+    override def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
 }
 
-class kidnapOfflineProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
-  	def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+class kidnapOfflineProp(kidnap : ActorRef) extends kidnapProp(kidnap) {
+  	override def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
 }
 
-class kidnapRemovedProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
-  	def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-  	def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-  	def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-  	def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-  	def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+class kidnapRemovedProp(kidnap : ActorRef) extends kidnapProp(kidnap) {
+  	override def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	override def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	override def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	override def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+  	override def revert(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
 }
 
-class kidnapOnlineProp(val kidnap : ActorRef) extends kidnapProp(kidnap) {
-  	def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
-    def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+class kidnapOnlineProp(kidnap : ActorRef) extends kidnapProp(kidnap) {
+  	override def push(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def pop(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def update(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
+    override def publish(data : JsValue, origin : MongoDBObject) : JsValue = ErrorCode.errorToJson("not allowed")
 }
 
 object kidnapProp {
@@ -99,6 +88,7 @@ object kidnapProp {
             case kidnapServiceStatus.none.t => new kidnapNoneProp(kidnapCenter.get)
             case kidnapServiceStatus.offine.t => new kidnapOfflineProp(kidnapCenter.get)
             case kidnapServiceStatus.online.t => new kidnapOnlineProp(kidnapCenter.get)
+            case kidnapServiceStatus.removed.t => new kidnapRemovedProp(kidnapCenter.get)
             case _ => ???
         }
     }

@@ -2,8 +2,7 @@ package controllers
 
 import play.api.mvc._
 
-import module.groups.GroupModule
-import module.groups.GroupModule2
+import module.kidnap.kidnapModule
 
 import controllers.common.requestArgsQuery.{requestArgs}
 
@@ -17,12 +16,13 @@ object kidnapController extends Controller {
      * 4. publish 把离线的任务发布出去，发布了之后服务的所有内容全部是只读
      * 5. revert 将任务变为离线，已经订单没有处理的任务不允许离线
      */
-  	def pushKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
-  	def popKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
-  	def updateKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
-  	def publishKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
-  	def revertKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
+  	def pushKidnapService = Action (request => requestArgs(request)(kidnapModule.pushKidnapService))
+  	def popKidnapService = Action (request => requestArgs(request)(kidnapModule.popKidnapService))
+  	def updateKidnapService = Action (request => requestArgs(request)(kidnapModule.updateKidnapService))
+  	def publishKidnapService = Action (request => requestArgs(request)(kidnapModule.publishKidnapService))
+  	def revertKidnapService = Action (request => requestArgs(request)(kidnapModule.revertKidnapService))
 
-  	def searchKidnapService = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
-  	def queryKidnapServiceDetail = Action (request => requestArgs(request)(GroupModule2.createChatGroup))
+  	def searchKidnapService = Action (request => requestArgs(request)(kidnapModule.searchKidnapService))
+  	def queryKidnapServiceDetail = Action (request => requestArgs(request)(kidnapModule.queryKidnapServiceDetail))
+  	def mineKidnapServiceDetail = Action (request => requestArgs(request)(kidnapModule.mineKidnapService))
 }
