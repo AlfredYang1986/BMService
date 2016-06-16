@@ -110,5 +110,20 @@ POST	/schools/addRoleTag							controllers.schoolsController.addOneSchool
 # email module
 POST	/email/sendPrivacy							controllers.emailController.sendEmail
 
+# kidnap service module
+POST	/kidnap/push								controllers.kidnapController.pushKidnapService
+POST	/kidnap/pop 								controllers.kidnapController.popKidnapService
+POST	/kidnap/publish								controllers.kidnapController.publishKidnapService
+POST	/kidnap/revert								controllers.kidnapController.revertKidnapService
+POST	/kidnap/update								controllers.kidnapController.updateKidnapService
+
+POST	/kidnap/search								controllers.kidnapController.searchKidnapService
+POST	/kidnap/mine								controllers.kidnapController.mineKidnapServiceDetail
+POST	/kidnap/detail								controllers.kidnapController.queryKidnapServiceDetail
+
+# expose abuse content and users
+POST 	/expose/user								controllers.exposeController.expostUser
+POST 	/expose/content								controllers.exposeController.expostContent
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

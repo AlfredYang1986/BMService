@@ -22,6 +22,8 @@ object ErrorCode {
   		new ErrorNode("already friends", -12, "these two people are already friends"),
   		new ErrorNode("create chat group error", -13, "create chat group error"),
   		new ErrorNode("dismiss chat group error", -14, "dismiss chat group error"),
+  		new ErrorNode("not allowed", -15, "operation not allowed"),
+  		new ErrorNode("service not existing", -16, "service not exist"),
 
   		new ErrorNode("unknown error", -999, "unknown error")
   	)
