@@ -85,10 +85,17 @@ object LoginModule {
 //		smsModule().sendSMS(phoneNo, code.toString)
 		
 		/**
-		 * return 
+		 * is register 
 		 */
+		val is_reg = (from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)).toList match {
+		                case Nil => false
+		                case _ => true
+		             }
+		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				toJson(Map("reg_token" -> toJson(reg_token), "phoneNo" -> toJson(phoneNo)))))
+				toJson(Map("reg_token" -> toJson(reg_token), 
+				           "phoneNo" -> toJson(phoneNo),
+				           "is_reg" -> toJson(is_reg)))))
 	}
 
 	def authComfirm(data : JsValue) : JsValue = {
