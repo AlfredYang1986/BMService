@@ -27,18 +27,18 @@ class DDNActor extends Actor {
 	}
 	
 	def receive = {
-	  case DDNInit => DDNNotification.getAuthTokenForXMPP
+	  case DDNInit => DDNEMNotification.getAuthTokenForEM //DDNNotification.getAuthTokenForXMPP
 	  case notify : DDNNotifyUsers => {
 		  DDNNotification.nofity(parameters2Map(notify.parameters.toList))
 	  }
 	  case create : DDNCreateChatRoom => {
-		  sender ! DDNNotification.createChatRoom(parameters2Map(create.parameters.toList))
+		  sender ! DDNEMNotification.createChatRoom(parameters2Map(create.parameters.toList))
 	  }
 	  case dismiss : DDNDismissChatRoom => {
 		  sender ! DDNNotification.dismissChatRoom(parameters2Map(dismiss.parameters.toList))
 	  }
 	  case cg : DDNCreateChatGroup => {
-	    sender ! DDNNotification.createChatGroup(parameters2Map(cg.parameters.toList))     
+	    sender ! DDNEMNotification.createChatGroup(parameters2Map(cg.parameters.toList))     
 	  }
 	  case dg : DDNDismissChatGroup => { 
 	    sender ! DDNNotification.dismissChatGroup(parameters2Map(dg.parameters.toList))     

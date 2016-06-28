@@ -26,7 +26,7 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
 import akka.actor.ActorRef
-import module.notification.{ DDNActor, DDNCreateChatGroup, DDNDismissChatGroup }
+import module.notification.{ DDNActor, DDNCreateChatGroup, DDNDismissChatGroup, DDNCreateChatRoom }
 import scala.concurrent.Future
 import scala.concurrent.Await
 import module.profile.ProfileModule
@@ -45,52 +45,49 @@ object GroupModule2 {
 		val post_id = (data \ "post_id").asOpt[String].get
 		val owner_id = (data \ "owner_id").asOpt[String].get
 
-		var group_id : Long = -1
+		var group_id : String = ""
 		
 		def isChatGroupExisting : Boolean = 
-		    (from db() in "groups" where ("post_id" -> post_id) select (x => x.getAs[Long]("group_id").get)).toList match {
+		    (from db() in "groups" where ("post_id" -> post_id) select (x => x.getAs[String]("group_id").get)).toList match {
 		        case Nil => false
-		        case x : List[Long] => group_id = x.head; true
+		        case x : List[String] => group_id = x.head; true
 		    }
 		
 		lazy val encode = new BASE64Encoder().encode(group_name.getBytes)
 		
 		def createChatGroupImpl : JsValue = {
-			val result = Await.result((ddn ? DDNCreateChatGroup("groupName" -> toJson(encode))).mapTo[JsValue], timeout.duration)
+//			val result = Await.result((ddn ? DDNCreateChatGroup("groupName" -> toJson(encode))).mapTo[JsValue], timeout.duration)
+			val result = Await.result((ddn ? DDNCreateChatGroup ("groupName" -> toJson(encode))).mapTo[JsValue], timeout.duration)
 
-  		(result \ "status").asOpt[Int].map { status => status match {
-  		  case 200 => {		// success
-  			  // get group_id
-  			  val group_id = ((result \ "entity").asOpt[JsValue].get \ "groupId").asOpt[Long].get
+			(result \ "data").asOpt[JsValue].map { x => 
+			     group_id = (x \ "groupid").asOpt[String].get 
+			     
+			     val builder = MongoDBObject.newBuilder
+    			 builder += "group_name" -> group_name
+  			   builder += "group_id" -> group_id
+  			   builder += "owner_id" -> owner_id 
+  			   builder += "post_id" -> post_id
   			  
-  			  val builder = MongoDBObject.newBuilder
-  			  builder += "group_name" -> group_name
-  			  builder += "group_id" -> group_id
-  			  builder += "owner_id" -> owner_id 
-  			  builder += "post_id" -> post_id
-  			  
-  			  builder += "post_thumb" -> (from db() in "posts" where ("post_id" -> post_id) select { x => 
+  			   builder += "post_thumb" -> (from db() in "posts" where ("post_id" -> post_id) select { x => 
                             			      x.getAs[MongoDBList]("items").map (lst => lst.toSeq.filter {iter =>
                             			           iter.asInstanceOf[BasicDBObject].getAs[Int]("type").get == 0}.head).getOrElse(???)
                           	    		  }).toList.head.asInstanceOf[DBObject].get("name")
                           	    		  
-  			  builder += "found_date" -> new Date().getTime
-  			  builder += "isActived" -> 1
+  			   builder += "found_date" -> new Date().getTime
+  			   builder += "isActived" -> 1
   	
-  			  val lst = MongoDBList.newBuilder
-  			  lst += user_id
-  			  builder += "joiners" -> lst.result
+  			   val lst = MongoDBList.newBuilder
+  			   lst += user_id
+  			   builder += "joiners" -> lst.result
   
-  			  ProfileModule.incrementCycleCount(user_id)
-  			  _data_connection.getCollection("groups") += builder.result
-  
-  			  Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
-  			  			
-  		  }
-  		  case _ => ErrorCode.errorToJson("create chat group error")		// error or no response
-  		}}.getOrElse(ErrorCode.errorToJson("create chat group error"))	    
+  			   ProfileModule.incrementCycleCount(user_id)
+  			   _data_connection.getCollection("groups") += builder.result
+
+  			   Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
+			  
+			}.getOrElse(throw new Exception((result \ "error").asOpt[String].get))
 		}
-  			     
+
 		if (isChatGroupExisting) 
 		    joinChatGroup(toJson(Map("user_id" -> toJson(user_id), 
 		            "auth_token" -> toJson(auth_token), "group_id" -> toJson(group_id))))
@@ -99,11 +96,12 @@ object GroupModule2 {
 //		if (isChatGroupExisting) Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 //		else createChatGroupImpl
 	}
+	
 	def updateChatGroup(data : JsValue) : JsValue = {
 
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
-		val group_id = (data \ "group_id").asOpt[Long].get
+		val group_id = (data \ "group_id").asOpt[String].get
 		val group_name = (data \ "group_name").asOpt[String].get
 
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
@@ -117,11 +115,12 @@ object GroupModule2 {
 			Json.toJson(Map("status" -> toJson("ok"), "result" -> queryGroupsWithID(group_id, user_id)))
 		}
 	}
+	
 	def joinChatGroup(data : JsValue) : JsValue = {
 		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
-		val group_id = (data \ "group_id").asOpt[Long].get
+		val group_id = (data \ "group_id").asOpt[String].get
 		val joiner_id = user_id
 		
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
@@ -134,7 +133,7 @@ object GroupModule2 {
 			  	if (!lst.exists(iter => iter.asInstanceOf[String].equals(joiner_id))) {
 			  		lst.add(joiner_id)
 			  		ProfileModule.incrementCycleCount(user_id)
-					_data_connection.getCollection("groups").update(DBObject("group_id" -> group_id), group)
+					  _data_connection.getCollection("groups").update(DBObject("group_id" -> group_id), group)
 			  	}
 			  
 			}.getOrElse(Unit)
@@ -146,7 +145,7 @@ object GroupModule2 {
 	  		
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
-		val group_id = (data \ "group_id").asOpt[Long].get
+		val group_id = (data \ "group_id").asOpt[String].get
 		val joiner_id = user_id
 		
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
@@ -194,13 +193,13 @@ object GroupModule2 {
 		}	
 	}
 	
-	def queryGroupsWithID(group_id : Long, user_id : String) : JsValue = {
+	def queryGroupsWithID(group_id : String, user_id : String) : JsValue = {
 
 	    (from db() in "groups" where ("group_id" -> group_id)).selectTop(1)("group_id") { x =>
 		  	var tmp : Map[String, JsValue] = Map.empty
   			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
 	  		x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
-		  	x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
+		  	x.getAs[String]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
 			  x.getAs[String]("post_id").map (y => tmp += "post_id" -> toJson(y)).getOrElse(Unit)
 			  x.getAs[String]("post_thumb").map (y => tmp += "post_thumb" -> toJson(y)).getOrElse(Unit)
 			  x.getAs[MongoDBList]("joiners").map { y => 
@@ -228,7 +227,7 @@ object GroupModule2 {
 		  	var tmp : Map[String, JsValue] = Map.empty
 			x.getAs[String]("group_name").map (y => tmp += "group_name" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("owner_id").map (y => tmp += "owner_id" -> toJson(y)).getOrElse(Unit)
-			x.getAs[Long]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
+			x.getAs[String]("group_id").map (y => tmp += "group_id" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("post_id").map (y => tmp += "post_id" -> toJson(y)).getOrElse(Unit)
 			x.getAs[String]("post_thumb").map (y => tmp += "post_thumb" -> toJson(y)).getOrElse(Unit)
 			x.getAs[MongoDBList]("joiners").map { y => 
