@@ -495,8 +495,11 @@ object PostModule {
 				                             case Nil => ""
 				                         }).getOrElse(""))
   
-		     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
-                                  "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+//		     ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(receiver_id, user_id).distinct), "isSave" -> toJson(1), 
+//                                  "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		     ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(receiver_id, user_id).distinct),
+                                  "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                  "from" -> toJson("dongda_master"))
 		 }
   	
      /**

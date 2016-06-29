@@ -162,8 +162,12 @@ object RelationshipModule {
 					content += "date" -> toJson(new Date().getTime)
 					content += "receiver_id" -> toJson(follow_user_id)
 					
-					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(follow_user_id)), "isSave" -> toJson(1), 
-								"msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+//					ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(follow_user_id)), "isSave" -> toJson(1), 
+//								"msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		     ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(follow_user_id, user_id).distinct),
+                                  "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                  "from" -> toJson("dongda_master"))
+
 				} else if ((x \ "user_id").asOpt[String].get.equals(follow_user_id)) {
 				
 					val status = (x \ "isLogin").asOpt[Int].get 

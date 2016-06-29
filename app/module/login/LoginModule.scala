@@ -311,8 +311,11 @@ object LoginModule {
 				  content += "uuid" -> toJson(uuid)
 				  content += "user_id" -> toJson(user_id)
       
-				  ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id).distinct), "isSave" -> toJson(1), 
-                                      "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+//				  ddn ! new DDNNotifyUsers("receiverType" -> toJson(0), "receiverIds" -> toJson(List(user_id).distinct), "isSave" -> toJson(1), 
+//                                      "msgType" -> toJson(0), "content" -> toJson(toJson(content).toString))
+		     ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+                                  "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                  "from" -> toJson("dongda_master"))
 	    }
 	    
 	    /**

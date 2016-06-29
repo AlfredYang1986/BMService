@@ -100,4 +100,11 @@ object DDNEMNotification {
   	  
     		HTTP(em_host + org_name + "/" + app_name + "/chatgroups/" + group_id).header("Accept" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).delete
   	}
+  	
+  	def nofity(pm : Map[String, JsValue]) = {
+    		var pushMsg = pm
+    		println(pushMsg)
+    		(HTTP(em_host + org_name + "/" + app_name + "/messages").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).
+    		  		post(toJson(pushMsg)) \ "error").asOpt[String].map (x => println("notification sent error %s", x)).getOrElse(println("notification sent success"))
+  	}
 }

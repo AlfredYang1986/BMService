@@ -23,8 +23,8 @@ object QueryModule {
 	 */
 //	def queryHomeContent(data : JsValue) : JsValue = {
 	def queryHomeContent(data : JsValue)(cur : MongoDBObject) : JsValue = {
-
-		val auth_token = (data \ "auth_token").asOpt[String].get
+		
+	  val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
 		
 		val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
@@ -42,7 +42,7 @@ object QueryModule {
 	def mongoDBObject2JsValue(user_id : String, x : MongoDBObject) : Map[String, JsValue] = {
 	    	var tmp : Map[String, JsValue] = Map.empty
 		  	List("post_id", "date", "owner_id", "owner_name", "owner_photo", "location", "title", "description", "likes_count", "likes", "comments_count", "comments", "items", "tags") map (iter => tmp += iter -> helpOptions.opt_2_js(x.get(iter), iter))
-		  	
+		  
 		  	val con = RelationshipModule.relationsBetweenUserAndPostowner(user_id, tmp.get("owner_id").get.asOpt[String].get)
 		  	tmp += "relations" -> toJson(con.con)
 		  
@@ -50,13 +50,13 @@ object QueryModule {
 		  	val (photo_list, group_chat_count) = GroupModule2.queryPhotoListAndCount(post_id)
 	  	  tmp += "group_chat_count" -> toJson(group_chat_count)
 	  	  tmp += "group_user_list" -> toJson(photo_list)
-		  
+		
 	  	  val isThumbup = PostModule.isLiked(user_id, post_id)
 	  	  tmp += "isLiked" -> toJson(isThumbup)
 
 	  	  val isPush = PostModule.isPush(user_id, post_id)
 	  	  tmp += "isPush" -> toJson(isPush)
-	  	 
+
 	  	  val profile = ProfileModule.queryUserProfile(tmp.get("owner_id").get.asOpt[String].get)
 	  	  if (profile == null) tmp += "role_tag" -> toJson("")
 	  	  else tmp += "role_tag" -> toJson(profile.get("role_tag").get.asOpt[String].map(rt => rt).getOrElse(""))
@@ -66,7 +66,7 @@ object QueryModule {
 	
 //	def queryContentWithConditions(data : JsValue) : JsValue = {
 	def queryContentWithConditions(data : JsValue)(cur : MongoDBObject) : JsValue = {
-	  
+
 		val auth_token = (data \ "auth_token").asOpt[String].get
 		val user_id = (data \ "user_id").asOpt[String].get
 		
@@ -93,10 +93,10 @@ object QueryModule {
 
 		var xls : List[JsValue] = Nil
 		(from db() in "posts" where constructConditions).selectSkipTop(skip)(take)("date") { x => 
-			var tmp : Map[String, JsValue] = Map.empty
+			  var tmp : Map[String, JsValue] = Map.empty
 		  	xls = xls :+ toJson(this.mongoDBObject2JsValue(user_id, x))
 		}	
-
+		
 		Json.toJson(Map("status" -> toJson("ok"), "date" -> toJson(date), "result" -> toJson(xls))) 
 	}
 	
