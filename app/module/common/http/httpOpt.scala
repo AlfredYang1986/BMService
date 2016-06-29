@@ -85,4 +85,20 @@ case class httpOpt(val url : String) {
 
 		post(toJson(para))
 	}
+	
+	def delete : JsValue = {
+	   val httpURLConnection = connection.asInstanceOf[HttpURLConnection]
+	   httpURLConnection.setRequestMethod("DELETE")
+	   httpURLConnection.connect
+	   
+	   val in = new BufferedReader(new InputStreamReader(connection.getInputStream))
+		 val buffer = new StringBuffer
+		 var line = ""
+		 do {
+			 buffer.append(line)
+			 line = in.readLine
+		 } while (line != null)
+
+		 parse(buffer.toString) 
+	}
 }

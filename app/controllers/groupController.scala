@@ -27,7 +27,7 @@ object groupController extends Controller {
 	def updateChatGroup = Action (request => requestArgs(request)(GroupModule2.updateChatGroup))
 	def joinChatGroup = Action (request => requestArgs(request)(GroupModule2.joinChatGroup))
 	def leaveChatGroup = Action (request => requestArgs(request)(GroupModule2.leaveChatGroup))
-	def dissmissChatGroup = Action (request => requestArgs(request)(GroupModule2.delectChatGroup))
+	def dissmissChatGroup = Action (request => requestArgs(request)(GroupModule2.deleteChatGroup))
 	
 	def queryChatGroup = Action (request => requestArgs(request)(GroupModule2.queryGroups))
 }

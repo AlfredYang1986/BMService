@@ -82,7 +82,7 @@ object DDNEMNotification {
     		HTTP(em_host + org_name + "/" + app_name + "/chatrooms").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).post(toJson(pushMsg)) 
   	}	
   	
-  	def createChatGroup(pm : Map[String, JsValue]) : JsValue= {
+  	def createChatGroup(pm : Map[String, JsValue]) : JsValue = {
   	    val name = pm.get("groupName").map (x => x.asOpt[String].get).getOrElse("")
   	  
     		var pushMsg : Map[String, JsValue] = Map.empty
@@ -94,4 +94,10 @@ object DDNEMNotification {
 	
     		HTTP(em_host + org_name + "/" + app_name + "/chatgroups").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).post(toJson(pushMsg)) 
 	  }
+  	
+  	def dismissChatGroup(pm : Map[String, JsValue]) : JsValue = {
+   	    val group_id = pm.get("groupId").map (x => x.asOpt[String].get).getOrElse("")
+  	  
+    		HTTP(em_host + org_name + "/" + app_name + "/chatgroups/" + group_id).header("Accept" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).delete
+  	}
 }

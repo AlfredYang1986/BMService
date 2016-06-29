@@ -41,7 +41,7 @@ class DDNActor extends Actor {
 	    sender ! DDNEMNotification.createChatGroup(parameters2Map(cg.parameters.toList))     
 	  }
 	  case dg : DDNDismissChatGroup => { 
-	    sender ! DDNNotification.dismissChatGroup(parameters2Map(dg.parameters.toList))     
+	    sender ! DDNEMNotification.dismissChatGroup(parameters2Map(dg.parameters.toList))     
 	  }
 	  case _ => 
 	}

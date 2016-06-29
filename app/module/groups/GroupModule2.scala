@@ -167,19 +167,17 @@ object GroupModule2 {
 		}	
 	}
 	
-	def delectChatGroup(data : JsValue) : JsValue = {
+	def deleteChatGroup(data : JsValue) : JsValue = {
 		val user_id = (data \ "user_id").asOpt[String].get
 		val auth_token = (data \ "auth_token").asOpt[String].get
-		var group_id = (data \ "group_id").asOpt[Long].get
+		var group_id = (data \ "group_id").asOpt[String].get
 		
 		val rel = from db() in "groups" where ("group_id" -> group_id) select (x => x)
 		if (rel.empty) ErrorCode.errorToJson("group is not exist")
 		else {
 			val result = Await.result((ddn ? DDNDismissChatGroup("groupId" -> toJson(group_id))).mapTo[JsValue], timeout.duration)
 
-			(result \ "status").asOpt[Int].map { status => status match {
-				case 200 => {		// success
-				    println("success")
+			(result \ "data").asOpt[JsValue].map { x => 
 					val group = rel.head
 		 			group.getAs[MongoDBList]("joiners").map ( x => 
 		 				x.asInstanceOf[MongoDBList].foreach (iter => ProfileModule.decrementCycleCount(iter.asInstanceOf[String]))
@@ -187,10 +185,9 @@ object GroupModule2 {
 					
 					_data_connection.getCollection("groups").remove(DBObject("group_id" -> group_id))
 					Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson("dissmiss group success")))
-				}
-				case _ => ErrorCode.errorToJson("dismiss chat group error")		// error or no response
-			}}.getOrElse(ErrorCode.errorToJson("dismiss chat group error"))
-		}	
+			  
+			}.getOrElse(throw new Exception((result \ "error").asOpt[String].get))
+		}
 	}
 	
 	def queryGroupsWithID(group_id : String, user_id : String) : JsValue = {
