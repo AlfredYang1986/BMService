@@ -60,16 +60,21 @@ object kidnapModule {
   	        
   	        service_builder += "comments" -> MongoDBList.newBuilder.result
   	        (data \ "title").asOpt[String].map (tmp => service_builder += "title" -> tmp).getOrElse(throw new Exception("wrong input"))
-  	        (data \ "description").asOpt[String].map (tmp => service_builder += "description" -> tmp).getOrElse("")
-  	        (data \ "capacity").asOpt[Int].map (tmp => service_builder += "capacity" -> tmp).getOrElse(0.intValue)
-  	        (data \ "price").asOpt[Float].map (tmp => service_builder += "price" -> tmp).getOrElse(0.floatValue)
+  	        (data \ "description").asOpt[String].map (tmp => service_builder += "description" -> tmp).getOrElse(service_builder += "description" -> "")
+  	        (data \ "capacity").asOpt[Int].map (tmp => service_builder += "capacity" -> tmp).getOrElse(service_builder += "capacity" -> 0.intValue)
+  	        (data \ "price").asOpt[Float].map (tmp => service_builder += "price" -> tmp).getOrElse(service_builder += "price" -> 0.floatValue)
 
   	        service_builder += "status" -> kidnapServiceStatus.offine.t
   	        service_builder += "rate" -> 0.floatValue
+  	      
+  	        (data \ "cans").asOpt[Long].map (cans => service_builder += "cans" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "cans" -> 0.intValue)
+            (data \ "facility").asOpt[Long].map (cans => service_builder += "facility" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "facility" -> 0.intValue)
+  	       
+            (data \ "images").asOpt[List[String]].map { lst => 
+                service_builder += "images" -> lst
+            }.getOrElse(service_builder += "images" -> MongoDBList.newBuilder.result) 
   	        
   	        service_builder += "reserve1" -> ""
-  	        service_builder += "reserve2" -> ""
-  	        service_builder += "reserve3" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
   	        
@@ -123,10 +128,17 @@ object kidnapModule {
             
             (data \ "offer_date").asOpt[JsValue].map { date =>
                 val offer_date = MongoDBObject.newBuilder
-  	            offer_date += "start" -> (date \ "latitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
-  	            offer_date += "end" -> (date \ "longtitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
+  	            offer_date += "start" -> (date \ "start").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
+  	            offer_date += "end" -> (date \ "end").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
   	            origin += "offer_date" -> offer_date.result            
             }.getOrElse(Unit)
+           
+            (data \ "cans").asOpt[Long].map (cans => origin += "cans" -> cans.asInstanceOf[Number]).getOrElse(Unit)
+            (data \ "facility").asOpt[Long].map (cans => origin += "facility" -> cans.asInstanceOf[Number]).getOrElse(Unit)
+  	       
+            (data \ "images").asOpt[List[String]].map { lst => 
+                origin += "images" -> lst
+            }.getOrElse(Unit) 
             
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
@@ -184,7 +196,10 @@ object kidnapModule {
   	               "offer_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("start").get.longValue),
   	                                          "end" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("end").get.longValue))),
   	               "location" -> toJson(Map("latitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("latitude").get.floatValue),
-  	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue)))
+  	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
+  	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
+  	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
+  	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
   
   	def queryKidnapServiceDetail(data : JsValue) : JsValue = {
