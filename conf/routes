@@ -121,6 +121,11 @@ POST	/kidnap/search								controllers.kidnapController.searchKidnapService
 POST	/kidnap/mine								controllers.kidnapController.mineKidnapServiceDetail
 POST	/kidnap/detail								controllers.kidnapController.queryKidnapServiceDetail
 
+# order module
+POST	/order/push									controllers.orderController.pushOrder
+POST	/order/pop									controllers.orderController.popOrder
+POST	/order/update								controllers.orderController.updateOrder
+
 # expose abuse content and users
 POST 	/expose/user								controllers.exposeController.expostUser
 POST 	/expose/content								controllers.exposeController.expostContent

@@ -90,7 +90,7 @@ object helpOptions {
 			  case str : String => opt_str_2_js(str)
 		  	case list : BasicDBList => opt_map_2_js(list, key)
 		  	case n : Number => opt_val_2_js(n)
-		  	case obj : MongoDBObject => opt_obj_2_js(obj, key)
+		  	case obj : BasicDBObject => opt_obj_2_js(obj, key)
 		  	case _ => ??? 
 		}).getOrElse(func(key))
 	}
