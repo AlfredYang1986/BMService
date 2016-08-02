@@ -19,6 +19,8 @@ import play.api.GlobalSettings
 import play.api.templates.Html
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+import java.util.Date
+
 object ProfileModule {
 
   /**
@@ -60,6 +62,7 @@ object ProfileModule {
 				builder += "screen_name" -> screen_name
 				builder += "screen_photo" -> screen_photo
 				builder += "role_tag" -> role_tag
+
 				builder += "followings_count" -> (data \ "followings_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "followers_count" -> (data \ "followers_count").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "friends_count" -> (data \ "friends_count").asOpt[Int].map(x => x).getOrElse(0)
@@ -68,7 +71,29 @@ object ProfileModule {
 				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(1)
 				builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
-	
+
+				val coordinate = MongoDBObject.newBuilder
+				coordinate += "longtitude" -> (data \ "longtitude").asOpt[Float].map(x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+				coordinate += "latitude" -> (data \ "latitude").asOpt[Float].map(x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+				builder += "coordinate" -> coordinate.result
+				
+				builder += "address" -> (data \ "address").asOpt[String].map (x => x).getOrElse("")
+				builder += "date" -> new Date().getTime
+				builder += "dob" -> (data \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+				builder += "about" -> (data \ "about").asOpt[String].map (x => x).getOrElse("")
+				
+				(data \ "kids").asOpt[List[JsValue]].map { lst => 
+				    val kids = MongoDBList.newBuilder
+				    lst foreach { tmp => 
+				        val kid = MongoDBObject.newBuilder
+				        kid += "gender" -> (tmp \ "gender").asOpt[Int].map (x => x).getOrElse(0)
+				        kid += "dob" -> (tmp \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+
+				        kids += kid.result
+				    }
+				    builder += "kids" -> kids.result
+				}.getOrElse(builder += "kids" -> MongoDBList.newBuilder.result)
+				
 				result += "user_id" -> toJson(user_id) //toJson(c_r_user_id)
 				result += "auth_token" -> toJson(auth_token) //toJson(c_r_user_id)
 				result += "screen_name" -> toJson(screen_name)
@@ -81,7 +106,7 @@ object ProfileModule {
 			
 			} else {
 				val user = reVal.head
-				List("signature", "role_tag", "screen_name", "screen_photo") foreach { x =>
+				List("signature", "role_tag", "screen_name", "screen_photo", "about", "address") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
 					
 //					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
@@ -100,6 +125,33 @@ object ProfileModule {
 						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
+
+				List("dob") foreach { x => 
+					(data \ x).asOpt[Long].map { value =>
+						user += x -> value.asInstanceOf[Number]
+						result += x -> toJson(value)
+					}.getOrElse(Unit)
+				}
+			
+				List("longtitude", "latitude") foreach { x => 
+					(data \ x).asOpt[Float].map { value =>
+						val co = user.getAs[MongoDBObject]("coordinate").get
+						co += x -> x.asInstanceOf[Number]
+						result += x -> toJson(value)
+					}.getOrElse(Unit)
+				}
+				
+				(data \ "kids").asOpt[List[JsValue]].map { lst => 
+				    val kids = MongoDBList.newBuilder
+				    lst foreach { tmp => 
+				        val kid = MongoDBObject.newBuilder
+				        kid += "gender" -> (tmp \ "gender").asOpt[Int].map (x => x).getOrElse(0)
+				        kid += "dob" -> (tmp \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+
+				        kids += kid.result
+				    }
+				    user += "kids" -> kids.result
+				}.getOrElse(Unit)
 		
 				result += "user_id" -> toJson(user_id)
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
@@ -126,32 +178,44 @@ object ProfileModule {
 	}
 	
 	def creatUserProfile(user_id : String, phoneNo : String) : Map[String, JsValue] = {
-  	  	val builder = MongoDBObject.newBuilder
-		builder += "user_id" -> user_id
-		builder += "screen_name" -> user_id
-		builder += "screen_photo" -> ""
-		builder += "role_tag" -> ""
-		builder += "followings_count" -> 0
-		builder += "followers_count" -> 0
-		builder += "friends_count" -> 0
-		builder += "posts_count" -> 0
-		builder += "cycle_count" -> 0
-		builder += "isLogin" -> 0
-		builder += "gender" -> 0
-		builder += "signature" -> ""
+  	  val builder = MongoDBObject.newBuilder
+  		builder += "user_id" -> user_id
+  		builder += "screen_name" -> user_id
+  		builder += "screen_photo" -> ""
+  		builder += "role_tag" -> ""
+  		builder += "followings_count" -> 0
+  		builder += "followers_count" -> 0
+  		builder += "friends_count" -> 0
+  		builder += "posts_count" -> 0
+  		builder += "cycle_count" -> 0
+  		builder += "isLogin" -> 0
+  		builder += "gender" -> 0
+  		builder += "signature" -> ""
+  		
+			val coordinate = MongoDBObject.newBuilder
+			coordinate += "longtitude" -> 0.toFloat.asInstanceOf[Number]
+			coordinate += "latitude" -> 0.toFloat.asInstanceOf[Number]
+			builder += "coordinate" -> coordinate.result
+				
+			builder += "address" -> ""
+			builder += "date" -> new Date().getTime
+			builder += "dob" -> 0.toFloat.asInstanceOf[Number]
+			builder += "about" -> ""
+				
+			builder += "kids" -> MongoDBList.newBuilder.result
 
-		val re = builder.result
-		_data_connection.getCollection("user_profile") += re //builder.result
-		
-		var tmp = Map.empty[String, JsValue]
-		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
-		        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-		        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
-				.foreach { x => 
-				    tmp += x -> helpOptions.opt_2_js_2(Option(re.get(x)), x)(str =>
-                  if (str.equals("gender")) toJson(0)
-                  else toJson(""))}
-		tmp
+  		val re = builder.result
+  		_data_connection.getCollection("user_profile") += re //builder.result
+  		
+  		var tmp = Map.empty[String, JsValue]
+  		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
+  		        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
+  		        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
+  				.foreach { x => 
+  				    tmp += x -> helpOptions.opt_2_js_2(Option(re.get(x)), x)(str =>
+                    if (str.equals("gender")) toJson(0)
+                    else toJson(""))}
+  		tmp
 	}
 	
 	/**
