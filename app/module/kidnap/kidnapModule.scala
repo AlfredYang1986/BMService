@@ -203,7 +203,7 @@ object kidnapModule {
   	    try {
   	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(0.intValue)
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
-  	       
+  	      
   	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
       	        (from db() in "kidnap" where ("status" -> kidnapServiceStatus.online.t)).
       	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))

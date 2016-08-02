@@ -159,21 +159,27 @@ object ProfileModule {
 			}
 		}
 	}
+	
+	def DB2JsValue(obj : MongoDBObject) : Map[String, JsValue] = {
+	    var tmp = Map.empty[String, JsValue]
+			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
+			        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
+			        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked"
+			        :: "address" :: "about" :: "dob" :: "date" :: "kids" :: "coordinate" :: Nil)
+					.foreach { x => 
+					    tmp += x -> helpOptions.opt_2_js_2(obj.get(x), x)(str =>
+                  if (str.equals("gender")) toJson(0)
+                  else toJson(""))}
+	    
+	    tmp
+	}
 
 	def queryUserProfile(user_id : String) : Map[String, JsValue] = {
 
 		val re = from db() in "user_profile" where ("user_id" -> user_id) select (x => x) 
 		if (re.empty) null 
 		else {
-			var tmp = Map.empty[String, JsValue]
-			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
-			        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-			        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked" :: Nil)
-					.foreach { x => 
-					    tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
-                  if (str.equals("gender")) toJson(0)
-                  else toJson(""))}
-			tmp
+			  DB2JsValue(re.head)
 		}
 	}
 	
@@ -206,16 +212,8 @@ object ProfileModule {
 
   		val re = builder.result
   		_data_connection.getCollection("user_profile") += re //builder.result
-  		
-  		var tmp = Map.empty[String, JsValue]
-  		("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
-  		        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-  		        :: "cycle_count" :: "isLogin" :: "gender" :: Nil)
-  				.foreach { x => 
-  				    tmp += x -> helpOptions.opt_2_js_2(Option(re.get(x)), x)(str =>
-                    if (str.equals("gender")) toJson(0)
-                    else toJson(""))}
-  		tmp
+  	
+  		DB2JsValue(re)
 	}
 	
 	/**
@@ -233,14 +231,8 @@ object ProfileModule {
 			if (re.count != 1) ErrorCode.errorToJson("user not existing")
 			// 2. 
 			else {
-				var tmp = Map.empty[String, JsValue]
-				("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
-				        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
-				        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked" :: Nil)
-					.foreach { x => tmp += x -> helpOptions.opt_2_js_2(re.head.get(x), x)(str =>
-                  if (str.equals("gender")) toJson(0)
-                  else toJson(""))}
-					
+				var tmp = DB2JsValue(re.head)
+				  
 				tmp += "relations" -> toJson(RelationshipModule.relationsBetweenUserAndPostowner(query_user_id, owner_user_id).con)
 			  tmp += "likes_count" -> toJson(QueryModule.queryUserLikesCount(query_user_id).intValue)
 				
