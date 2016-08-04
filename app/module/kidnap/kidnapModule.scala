@@ -48,7 +48,10 @@ object kidnapModule {
   	        (data \ "offer_date").asOpt[JsValue].map { date => 
   	            offer_date += "start" -> (date \ "start").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
   	            offer_date += "end" -> (date \ "end").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
-  	        }.getOrElse(throw new Exception("wrong input"))
+  	        }.getOrElse {
+  	            offer_date += "start" -> 0.longValue
+  	            offer_date += "end" -> 0.longValue
+  	        }
   	        service_builder += "offer_date" -> offer_date.result
   	       
   	        val location = MongoDBObject.newBuilder

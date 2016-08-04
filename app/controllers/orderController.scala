@@ -11,4 +11,5 @@ object orderController extends Controller {
     def popOrder = Action (request => requestArgs(request)(orderModule.popOrder))
     
     def updateOrder = Action(request => requestArgs(request)(orderModule.updateOrder))
+    def queryOrder = Action(request => requestArgs(request)(orderModule.queryOrder))
 }
