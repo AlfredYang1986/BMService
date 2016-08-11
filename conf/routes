@@ -126,6 +126,8 @@ POST	/order/push									controllers.orderController.pushOrder
 POST	/order/pop									controllers.orderController.popOrder
 POST	/order/update								controllers.orderController.updateOrder
 POST	/order/query								controllers.orderController.queryOrder
+POST	/order/query/own							controllers.orderController.queryOwnOrder
+POST	/order/query/apply							controllers.orderController.queryApplyOrder
 
 # expose abuse content and users
 POST 	/expose/user								controllers.exposeController.expostUser

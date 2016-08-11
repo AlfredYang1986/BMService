@@ -24,6 +24,7 @@ object orderStatus {
     case object ready extends orderStatusDefines(0, "ready")
     case object confirm extends orderStatusDefines(1, "confirm")
     case object done extends orderStatusDefines(2, "done")
+    case object reject extends orderStatusDefines(3, "reject")
 }
 
 sealed abstract class orderStatusDefines(val t : Int, val des : String)
@@ -39,7 +40,13 @@ object orderModule {
             
             builder += "user_id" -> user_id
             builder += "service_id" -> service_id
-           
+
+            val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(service_id))))
+            (service \ "status").asOpt[String].map { status => 
+              if (status == "error") throw new Exception("service not valid") 
+              else builder += "owner_id" -> (service \ "result" \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+            }
+            
             builder += "date" -> new Date().getTime
             builder += "status" -> orderStatus.ready.t
             
@@ -68,6 +75,7 @@ object orderModule {
           else {
             toJson(Map("user_id" -> toJson(x.getAs[String]("user_id").get),
                        "service_id" -> toJson(x.getAs[String]("service_id").get),
+                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
                        "date" -> toJson(x.getAs[Long]("date").get),
                        "status" -> toJson(x.getAs[Int]("status").get),
                        "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
@@ -125,19 +133,21 @@ object orderModule {
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
-        
+       
     def queryOrder(data : JsValue) : JsValue = {
       
         def serviceIdCondition(v : String) = "service_id" $eq v
         def userIdCondition(u : String) = "user_id" $eq u
         def statusCondition(s : Int) = "status" $eq s
         def dateCondition(d : Long) = "date" $gte d
+        def ownIdCondition(o : String) = "owner_id" $eq o
         def orderDateCondition(o : (Long, Long)) = $and("order_date.start" $gte o._1, "order_date.end" $lt o._2)
      
         def conditionsAcc(o : Option[DBObject], key : String, value : Any) : Option[DBObject] = {
             val n = key match {
               case "service_id" => serviceIdCondition(value.asInstanceOf[String])
               case "user_id" => userIdCondition(value.asInstanceOf[String])
+              case "owner_id" => ownIdCondition(value.asInstanceOf[String])
               case "status" => statusCondition(value.asInstanceOf[Int])
               case "date" => dateCondition(value.asInstanceOf[Long])
               case "order_date" => orderDateCondition(value.asInstanceOf[(Long, Long)])
@@ -152,6 +162,7 @@ object orderModule {
             var condition : Option[DBObject] = None
             (data \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
             (data \ "user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
+            (data \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
             (data \ "date").asOpt[Long].map (x => condition = conditionsAcc(condition, "date", x)).getOrElse(Unit)
             (data \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
             (data \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
@@ -162,4 +173,7 @@ object orderModule {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
     }
+    
+    def queryApplyOrder(data : JsValue) : JsValue = queryOrder(data)
+    def queryOwnOrder(data : JsValue) : JsValue = queryOrder(data)
 }

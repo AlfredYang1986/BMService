@@ -76,7 +76,20 @@ object kidnapModule {
             (data \ "images").asOpt[List[String]].map { lst => 
                 service_builder += "images" -> lst
             }.getOrElse(service_builder += "images" -> MongoDBList.newBuilder.result) 
-  	        
+  	       
+            service_builder += "distinct" -> (data \ "distinct").asOpt[String].map (x => x).getOrElse("")
+            service_builder += "address" -> (data \ "address").asOpt[String].map (x => x).getOrElse("")
+            
+            val age_boundary = MongoDBObject.newBuilder
+            (data \ "age_boundary").asOpt[JsValue].map { boundary => 
+                age_boundary += "lsl" -> (boundary \ "lsl").asOpt[Int].map (x => x).getOrElse(3)
+                age_boundary += "usl" -> (boundary \ "usl").asOpt[Int].map (x => x).getOrElse(11)
+            }.getOrElse {
+  	            age_boundary += "lsl" -> 3.longValue
+  	            age_boundary += "usl" -> 11.longValue
+            }
+  	        service_builder += "age_boundary" -> age_boundary.result
+            
   	        service_builder += "reserve1" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
@@ -143,6 +156,16 @@ object kidnapModule {
                 origin += "images" -> lst
             }.getOrElse(Unit) 
             
+            (data \ "distinct").asOpt[String].map (x => origin += "distinct" -> x).getOrElse(Unit)
+            (data \ "address").asOpt[String].map (x => origin += "address" -> x).getOrElse(Unit)
+            
+            (data \ "age_boundary").asOpt[JsValue].map { boundary => 
+                val age_boundary = MongoDBObject.newBuilder
+                age_boundary += "lsl" -> (boundary \ "lsl").asOpt[Int].map (x => x).getOrElse(3)
+                age_boundary += "usl" -> (boundary \ "usl").asOpt[Int].map (x => x).getOrElse(11)
+                origin += "age_boundary" -> age_boundary.result
+            }.getOrElse(Unit)
+            
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
             toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
@@ -200,8 +223,12 @@ object kidnapModule {
   	                                          "end" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("end").get.longValue))),
   	               "location" -> toJson(Map("latitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("latitude").get.floatValue),
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
+  	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
+  	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
+  	               "distinct" -> toJson(x.getAs[String]("distinct").get),
+  	               "address" -> toJson(x.getAs[String]("address").get),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
   
