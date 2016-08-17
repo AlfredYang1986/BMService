@@ -20,14 +20,14 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "user_id" -> user_id
-                      builder += "services" -> (service_id :: Nil)
+                      builder += "services" -> MongoDBList(service_id :: Nil)
                       
                       _data_connection.getCollection("user_service") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val service_lst = head.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]]
-                      head += "services" -> (service_lst +: service_id).distinct
+                      head += "services" -> MongoDBList((service_lst +: service_id).distinct)
                       _data_connection.getCollection("user_service").update(DBObject("user_id" -> user_id), head)
                       true
                   }
@@ -39,14 +39,14 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "service_id" -> service_id
-                      builder += "users" -> (user_id :: Nil)
+                      builder += "users" -> MongoDBList(user_id :: Nil)
                       
                       _data_connection.getCollection("service_user") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val user_lst = head.getAs[MongoDBList]("users").get.toList.asInstanceOf[List[String]]
-                      head += "users" -> (user_lst +: user_id).distinct
+                      head += "users" -> MongoDBList((user_lst +: user_id).distinct)
                       _data_connection.getCollection("service_user").update(DBObject("service_id" -> service_id), head)
                       true
                   }
