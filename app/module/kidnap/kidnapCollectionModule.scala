@@ -20,14 +20,17 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "user_id" -> user_id
-                      builder += "services" -> MongoDBList(service_id :: Nil)
+                      
+                      val services = MongoDBList.newBuilder
+                      services += service_id
+                      builder += "services" -> services.result
                       
                       _data_connection.getCollection("user_service") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val service_lst = head.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]]
-                      head += "services" -> MongoDBList((service_lst +: service_id).distinct)
+                      head += "services" -> (service_lst +: service_id).distinct
                       _data_connection.getCollection("user_service").update(DBObject("user_id" -> user_id), head)
                       true
                   }
@@ -39,14 +42,17 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "service_id" -> service_id
-                      builder += "users" -> MongoDBList(user_id :: Nil)
+                      
+                      val users = MongoDBList.newBuilder
+                      users += user_id
+                      builder += "users" -> users.result
                       
                       _data_connection.getCollection("service_user") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val user_lst = head.getAs[MongoDBList]("users").get.toList.asInstanceOf[List[String]]
-                      head += "users" -> MongoDBList((user_lst +: user_id).distinct)
+                      head += "users" -> (user_lst +: user_id).distinct
                       _data_connection.getCollection("service_user").update(DBObject("service_id" -> service_id), head)
                       true
                   }
@@ -100,12 +106,12 @@ object kidnapCollectionModule {
             println(data)
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             println(user_id)
-            val lst = (from db() in "user_service" where ("user_id" -> 
-                        (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))) select (x => 
-                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList.head.distinct
+            val lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
+                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
             println(lst)
+            println(lst.head)
                           
-            kidnapModule.queryMultipleService(toJson(Map("lst" -> lst)))
+            kidnapModule.queryMultipleService(toJson(Map("lst" -> lst.head)))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
