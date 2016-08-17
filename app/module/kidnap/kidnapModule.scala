@@ -288,7 +288,7 @@ object kidnapModule {
   	          case head :: tail => conditions(tail, conditionsAcc(head, o))
   	        }
   
-  	        toJson(Map("status" -> toJson("ok"), "resutl" -> toJson(
+  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
   	                   (from db() in "kidnap" where conditions(lst, None) select(DB2JsValue(_))).toList)))
   	        
   	    } catch {
