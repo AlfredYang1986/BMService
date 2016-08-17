@@ -273,4 +273,25 @@ object kidnapModule {
   	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
   	    }
   	}
+  	
+  	def queryMultipleService(data : JsValue) : JsValue = 
+  	    try {
+  	        val lst = (data \ "lst").asOpt[List[String]].map (x => x).getOrElse(throw new Exception)
+  	        
+  	        def conditionsAcc(id : String, o : Option[DBObject]) : Option[DBObject] = o match {
+  	              case None => Some("service_id" $eq id)
+  	              case Some(x) => Some($or(x, "service_id" $eq id))
+  	            }
+  	        
+  	        def conditions(l : List[String], o : Option[DBObject]) : Option[DBObject] = l match {
+  	          case Nil => o
+  	          case head :: tail => conditions(tail, conditionsAcc(head, o))
+  	        }
+  
+  	        toJson(Map("status" -> toJson("ok"), "resutl" -> toJson(
+  	                   (from db() in "kidnap" where conditions(lst, None) select(DB2JsValue(_))).toList)))
+  	        
+  	    } catch {
+  	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+  	    }
 }

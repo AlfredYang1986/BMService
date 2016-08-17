@@ -121,6 +121,10 @@ POST	/kidnap/search								controllers.kidnapController.searchKidnapService
 POST	/kidnap/mine								controllers.kidnapController.mineKidnapServiceDetail
 POST	/kidnap/detail								controllers.kidnapController.queryKidnapServiceDetail
 
+POST	/kidnap/collect								controllers.kidnapController.collecteKidnapService
+POST	/kidnap/uncollect							controllers.kidnapController.unCollecteKidnapService
+POST	/kidnap/lst/collect							controllers.kidnapController.queryCollectKidnapService
+
 # order module
 POST	/order/push									controllers.orderController.pushOrder
 POST	/order/pop									controllers.orderController.popOrder

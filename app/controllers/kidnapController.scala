@@ -2,7 +2,7 @@ package controllers
 
 import play.api.mvc._
 
-import module.kidnap.kidnapModule
+import module.kidnap.{ kidnapModule, kidnapCollectionModule }
 
 import controllers.common.requestArgsQuery.{requestArgs}
 
@@ -25,4 +25,8 @@ object kidnapController extends Controller {
   	def searchKidnapService = Action (request => requestArgs(request)(kidnapModule.searchKidnapService))
   	def queryKidnapServiceDetail = Action (request => requestArgs(request)(kidnapModule.queryKidnapServiceDetail))
   	def mineKidnapServiceDetail = Action (request => requestArgs(request)(kidnapModule.mineKidnapService))
+  	
+  	def collecteKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.collectKidnapService))
+  	def unCollecteKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.unCollectKidnapService))
+  	def queryCollectKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.userCollectionsLst))
 }
