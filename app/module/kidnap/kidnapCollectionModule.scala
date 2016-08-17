@@ -20,17 +20,14 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "user_id" -> user_id
-                      
-                      val services = MongoDBList.newBuilder
-                      services += service_id
-                      builder += "services" -> services.result
+                      builder += "services" -> (service_id :: Nil)
                       
                       _data_connection.getCollection("user_service") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val service_lst = head.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]]
-                      head += "services" -> (service_lst +: service_id).distinct
+                      head += "services" -> (service_id :: service_lst).distinct 
                       _data_connection.getCollection("user_service").update(DBObject("user_id" -> user_id), head)
                       true
                   }
@@ -42,17 +39,14 @@ object kidnapCollectionModule {
                   case Nil => {
                       val builder = MongoDBObject.newBuilder
                       builder += "service_id" -> service_id
-                      
-                      val users = MongoDBList.newBuilder
-                      users += user_id
-                      builder += "users" -> users.result
+                      builder += "users" -> (user_id :: Nil)
                       
                       _data_connection.getCollection("service_user") += builder.result
                       true
                   }
                   case head :: Nil => {
                       val user_lst = head.getAs[MongoDBList]("users").get.toList.asInstanceOf[List[String]]
-                      head += "users" -> (user_lst +: user_id).distinct
+                      head += "users" -> (user_id :: user_lst).distinct
                       _data_connection.getCollection("service_user").update(DBObject("service_id" -> service_id), head)
                       true
                   }
