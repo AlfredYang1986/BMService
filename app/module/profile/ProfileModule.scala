@@ -71,6 +71,10 @@ object ProfileModule {
 				builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(1)
 				builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
 				builder += "signature" -> (data \ "signature").asOpt[String].map(x => x).getOrElse("")
+				
+				builder += "school" -> (data \ "school").asOpt[String].map (x => x).getOrElse("")
+				builder += "company" -> (data \ "company").asOpt[String].map (x => x).getOrElse("")
+				builder += "occupation" -> (data \ "occupation").asOpt[String].map (x => x).getOrElse("")
 
 				val coordinate = MongoDBObject.newBuilder
 				coordinate += "longtitude" -> (data \ "longtitude").asOpt[Float].map(x => x).getOrElse(0.toFloat.asInstanceOf[Number])
@@ -106,7 +110,7 @@ object ProfileModule {
 			
 			} else {
 				val user = reVal.head
-				List("signature", "role_tag", "screen_name", "screen_photo", "about", "address") foreach { x =>
+				List("signature", "role_tag", "screen_name", "screen_photo", "about", "address", "school", "company", "occupation") foreach { x =>
 					(data \ x).asOpt[String].map { value =>
 					
 //					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
@@ -165,7 +169,8 @@ object ProfileModule {
 			("user_id" :: "screen_name" :: "screen_photo" :: "role_tag" :: "signature" 
 			        :: "followings_count" :: "followers_count" :: "posts_count" :: "friends_count" 
 			        :: "cycle_count" :: "isLogin" :: "gender" :: "been_pushed" :: "been_liked"
-			        :: "address" :: "about" :: "dob" :: "date" :: "kids" :: "coordinate" :: Nil)
+			        :: "address" :: "about" :: "dob" :: "date" :: "kids" :: "coordinate" 
+			        :: "school" :: "company" :: "occupation" :: Nil)
 					.foreach { x => 
 					    tmp += x -> helpOptions.opt_2_js_2(obj.get(x), x)(str =>
                   if (str.equals("gender")) toJson(0)
@@ -209,6 +214,10 @@ object ProfileModule {
 			builder += "about" -> ""
 				
 			builder += "kids" -> MongoDBList.newBuilder.result
+			
+			builder += "school" -> ""
+			builder += "company" -> ""
+			builder += "occupation" -> ""
 
   		val re = builder.result
   		_data_connection.getCollection("user_profile") += re //builder.result
