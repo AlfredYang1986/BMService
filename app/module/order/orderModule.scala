@@ -21,10 +21,11 @@ import java.util.Date
 import module.kidnap.kidnapModule
 
 object orderStatus {
+    case object reject extends orderStatusDefines(-1, "reject")
     case object ready extends orderStatusDefines(0, "ready")
     case object confirm extends orderStatusDefines(1, "confirm")
-    case object done extends orderStatusDefines(2, "done")
-    case object reject extends orderStatusDefines(3, "reject")
+    case object paid extends orderStatusDefines(2, "paid")
+    case object done extends orderStatusDefines(9, "done")
 }
 
 sealed abstract class orderStatusDefines(val t : Int, val des : String)
