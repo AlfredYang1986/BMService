@@ -89,7 +89,11 @@ object kidnapModule {
   	            age_boundary += "usl" -> 11.longValue
             }
   	        service_builder += "age_boundary" -> age_boundary.result
-            
+           
+  	        service_builder += "least_hours" -> (data \ "least_hours").asOpt[Int].map (x => x).getOrElse(0)
+  	        service_builder += "allow_leave" -> (data \ "allow_leave").asOpt[Int].map (x => x).getOrElse(1)
+  	        service_builder += "service_cat" -> (data \ "service_cat").asOpt[Int].map (x => x).getOrElse(0)
+  	        
   	        service_builder += "reserve1" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
@@ -165,6 +169,10 @@ object kidnapModule {
                 age_boundary += "usl" -> (boundary \ "usl").asOpt[Int].map (x => x).getOrElse(11)
                 origin += "age_boundary" -> age_boundary.result
             }.getOrElse(Unit)
+
+            (data \ "least_hours").asOpt[Int].map (x => origin += "least_hours" -> x.asInstanceOf[Number]).getOrElse(Unit)
+            (data \ "allow_leave").asOpt[Int].map (x => origin += "allow_leave" -> x.asInstanceOf[Number]).getOrElse(Unit)
+            (data \ "service_cat").asOpt[Int].map (x => origin += "service_cat" -> x.asInstanceOf[Number]).getOrElse(Unit)
             
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
@@ -229,6 +237,9 @@ object kidnapModule {
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
   	               "distinct" -> toJson(x.getAs[String]("distinct").get),
   	               "address" -> toJson(x.getAs[String]("address").get),
+  	               "least_hours" -> toJson(x.getAs[Number]("lease_hours").map (y => y.intValue).getOrElse(0)),
+  	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(0)),
+  	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(0)),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
   
