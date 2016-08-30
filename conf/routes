@@ -137,5 +137,8 @@ POST	/order/query/apply							controllers.orderController.queryApplyOrder
 POST 	/expose/user								controllers.exposeController.expostUser
 POST 	/expose/content								controllers.exposeController.expostContent
 
+# web pay controller
+POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

@@ -20,8 +20,17 @@ import java.util.Date
 
 import module.kidnap.kidnapModule
 
+import scala.concurrent.Await
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.duration._
+import akka.util.Timeout
+
+import module.webpay.WechatPayModule
+
 object orderStatus {
-    case object reject extends orderStatusDefines(-1, "reject")
+    case object reject extends orderStatusDefines(-9, "reject")
+    case object unpaid extends orderStatusDefines(-1, "unpaid")
     case object ready extends orderStatusDefines(0, "ready")
     case object confirm extends orderStatusDefines(1, "confirm")
     case object paid extends orderStatusDefines(2, "paid")
@@ -32,42 +41,38 @@ sealed abstract class orderStatusDefines(val t : Int, val des : String)
 
 object orderModule {
  
-    def JsValue2DB(data : JsValue) : Option[MongoDBObject] = 
-        try {
-            val builder = MongoDBObject.newBuilder
-          
-            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
-            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
-            
-            builder += "user_id" -> user_id
-            builder += "service_id" -> service_id
+    def JsValue2DB(data : JsValue, order_id : String) : MongoDBObject = {
+        val builder = MongoDBObject.newBuilder
+      
+        val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+        val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+        
+        builder += "user_id" -> user_id
+        builder += "service_id" -> service_id
 
-            val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(service_id))))
-            (service \ "status").asOpt[String].map { status => 
-              if (status == "error") throw new Exception("service not valid") 
-              else builder += "owner_id" -> (service \ "result" \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
-            }
-            
-            builder += "date" -> new Date().getTime
-            builder += "status" -> orderStatus.ready.t
-            
-            builder += "order_thumbs" -> (data \ "order_thumbs").asOpt[String].map (x => x).getOrElse(throw new Exception)
-            builder += "order_title" -> (data \ "order_title").asOpt[String].map (x => x).getOrElse(throw new Exception)
-
-            val order_date = MongoDBObject.newBuilder
-            (data \ "order_date").asOpt[JsValue].map { x => 
-                order_date += "start" -> (x \ "start").asOpt[Long].map (y => y).getOrElse(0.longValue)    
-                order_date += "end" -> (x \ "end").asOpt[Long].map (y => y).getOrElse(0.longValue)    
-            }.getOrElse(throw new Exception)
-            builder += "order_date" -> order_date.result
-            builder += "is_read" -> (data \ "is_read").asOpt[Int].map (x => x).getOrElse(0)
-            builder += "order_id" -> Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
-            
-            Some(builder.result)
-          
-        } catch {
-          case ex : Exception => None
+        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(service_id))))
+        (service \ "status").asOpt[String].map { status => 
+          if (status == "error") throw new Exception("service not valid") 
+          else builder += "owner_id" -> (service \ "result" \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
         }
+        
+        builder += "date" -> new Date().getTime
+        builder += "status" -> orderStatus.ready.t
+        
+        builder += "order_thumbs" -> (data \ "order_thumbs").asOpt[String].map (x => x).getOrElse(throw new Exception)
+        builder += "order_title" -> (data \ "order_title").asOpt[String].map (x => x).getOrElse(throw new Exception)
+
+        val order_date = MongoDBObject.newBuilder
+        (data \ "order_date").asOpt[JsValue].map { x => 
+            order_date += "start" -> (x \ "start").asOpt[Long].map (y => y).getOrElse(0.longValue)    
+            order_date += "end" -> (x \ "end").asOpt[Long].map (y => y).getOrElse(0.longValue)    
+        }.getOrElse(throw new Exception)
+        builder += "order_date" -> order_date.result
+        builder += "is_read" -> (data \ "is_read").asOpt[Int].map (x => x).getOrElse(0)
+        builder += "order_id" -> order_id
+        
+        builder.result
+    }
     
     def DB2JsValue(x : MongoDBObject) : JsValue = {
         val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
@@ -84,20 +89,35 @@ object orderModule {
                                                   "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
                        "is_read" -> toJson(x.getAs[Int]("is_read").get),
                        "order_id" -> toJson(x.getAs[String]("order_id").get),
+                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
                        "service" -> (service \ "result")
                   ))
           }
         }.getOrElse(throw new Exception("wrong input"))
     }
   
-    def pushOrder(data : JsValue) : JsValue = 
-        JsValue2DB(data) match {
-          case Some(x) => {
-              _data_connection.getCollection("orders") += x
-              toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(x))))
-          }
-          case None => ErrorCode.errorToJson("wrong input")
+    def pushOrder(data : JsValue) : JsValue = {
+        try {
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+              
+            val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
+            val x = Future(JsValue2DB(data, order_id))
+            val y = Future(WechatPayModule.prepayid(data))
+            
+            val obj = Await.result (x map (o => o), Timeout(1 second).duration).asInstanceOf[MongoDBObject]
+            val js = Await.result (y map (v => v), Timeout(1 second).duration).asInstanceOf[JsValue]
+           
+            val prepay_id = (js \ "result" \ "prepay_id").asOpt[String].map (x => x).getOrElse("")
+            
+            obj += "prepay_id" -> prepay_id
+            
+            _data_connection.getCollection("orders") += obj
+            toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(obj))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
+    }
     
     def popOrder(data : JsValue) : JsValue = 
         try {

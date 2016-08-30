@@ -5,4 +5,6 @@
 /project/target
 /upload
 /logs
+/.classpath
+/.settings
 
