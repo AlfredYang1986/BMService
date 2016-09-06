@@ -288,6 +288,7 @@ object kidnapModule {
   	def queryMultipleService(data : JsValue) : JsValue = 
   	    try {
   	        val lst = (data \ "lst").asOpt[List[String]].map (x => x).getOrElse(throw new Exception)
+  	        println(lst)
   	        
   	        def conditionsAcc(id : String, o : Option[DBObject]) : Option[DBObject] = o match {
   	              case None => Some("service_id" $eq id)
@@ -299,10 +300,12 @@ object kidnapModule {
   	          case head :: tail => conditions(tail, conditionsAcc(head, o))
   	        }
   	        
+  	        println(123)
   	        val reVal = conditions(lst, None) match {
   	          case None => toJson(List[String]())
   	          case Some(x) => toJson((from db() in "kidnap" where x select(DB2JsValue(_))).toList)
   	        }
+  	        println(reVal)
   
   	        toJson(Map("status" -> toJson("ok"), "result" -> reVal))
   	        

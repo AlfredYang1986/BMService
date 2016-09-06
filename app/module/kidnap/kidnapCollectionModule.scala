@@ -98,9 +98,11 @@ object kidnapCollectionModule {
     def userCollectionsLst(data : JsValue) : JsValue = 
         try {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            println(user_id)
             val lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
                           x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
-                         
+                        
+                          println(lst)
             lst match {
               case Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson(List[String]())))
               case _ => kidnapModule.queryMultipleService(toJson(Map("lst" -> lst))) 
