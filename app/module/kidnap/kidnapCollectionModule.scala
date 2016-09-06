@@ -100,8 +100,11 @@ object kidnapCollectionModule {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
                           x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
-                          
-            kidnapModule.queryMultipleService(toJson(Map("lst" -> lst.head)))
+                         
+            lst match {
+              case Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson(List[String]())))
+              case _ => kidnapModule.queryMultipleService(toJson(Map("lst" -> lst))) 
+            }
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }

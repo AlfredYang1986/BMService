@@ -298,9 +298,13 @@ object kidnapModule {
   	          case Nil => o
   	          case head :: tail => conditions(tail, conditionsAcc(head, o))
   	        }
+  	        
+  	        val reVal = conditions(lst, None) match {
+  	          case None => toJson(List[String]())
+  	          case Some(x) => toJson((from db() in "kidnap" where x select(DB2JsValue(_))).toList)
+  	        }
   
-  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
-  	                   (from db() in "kidnap" where conditions(lst, None) select(DB2JsValue(_))).toList)))
+  	        toJson(Map("status" -> toJson("ok"), "result" -> reVal))
   	        
   	    } catch {
   	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
