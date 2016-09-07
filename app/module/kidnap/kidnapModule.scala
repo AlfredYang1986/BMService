@@ -79,6 +79,7 @@ object kidnapModule {
   	       
             service_builder += "distinct" -> (data \ "distinct").asOpt[String].map (x => x).getOrElse("")
             service_builder += "address" -> (data \ "address").asOpt[String].map (x => x).getOrElse("")
+            service_builder += "adjust_address" -> (data \ "adjust_address").asOpt[String].map (x => x).getOrElse("")
             
             val age_boundary = MongoDBObject.newBuilder
             (data \ "age_boundary").asOpt[JsValue].map { boundary => 
@@ -162,6 +163,7 @@ object kidnapModule {
             
             (data \ "distinct").asOpt[String].map (x => origin += "distinct" -> x).getOrElse(Unit)
             (data \ "address").asOpt[String].map (x => origin += "address" -> x).getOrElse(Unit)
+            (data \ "adjust_address").asOpt[String].map (x => origin += "adjust_address" -> x).getOrElse(Unit)
             
             (data \ "age_boundary").asOpt[JsValue].map { boundary => 
                 val age_boundary = MongoDBObject.newBuilder
@@ -240,6 +242,7 @@ object kidnapModule {
   	               "least_hours" -> toJson(x.getAs[Number]("least_hours").map (y => y.intValue).getOrElse(0)),
   	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(1)),
   	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(0)),
+  	               "adjust_address" -> toJson(x.getAs[String]("adjust_address").map (y => y).getOrElse("")),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
   
