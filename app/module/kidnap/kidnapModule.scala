@@ -237,8 +237,8 @@ object kidnapModule {
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
   	               "distinct" -> toJson(x.getAs[String]("distinct").map(x => x).getOrElse("")),
   	               "address" -> toJson(x.getAs[String]("address").get),
-  	               "least_hours" -> toJson(x.getAs[Number]("lease_hours").map (y => y.intValue).getOrElse(0)),
-  	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(0)),
+  	               "least_hours" -> toJson(x.getAs[Number]("least_hours").map (y => y.intValue).getOrElse(0)),
+  	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(1)),
   	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(0)),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
