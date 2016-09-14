@@ -132,6 +132,7 @@ POST	/order/update								controllers.orderController.updateOrder
 POST	/order/query								controllers.orderController.queryOrder
 POST	/order/query/own							controllers.orderController.queryOwnOrder
 POST	/order/query/apply							controllers.orderController.queryApplyOrder
+POST	/order/reject								controllers.orderController.rejectOrder
 
 # expose abuse content and users
 POST 	/expose/user								controllers.exposeController.expostUser

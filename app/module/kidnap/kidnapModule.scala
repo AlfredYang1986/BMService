@@ -92,7 +92,7 @@ object kidnapModule {
   	        service_builder += "age_boundary" -> age_boundary.result
            
   	        service_builder += "least_hours" -> (data \ "least_hours").asOpt[Int].map (x => x).getOrElse(0)
-  	        service_builder += "allow_leave" -> (data \ "allow_leave").asOpt[Int].map (x => x).getOrElse(1)
+  	        service_builder += "allow_leave" -> (data \ "allow_leave").asOpt[Int].map (x => x).getOrElse(0)
   	        service_builder += "service_cat" -> (data \ "service_cat").asOpt[Int].map (x => x).getOrElse(0)
   	        
   	        service_builder += "reserve1" -> ""

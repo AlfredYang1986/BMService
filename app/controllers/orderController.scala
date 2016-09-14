@@ -15,4 +15,6 @@ object orderController extends Controller {
     
     def queryOwnOrder = Action(request => requestArgs(request)(orderModule.queryOwnOrder))
     def queryApplyOrder = Action(request => requestArgs(request)(orderModule.queryApplyOrder))
+
+    def rejectOrder = Action(request => requestArgs(request)(orderModule.rejectOrder))
 }

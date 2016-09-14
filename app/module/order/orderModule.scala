@@ -71,6 +71,8 @@ object orderModule {
         builder += "is_read" -> (data \ "is_read").asOpt[Int].map (x => x).getOrElse(0)
         builder += "order_id" -> order_id
         
+        builder += "total_fee" -> (data \ "total_fee").asOpt[Float].map (x => x).getOrElse(throw new Exception)
+
         builder.result
     }
     
@@ -90,6 +92,7 @@ object orderModule {
                        "is_read" -> toJson(x.getAs[Int]("is_read").get),
                        "order_id" -> toJson(x.getAs[String]("order_id").get),
                        "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
+                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
                        "service" -> (service \ "result")
                   ))
           }
@@ -100,6 +103,7 @@ object orderModule {
         try {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+            
               
             val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
             val x = Future(JsValue2DB(data, order_id))
@@ -197,4 +201,13 @@ object orderModule {
     
     def queryApplyOrder(data : JsValue) : JsValue = queryOrder(data)
     def queryOwnOrder(data : JsValue) : JsValue = queryOrder(data)
+    
+    def rejectOrder(data : JsValue) : JsValue = {
+        try {
+            val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "status" -> toJson(orderStatus.reject.t))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+        }
+    }
 }
