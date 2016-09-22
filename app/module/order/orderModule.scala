@@ -243,6 +243,7 @@ object orderModule {
     def queryOwnOrder(data : JsValue) : JsValue = queryOrder(data)
     
     /** 
+     * Notifications
      * push 
      * 接受 (accept)
      * 拒绝 (reject)
@@ -266,7 +267,7 @@ object orderModule {
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
                                      "from" -> toJson("dongda_master"))
             
-            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.reject.t))))
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.confirm.t))))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
@@ -314,7 +315,7 @@ object orderModule {
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
                                      "from" -> toJson("dongda_master"))
             
-            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.reject.t))))
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.done.t))))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
