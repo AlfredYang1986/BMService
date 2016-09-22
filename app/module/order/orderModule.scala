@@ -28,6 +28,21 @@ import akka.util.Timeout
 
 import module.webpay.WechatPayModule
 
+import play.api._
+import play.api.mvc._
+import play.api.libs.iteratee._
+import play.api.libs.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits._
+import akka.actor.Actor
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.actor.ActorRef
+
+import module.common.AcitionType._
+import module.notification.{ DDNActor, DDNNotifyUsers } 
+
 object orderStatus {
     case object reject extends orderStatusDefines(-9, "reject")
     case object unpaid extends orderStatusDefines(-1, "unpaid")
@@ -40,6 +55,9 @@ object orderStatus {
 sealed abstract class orderStatusDefines(val t : Int, val des : String)
 
 object orderModule {
+
+    val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
+//	  val apn = Akka.system(play.api.Play.current).actorOf(Props[apnsActor])
  
     def JsValue2DB(data : JsValue, order_id : String) : MongoDBObject = {
         val builder = MongoDBObject.newBuilder
@@ -72,6 +90,8 @@ object orderModule {
         builder += "order_id" -> order_id
         
         builder += "total_fee" -> (data \ "total_fee").asOpt[Float].map (x => x).getOrElse(throw new Exception)
+        
+        builder += "further_message" -> (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
 
         builder.result
     }
@@ -93,6 +113,7 @@ object orderModule {
                        "order_id" -> toJson(x.getAs[String]("order_id").get),
                        "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
                        "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
+                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
                        "service" -> (service \ "result")
                   ))
           }
@@ -103,7 +124,6 @@ object orderModule {
         try {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
-            
               
             val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
             val x = Future(JsValue2DB(data, order_id))
@@ -117,6 +137,25 @@ object orderModule {
             obj += "prepay_id" -> prepay_id
             
             _data_connection.getCollection("orders") += obj
+            
+            { 
+//                val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
+                
+                var content : Map[String, JsValue] = Map.empty
+      					content += "type" -> toJson(module.common.AcitionType.orderAccecpted.index)
+      					content += "sender_id" -> toJson(user_id)
+      					content += "date" -> toJson(new Date().getTime)
+      					content += "receiver_id" -> toJson(owner_id)
+      					content += "order_id" -> toJson(order_id)
+    					
+        		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(owner_id).distinct),
+                                         "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                         "from" -> toJson("dongda_master"))
+            }
+            
             toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(obj))))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
@@ -145,10 +184,11 @@ object orderModule {
 
             (from db() in "orders" where ("order_id" -> order_id) select (x => x)).toList match {
               case head :: Nil => {
-                  (data \ "status").asOpt[Int].map (x => head += "status" -> x.intValue.asInstanceOf[Number])
-                  (data \ "order_thumbs").asOpt[String].map (x => head += "order_thumbs" -> x)
-                  (data \ "order_date").asOpt[Long].map (x => head += "order_date" -> x.longValue.asInstanceOf[Number])
-                  (data \ "is_read").asOpt[Int].map (x => head += "is_read" -> x.intValue.asInstanceOf[Number])
+                  (data \ "status").asOpt[Int].map (x => head += "status" -> x.intValue.asInstanceOf[Number]).getOrElse(Unit)
+                  (data \ "further_message").asOpt[String].map (x => head += "further_message" -> x).getOrElse(Unit)
+                  (data \ "order_thumbs").asOpt[String].map (x => head += "order_thumbs" -> x).getOrElse(Unit)
+                  (data \ "order_date").asOpt[Long].map (x => head += "order_date" -> x.longValue.asInstanceOf[Number]).getOrElse(Unit)
+                  (data \ "is_read").asOpt[Int].map (x => head += "is_read" -> x.intValue.asInstanceOf[Number]).getOrElse(Unit)
                   
                   _data_connection.getCollection("orders").update(DBObject("order_id" -> order_id), head)
                   toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(head))))
@@ -202,10 +242,79 @@ object orderModule {
     def queryApplyOrder(data : JsValue) : JsValue = queryOrder(data)
     def queryOwnOrder(data : JsValue) : JsValue = queryOrder(data)
     
+    /** 
+     * push 
+     * 接受 (accept)
+     * 拒绝 (reject)
+     * 完成 (accomplish)
+     */
+    def acceptOrder(data : JsValue) : JsValue = {
+        try {
+            val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
+            
+            var content : Map[String, JsValue] = Map.empty
+  					content += "type" -> toJson(module.common.AcitionType.orderAccecpted.index)
+  					content += "sender_id" -> toJson(owner_id)
+  					content += "date" -> toJson(new Date().getTime)
+  					content += "receiver_id" -> toJson(user_id)
+  					content += "order_id" -> toJson(order_id)
+					
+    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+                                     "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                     "from" -> toJson("dongda_master"))
+            
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.reject.t))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+        }
+    }
+
     def rejectOrder(data : JsValue) : JsValue = {
         try {
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-            updateOrder(toJson(Map("order_id" -> toJson(order_id), "status" -> toJson(orderStatus.reject.t))))
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
+            
+            var content : Map[String, JsValue] = Map.empty
+  					content += "type" -> toJson(module.common.AcitionType.orderRejected.index)
+  					content += "sender_id" -> toJson(owner_id)
+  					content += "date" -> toJson(new Date().getTime)
+  					content += "receiver_id" -> toJson(user_id)
+  					content += "order_id" -> toJson(order_id)
+					
+    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+                                     "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                     "from" -> toJson("dongda_master"))
+            
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.reject.t))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+        }
+    }
+
+    def accomplishOrder(data : JsValue) : JsValue = {
+        try {
+            val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
+            
+            var content : Map[String, JsValue] = Map.empty
+  					content += "type" -> toJson(module.common.AcitionType.orderAccomplished.index)
+  					content += "sender_id" -> toJson(owner_id)
+  					content += "date" -> toJson(new Date().getTime)
+  					content += "receiver_id" -> toJson(user_id)
+  					content += "order_id" -> toJson(order_id)
+					
+    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+                                     "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                     "from" -> toJson("dongda_master"))
+            
+            updateOrder(toJson(Map("order_id" -> toJson(order_id), "further_message" -> toJson(further_message), "status" -> toJson(orderStatus.reject.t))))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }

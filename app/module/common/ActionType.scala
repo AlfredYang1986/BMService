@@ -9,6 +9,14 @@ object AcitionType {
   case object unlike extends ActionTypeDefines(5)
   case object unpush extends ActionTypeDefines(6)
   case object message extends ActionTypeDefines(7) // may not use
+  
+  /**
+   * order notify
+   */
+  case object orderPushed extends ActionTypeDefines(10)
+  case object orderAccecpted extends ActionTypeDefines(11)
+  case object orderRejected extends ActionTypeDefines(12)
+  case object orderAccomplished extends ActionTypeDefines(13)
 }
 
 sealed abstract class ActionTypeDefines(val index : Int)
