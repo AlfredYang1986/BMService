@@ -139,13 +139,14 @@ object orderModule {
             _data_connection.getCollection("orders") += obj
             
             { 
+             
 //                val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
                 val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
                 val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
                 val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
                 
                 var content : Map[String, JsValue] = Map.empty
-      					content += "type" -> toJson(module.common.AcitionType.orderAccecpted.index)
+      					content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
       					content += "sender_id" -> toJson(user_id)
       					content += "date" -> toJson(new Date().getTime)
       					content += "receiver_id" -> toJson(owner_id)
