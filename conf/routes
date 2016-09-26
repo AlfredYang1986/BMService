@@ -133,7 +133,7 @@ POST	/order/query								controllers.orderController.queryOrder
 POST	/order/query/own							controllers.orderController.queryOwnOrder
 POST	/order/query/apply							controllers.orderController.queryApplyOrder
 POST	/order/reject								controllers.orderController.rejectOrder
-POST	/order/accecpt								controllers.orderController.accecptOrder
+POST	/order/accept								controllers.orderController.acceptOrder
 POST	/order/accomplish							controllers.orderController.accomplishOrder
 
 POST	/order/comments/push						controllers.orderController.pushComments
