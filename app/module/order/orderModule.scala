@@ -151,6 +151,7 @@ object orderModule {
       					content += "date" -> toJson(new Date().getTime)
       					content += "receiver_id" -> toJson(owner_id)
       					content += "order_id" -> toJson(order_id)
+      					content += "service_id" -> toJson(service_id)
     					
         		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(owner_id).distinct),
                                          "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -255,6 +256,7 @@ object orderModule {
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
@@ -263,6 +265,7 @@ object orderModule {
   					content += "date" -> toJson(new Date().getTime)
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
+            content += "service_id" -> toJson(service_id)
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -279,6 +282,7 @@ object orderModule {
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
@@ -287,6 +291,7 @@ object orderModule {
   					content += "date" -> toJson(new Date().getTime)
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
+            content += "service_id" -> toJson(service_id)
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -303,6 +308,7 @@ object orderModule {
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
@@ -311,6 +317,7 @@ object orderModule {
   					content += "date" -> toJson(new Date().getTime)
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
+            content += "service_id" -> toJson(service_id)
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),

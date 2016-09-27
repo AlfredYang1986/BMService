@@ -182,8 +182,23 @@ object ProfileModule {
               }}
           }
 	    
-	    tmp += "is_real_name_cert" -> true
-	    tmp += "has_phone" -> true
+	    val user_id = obj.getAs[String]("user_id").get
+	    var is_real_name_cert = false
+	    var has_phone = false
+	    
+	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+	      case head :: Nil => {
+	          is_real_name_cert = head.getAs[MongoDBObject]("real_name").map { x => 
+	              x.getAs[Number]("status").get.intValue == 2
+	          }.getOrElse(false)
+	         
+	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
+	      }
+	      case _ => ???
+	    }
+	    
+	    tmp += "is_real_name_cert" -> toJson(is_real_name_cert)
+	    tmp += "has_phone" -> toJson(has_phone)
 	    
 	    tmp
 	}

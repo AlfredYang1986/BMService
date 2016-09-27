@@ -81,20 +81,35 @@ object orderCommentsModule {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
     }
+   
+    def queryOverallComments(data : JsValue) : JsValue = {
+      
+        def overallAcc(r : List[Float], lst : List[List[Float]]) : List[Float] = lst match { 
+          case Nil => r
+          case head :: Nil => r match {
+            case Nil => head
+            case _ => (r zip head).map (x => x._1 + x._2)
+          }
+        }
+      
+        try {
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+    
+            toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id), "points" -> toJson(
+                        overallAcc(Nil, (from db() in "service_comments" where ("service_id" -> service_id) select (x => x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Float]])).toList)
+                        )))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+        }
+    }
     
     def queryComments(data : JsValue) : JsValue = {
         try {
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-         
-            (from db() in "service_comments" where ("service_id" -> service_id) select (x => x)).toList match {
-              case head :: Nil => {
-                
-              }
-              case _ => ???
-            }
-            
-            null
-          
+            val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+       
+            toJson(Map("status" -> toJson("ok"), "result" -> toJson(
+                      (from db() in "service_comments" where ("service_id" -> service_id, "order_id" -> order_id) select (DB2Object(_))).toList)))
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
