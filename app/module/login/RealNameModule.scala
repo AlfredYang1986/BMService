@@ -43,11 +43,19 @@ object RealNameModule {
         try {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val real_name = (data \ "real_name").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-            val sociel_id = (data \ "sociel_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            val social_id = (data \ "social_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             
             (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
               case head :: Nil => {
-                  null
+                  val builder = MongoDBObject.newBuilder
+                  builder += "real_name" -> real_name
+                  builder += "social_id" -> social_id
+                  builder += "status" -> realNameStatus.pushed.t
+                  
+                  head += "real_name" -> builder.result
+                  
+                  _data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
+                  toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
               }
               case _ => throw new Exception("not existing")
             }
@@ -57,10 +65,42 @@ object RealNameModule {
     }
     
     def approveRealName(data : JsValue) : JsValue = {
-        null 
+        try {
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            
+            (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+              case head :: Nil => {
+                  val x = head.getAs[MongoDBObject]("real_name").map (x => x).getOrElse(throw new Exception("not existing"))
+                  x += "status" -> realNameStatus.approved.t.asInstanceOf[Number]
+                  head += "real_name" -> x
+                  
+                  _data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
+                  toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+              }
+              case _ => throw new Exception("not existing")
+            }
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)      
+        }
     }
      
     def rejectRealName(data : JsValue) : JsValue = {
-        null
+        try {
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            
+            (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+              case head :: Nil => {
+                  val x = head.getAs[MongoDBObject]("real_name").map (x => x).getOrElse(throw new Exception("not existing"))
+                  x += "status" -> realNameStatus.rejected.t.asInstanceOf[Number]
+                  head += "real_name" -> x
+                  
+                  _data_connection.getCollection("users").update(DBObject("user_id" -> user_id), head)
+                  toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+              }
+              case _ => throw new Exception("not existing")
+            }
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)      
+        }
     }
 }
