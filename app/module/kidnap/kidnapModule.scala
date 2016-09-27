@@ -16,6 +16,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 import module.sercurity.Sercurity
+import module.profile.ProfileModule
 
 object kidnapModule {
   
@@ -98,6 +99,8 @@ object kidnapModule {
   	        service_builder += "reserve1" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
+  	        
+  	        ProfileModule.updateUserProfile(toJson(Map("user_id" -> toJson(owner_id), "is_service_provider" -> toJson(1))))
   	        
   	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
   	      

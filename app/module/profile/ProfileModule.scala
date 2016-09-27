@@ -181,6 +181,10 @@ object ProfileModule {
 					        case _ => toJson("")
               }}
           }
+	    
+	    tmp += "is_real_name_cert" -> true
+	    tmp += "has_phone" -> true
+	    
 	    tmp
 	}
 
