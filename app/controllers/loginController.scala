@@ -2,7 +2,7 @@ package controllers
 
 import play.api.mvc._
 
-import module.login.LoginModule
+import module.login.{ LoginModule, phoneCheckModule }
 
 import controllers.common.requestArgsQuery.{requestArgs, requestArgsWithAuthCheck}
 
@@ -25,4 +25,7 @@ object loginController extends Controller {
 	def authCreateTmpUserWithPhone = Action (request => requestArgs(request)(LoginModule.authCreateTmpUserForRegisterProcess))
 	
 	def pingTest = Action (request => requestArgsWithAuthCheck(request)(LoginModule.pingTest))
+	
+	def requirePhoneCheckCode = Action (request => requestArgs(request)(phoneCheckModule.pushSMSCode))
+	def phoneCheckCode = Action (request => requestArgs(request)(phoneCheckModule.checkSMSCode))
 }

@@ -20,6 +20,10 @@ POST	/login/userLstInSystem						controllers.loginController.userLstInSystem
 POST	/login/pingtest 							controllers.loginController.pingTest
 POST	/login/authCreateTmpUserWithPhone 			controllers.loginController.authCreateTmpUserWithPhone
 
+# phone validate
+POST	/auth/code/require							controllers.loginController.requirePhoneCheckCode				
+POST	/auth/code/check							controllers.loginController.phoneCheckCode
+
 # post module
 POST	/post/postContent							controllers.postController.postContent
 POST	/post/uploadFile							controllers.postController.uploadFile
@@ -144,6 +148,7 @@ POST	/order/comments/query						controllers.orderController.queryComments
 # expose abuse content and users
 POST 	/expose/user								controllers.exposeController.expostUser
 POST 	/expose/content								controllers.exposeController.expostContent
+
 
 # web pay controller
 POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID
