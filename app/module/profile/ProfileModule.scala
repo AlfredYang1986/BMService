@@ -189,7 +189,7 @@ object ProfileModule {
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	      case head :: Nil => {
 	          is_real_name_cert = head.getAs[MongoDBObject]("real_name").map { x => 
-	              x.getAs[Number]("status").get.intValue == 2
+	              x.getAs[Number]("status").get.intValue == 1
 	          }.getOrElse(false)
 	         
 	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
