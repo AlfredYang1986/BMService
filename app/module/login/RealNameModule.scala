@@ -41,12 +41,14 @@ sealed abstract class RealNameAuthDefines(val t : Int, val des : String)
 object RealNameModule {
     def pushRealName(data : JsValue) : JsValue = {
         try {
+                println(data)
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val real_name = (data \ "real_name").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val social_id = (data \ "social_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             
             (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
               case head :: Nil => {
+                println(1234)
                   val builder = MongoDBObject.newBuilder
                   builder += "real_name" -> real_name
                   builder += "social_id" -> social_id
