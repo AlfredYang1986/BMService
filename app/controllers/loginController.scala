@@ -2,7 +2,7 @@ package controllers
 
 import play.api.mvc._
 
-import module.login.{ LoginModule, phoneCheckModule }
+import module.login.{ LoginModule, phoneCheckModule, RealNameModule }
 
 import controllers.common.requestArgsQuery.{requestArgs, requestArgsWithAuthCheck}
 
@@ -28,4 +28,8 @@ object loginController extends Controller {
 	
 	def requirePhoneCheckCode = Action (request => requestArgs(request)(phoneCheckModule.pushSMSCode))
 	def phoneCheckCode = Action (request => requestArgs(request)(phoneCheckModule.checkSMSCode))
+	
+	def pushRealName = Action (request => requestArgs(request)(RealNameModule.pushRealName))
+	def approveRealName = Action (request => requestArgs(request)(RealNameModule.approveRealName)) 
+	def rejectRealName = Action (request => requestArgs(request)(RealNameModule.rejectRealName))
 }

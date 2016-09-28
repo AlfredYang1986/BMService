@@ -24,6 +24,10 @@ POST	/login/authCreateTmpUserWithPhone 			controllers.loginController.authCreate
 POST	/auth/code/require							controllers.loginController.requirePhoneCheckCode				
 POST	/auth/code/check							controllers.loginController.phoneCheckCode
 
+POST	/auth/realname/push							controllers.loginController.pushRealName
+POST	/auth/realname/approve						controllers.loginController.approveRealName
+POST	/auth/realname/reject						controllers.loginController.rejectRealName
+
 # post module
 POST	/post/postContent							controllers.postController.postContent
 POST	/post/uploadFile							controllers.postController.uploadFile
