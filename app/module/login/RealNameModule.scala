@@ -52,7 +52,8 @@ object RealNameModule {
                   val builder = MongoDBObject.newBuilder
                   builder += "real_name" -> real_name
                   builder += "social_id" -> social_id
-                  builder += "status" -> realNameStatus.pushed.t
+//                  builder += "status" -> realNameStatus.pushed.t
+                  builder += "status" -> realNameStatus.approved.t
                   
                   head += "real_name" -> builder.result
                   
