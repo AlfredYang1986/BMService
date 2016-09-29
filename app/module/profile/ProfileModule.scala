@@ -76,6 +76,7 @@ object ProfileModule {
 				builder += "company" -> (data \ "company").asOpt[String].map (x => x).getOrElse("")
 				builder += "occupation" -> (data \ "occupation").asOpt[String].map (x => x).getOrElse("")
 				builder += "personal_description" -> (data \ "personal_description").asOpt[String].map (x => x).getOrElse("")
+				builder += "contact_no" -> (data \ "contact_no").asOpt[String].map (x => x).getOrElse("")
 				
 				builder += "is_service_provider" -> (data \ "is_service_provider").asOpt[Int].map (x => x).getOrElse(0)
 
@@ -184,7 +185,7 @@ object ProfileModule {
 	    
 	    val user_id = obj.getAs[String]("user_id").get
 	    var is_real_name_cert = false
-	    var has_phone = false
+	    var has_phone = obj.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
 	    
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	      case head :: Nil => {
@@ -192,7 +193,7 @@ object ProfileModule {
 	              x.getAs[Number]("status").get.intValue == 1
 	          }.getOrElse(false)
 	         
-	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
+//	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
 	      }
 	      case _ => ???
 	    }
