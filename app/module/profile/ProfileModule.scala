@@ -190,7 +190,7 @@ object ProfileModule {
 	    
 	    val user_id = obj.getAs[String]("user_id").get
 	    var is_real_name_cert = false
-	    var has_phone = obj.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
+	    var has_phone = obj.getAs[String]("contact_no").map (x => x.length > 0).getOrElse(false)
 	    
 	    (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
 	      case head :: Nil => {
