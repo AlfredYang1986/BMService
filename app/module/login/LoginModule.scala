@@ -413,7 +413,7 @@ object LoginModule {
 //			tmp += "auth_token" -> toJson(auth_token)
 //		}
 
-		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "contact_no" -> toJson(phoneNo))))
+//		ProfileModule.updateUserProfile(Json.toJson(Map("user_id" -> toJson(user_id), "contact_no" -> toJson(phoneNo))))
 		
 		Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map(
 		    "user_id" -> user_id,

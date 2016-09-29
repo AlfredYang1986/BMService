@@ -76,7 +76,6 @@ object ProfileModule {
 				builder += "company" -> (data \ "company").asOpt[String].map (x => x).getOrElse("")
 				builder += "occupation" -> (data \ "occupation").asOpt[String].map (x => x).getOrElse("")
 				builder += "personal_description" -> (data \ "personal_description").asOpt[String].map (x => x).getOrElse("")
-				builder += "contact_no" -> (data \ "contact_no").asOpt[String].map (x => x).getOrElse("")
 				
 				builder += "is_service_provider" -> (data \ "is_service_provider").asOpt[Int].map (x => x).getOrElse(0)
 
@@ -89,6 +88,12 @@ object ProfileModule {
 				builder += "date" -> new Date().getTime
 				builder += "dob" -> (data \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
 				builder += "about" -> (data \ "about").asOpt[String].map (x => x).getOrElse("")
+				
+				val contact_no = (from db() in "users" where ("user_id" -> user_id) select (x => x.getAs[String]("phoneNo").get)).toList match {
+				  case head :: Nil => head
+				  case _ => ""
+				}
+				builder += "contact_no" -> contact_no
 				
 				(data \ "kids").asOpt[List[JsValue]].map { lst => 
 				    val kids = MongoDBList.newBuilder
@@ -107,8 +112,8 @@ object ProfileModule {
 				result += "screen_name" -> toJson(screen_name)
 				result += "screen_photo" -> toJson(screen_photo)
 				result += "role_tag" -> toJson(role_tag)
-        RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))    
-			
+        RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))
+        
 				_data_connection.getCollection("user_profile") += builder.result
 				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
 			
