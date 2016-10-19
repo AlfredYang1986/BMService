@@ -148,6 +148,7 @@ POST	/order/comments/push						controllers.orderController.pushComments
 POST	/order/comments/update						controllers.orderController.updateComments
 POST	/order/comments/pop							controllers.orderController.popComments
 POST	/order/comments/query						controllers.orderController.queryComments
+POST	/order/comments/overall						controllers.orderController.queryOverAllComments
 
 # expose abuse content and users
 POST 	/expose/user								controllers.exposeController.expostUser

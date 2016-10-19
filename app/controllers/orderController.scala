@@ -24,4 +24,5 @@ object orderController extends Controller {
     def updateComments = Action(request => requestArgs(request)(orderCommentsModule.updateComments))
     def popComments = Action(request => requestArgs(request)(orderCommentsModule.popComments))
     def queryComments = Action(request => requestArgs(request)(orderCommentsModule.queryComments))
+    def queryOverAllComments = Action(request => requestArgs(request)(orderCommentsModule.queryOverallComments))
 }
