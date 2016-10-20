@@ -24,6 +24,7 @@ object ErrorCode {
   		new ErrorNode("dismiss chat group error", -14, "dismiss chat group error"),
   		new ErrorNode("not allowed", -15, "operation not allowed"),
   		new ErrorNode("service not existing", -16, "service not exist"),
+  		new ErrorNode("wechat pay error", -17, "wechat pay error"),
 
   		new ErrorNode("unknown error", -999, "unknown error")
   	)

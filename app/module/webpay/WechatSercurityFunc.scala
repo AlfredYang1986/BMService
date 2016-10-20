@@ -5,11 +5,11 @@ import module.sercurity.Sercurity
 object WechatSercurityFunc {
     val seed = "alfred yang wechat nonce str generater"
     
-    val app_id = ""
-    val app_secret = ""
+    val app_id = "wx66d179d99c9ba7d6"
+    val app_secret = "469c1beed3ecaa3a836767a5999beeb1"
     
-    val mch_id = ""
-    val mch_key = ""
+    val mch_id = "1384946602"
+    val mch_key = "dongdaservicedongdaservice123456"
    
     val trade_type_app = "APP"
     val trade_type_web = "JSAPI"

@@ -127,10 +127,10 @@ object orderModule {
               
             val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
             val x = Future(JsValue2DB(data, order_id))
-            val y = Future(WechatPayModule.prepayid(data))
+            val y = Future(WechatPayModule.prepayid(data, order_id))
             
             val obj = Await.result (x map (o => o), Timeout(1 second).duration).asInstanceOf[MongoDBObject]
-            val js = Await.result (y map (v => v), Timeout(1 second).duration).asInstanceOf[JsValue]
+            val js = Await.result (y map (v => v), Timeout(10 second).duration).asInstanceOf[JsValue]
            
             val prepay_id = (js \ "result" \ "prepay_id").asOpt[String].map (x => x).getOrElse("")
             
@@ -138,27 +138,45 @@ object orderModule {
             
             _data_connection.getCollection("orders") += obj
             
-            { 
-             
-//                val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-                val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-                val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-                val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
-                
-                var content : Map[String, JsValue] = Map.empty
-      					content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
-      					content += "sender_id" -> toJson(user_id)
-      					content += "date" -> toJson(new Date().getTime)
-      					content += "receiver_id" -> toJson(owner_id)
-      					content += "order_id" -> toJson(order_id)
-      					content += "service_id" -> toJson(service_id)
-    					
-        		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(owner_id).distinct),
-                                         "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
-                                         "from" -> toJson("dongda_master"))
-            }
-            
             toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(obj))))
+        } catch {
+          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+        }
+    }
+    
+    def payOrder(data : JsValue) : JsValue = {
+        try {
+          println(data)
+            val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+          
+            (from db() in "orders" where ("order_id" -> order_id) select (x => x)).toList match {
+              case head :: Nil => {
+                  head += "status" -> orderStatus.paid.t.asInstanceOf[Number]
+                 
+                  { 
+                      val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                      val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                      val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+                      val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
+                      
+                      var content : Map[String, JsValue] = Map.empty
+            					content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
+            					content += "sender_id" -> toJson(user_id)
+            					content += "date" -> toJson(new Date().getTime)
+            					content += "receiver_id" -> toJson(owner_id)
+            					content += "order_id" -> toJson(order_id)
+            					content += "service_id" -> toJson(service_id)
+          					
+              		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(owner_id).distinct),
+                                               "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
+                                               "from" -> toJson("dongda_master"))
+                  }
+                  
+                  _data_connection.getCollection("orders").update(DBObject("order_id" -> order_id), head)
+                  toJson(Map("status" -> "ok", "result" -> "success"))
+              }
+              case _ => throw new Exception("not existing")
+            }
         } catch {
           case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
         }
@@ -226,7 +244,7 @@ object orderModule {
         }
         
         try { 
-            var condition : Option[DBObject] = None
+            var condition : Option[DBObject] = Some("status" $ne 0)
             (data \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
             (data \ "user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
             (data \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
