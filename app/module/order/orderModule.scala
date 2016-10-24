@@ -43,6 +43,8 @@ import akka.actor.ActorRef
 import module.common.AcitionType._
 import module.notification.{ DDNActor, DDNNotifyUsers } 
 
+import module.sercurity.Sercurity
+
 object orderStatus {
     case object reject extends orderStatusDefines(-9, "reject")
     case object unpaid extends orderStatusDefines(-1, "unpaid")
@@ -165,6 +167,7 @@ object orderModule {
             					content += "receiver_id" -> toJson(owner_id)
             					content += "order_id" -> toJson(order_id)
             					content += "service_id" -> toJson(service_id)
+                      content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
           					
               		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(owner_id).distinct),
                                                "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -283,6 +286,7 @@ object orderModule {
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
+            content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -309,6 +313,7 @@ object orderModule {
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
+            content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
@@ -335,6 +340,7 @@ object orderModule {
   					content += "receiver_id" -> toJson(user_id)
   					content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
+            content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
     		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
