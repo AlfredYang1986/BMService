@@ -53,8 +53,8 @@ object phoneCheckModule {
 	    else _data_connection.getCollection("reg").update(DBObject("phoneNo" -> phoneNo), builder.result)
 
 	    /**
-	 		 * send code to the phone
-	 		 */	
+	 	 * send code to the phone
+	 	 */	
  		import play.api.Play.current
  		smsModule().sendSMS(phoneNo, code.toString)
 	
