@@ -36,26 +36,26 @@ object ProfileModule {
 		val createWhenNotExist = (data \ "create").asOpt[Int].map(x => x).getOrElse(0)
 		val createNewAuthToken= (data \ "refresh_token").asOpt[Int].map(x => x).getOrElse(0)
  
-    if (user_id == "") ErrorCode.errorToJson("user not existing")
+	    if (user_id == "") ErrorCode.errorToJson("user not existing")
 		else {
 			val reVal = from db() in "user_profile" where ("user_id" -> user_id) select (x => x)
-			var result : Map[String, JsValue] = Map.empty
+//			var result : Map[String, JsValue] = Map.empty
      
-			(data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
-      (data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
+//			(data \ "auth_token").asOpt[String].map(x => result += "auth_token" -> toJson(x)).getOrElse(Unit)
+//	    	(data \ "connect_result").asOpt[String].map(x => result += "connect_result" -> toJson(x)).getOrElse(Unit)
 
-      if (createNewAuthToken != 0) {
-            auth_token = LoginModule.refreshAuthToken(user_id, (data \ "uuid").asOpt[String].get)
-            result += "auth_token" -> toJson(auth_token)
-      }
+		    if (createNewAuthToken != 0) {
+		    	auth_token = LoginModule.refreshAuthToken(user_id, (data \ "uuid").asOpt[String].get)
+//		        result += "auth_token" -> toJson(auth_token)
+		    }
       
 			if (reVal.empty) { 
 			   
-        if (createWhenNotExist != 0) {
-            val cn = LoginModule.authCreateUserWithPhone(data)
-            user_id =  ((cn \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
-            auth_token =  ((cn \ "result").asOpt[JsValue].get \ "auth_token").asOpt[String].get
-        }
+		        if (createWhenNotExist != 0) {
+		            val cn = LoginModule.authCreateUserWithPhone(data)
+		            user_id =  ((cn \ "result").asOpt[JsValue].get \ "user_id").asOpt[String].get
+		            auth_token =  ((cn \ "result").asOpt[JsValue].get \ "auth_token").asOpt[String].get
+		        }
 			    
 				val builder = MongoDBObject.newBuilder
 				builder += "user_id" -> user_id // c_r_user_id
@@ -107,15 +107,16 @@ object ProfileModule {
 				    builder += "kids" -> kids.result
 				}.getOrElse(builder += "kids" -> MongoDBList.newBuilder.result)
 				
-				result += "user_id" -> toJson(user_id) //toJson(c_r_user_id)
-				result += "auth_token" -> toJson(auth_token) //toJson(c_r_user_id)
-				result += "screen_name" -> toJson(screen_name)
-				result += "screen_photo" -> toJson(screen_photo)
-				result += "role_tag" -> toJson(role_tag)
-        RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))
-        
-				_data_connection.getCollection("user_profile") += builder.result
-				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
+//				result += "user_id" -> toJson(user_id) //toJson(c_r_user_id)
+//				result += "auth_token" -> toJson(auth_token) //toJson(c_r_user_id)
+//				result += "screen_name" -> toJson(screen_name)
+//				result += "screen_photo" -> toJson(screen_photo)
+//				result += "role_tag" -> toJson(role_tag)
+        		RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))
+       
+		        val result = builder.result
+				_data_connection.getCollection("user_profile") += result
+    			Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(result))))
 			
 			} else {
 				val user = reVal.head
@@ -124,7 +125,7 @@ object ProfileModule {
 					
 //					  	(data \ "isThird").asOpt[Int].map ( bt => Unit).getOrElse {
 					  		user += x -> value
-					  		result += x -> toJson(value)
+//					  		result += x -> toJson(value)
 					  		if (x == "role_tag") {
 					  		    RoleTagModule.addRoleTags(toJson(Map("tag_name" -> role_tag)))    
 					  		}
@@ -135,14 +136,14 @@ object ProfileModule {
 				List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin", "gender", "is_service_provider") foreach { x => 
 					(data \ x).asOpt[Int].map { value =>
 						user += x -> new Integer(value)
-						result += x -> toJson(value)
+//						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
 
 				List("dob") foreach { x => 
 					(data \ x).asOpt[Long].map { value =>
 						user += x -> value.asInstanceOf[Number]
-						result += x -> toJson(value)
+//						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
 			
@@ -150,7 +151,7 @@ object ProfileModule {
 					(data \ x).asOpt[Float].map { value =>
 						val co = user.getAs[MongoDBObject]("coordinate").get
 						co += x -> x.asInstanceOf[Number]
-						result += x -> toJson(value)
+//						result += x -> toJson(value)
 					}.getOrElse(Unit)
 				}
 				
@@ -166,9 +167,9 @@ object ProfileModule {
 				    user += "kids" -> kids.result
 				}.getOrElse(Unit)
 		
-				result += "user_id" -> toJson(user_id)
+//				result += "user_id" -> toJson(user_id)
 				_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
-				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(result)))
+				Json.toJson(Map("status" -> toJson("ok"), "result" -> toJson(DB2JsValue(user))))
 			}
 		}
 	}
@@ -198,7 +199,7 @@ object ProfileModule {
 	              x.getAs[Number]("status").get.intValue == 1
 	          }.getOrElse(false)
 	         
-//	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
+	          has_phone = head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)
 	      }
 	      case _ => ???
 	    }

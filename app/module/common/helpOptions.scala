@@ -89,9 +89,10 @@ object helpOptions {
 		value.map ( x => x match {
 			  case str : String => opt_str_2_js(str)
 		  	case list : BasicDBList => opt_map_2_js(list, key)
+		  	case mst : MongoDBList => opt_map_2_js(mst, key)
 		  	case n : Number => opt_val_2_js(n)
 		  	case obj : BasicDBObject => opt_obj_2_js(obj, key)
-		  	case _ => ??? 
+		  	case _ => ???
 		}).getOrElse(func(key))
 	}
 }

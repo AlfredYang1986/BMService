@@ -15,24 +15,18 @@ import module.sercurity.Sercurity
 object orderCommentsModule {
     def pushComments(data : JsValue) : JsValue = {
         try {
-//            val punctual = (data \ "punctual").asOpt[Float].map (x => x).getOrElse(5.floatValue)
-        
             val builder = MongoDBObject.newBuilder
+            
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+            
             builder += "order_id" -> order_id
             builder += "service_id" -> service_id
             builder += "owner_id" -> (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             builder += "user_id" -> (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             builder += "content" -> (data \ "content").asOpt[String].map (x => x).getOrElse("")
-
-            builder += "points" -> (data \ "points").asOpt[List[Float]].map (x => x).getOrElse(throw new Exception("wrong input"))
+            builder += "points" -> ((data \ "points").asOpt[List[Int]].map (x => x).getOrElse(throw new Exception("wrong input"))).map (_.toFloat)
             
-//            builder += "accuracy" -> (data \ "accuracy").asOpt[Float].map (x => x).getOrElse(5.floatValue)
-//            builder += "communication" -> (data \ "communication").asOpt[Float].map (x => x).getOrElse(5.floatValue)
-//            builder += "professional" -> (data \ "professional").asOpt[Float].map (x => x).getOrElse(5.floatValue)
-//            builder += "hygiene" -> (data \ "hygiene").asOpt[Float].map (x => x).getOrElse(5.floatValue)
-           
             builder += "comment_id" -> Sercurity.md5Hash(order_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
             builder += "date" -> new Date().getTime
             
@@ -121,11 +115,7 @@ object orderCommentsModule {
                    "owner_id" -> toJson(x.getAs[String]("owner_id").get),
                    "user_id" -> toJson(x.getAs[String]("user_id").get),
                    "service_id" -> toJson(x.getAs[String]("service_id").get),
-                   "content" -> toJson(x.getAs[String]("contetn").get),
+                   "content" -> toJson(x.getAs[String]("content").get),
                    "points" -> toJson(x.getAs[List[Float]]("points").get.toList),
-//                   "accuracy" -> toJson(x.getAs[Float]("accuracy").get),
-//                   "communication" -> toJson(x.getAs[Float]("communication").get),
-//                   "professional" -> toJson(x.getAs[Float]("professional").get),
-//                   "hygiene" -> toJson(x.getAs[Float]("hygiene").get),
-                   "date" -> toJson(x.getAs[Long]("date").get)))
+                   "date" -> toJson(x.getAs[Number]("date").get.longValue)))
 }

@@ -34,42 +34,42 @@ object phoneCheckModule {
     def pushSMSCode(data : JsValue) : JsValue = {
         val phoneNo = (data \ "phoneNo").asOpt[String].get
 		
-		    val code = 1111 // fake on
-//  		val code = scala.util.Random.nextInt(9000) + 1000
+		// val code = 1111 // fake on
+ 		val code = scala.util.Random.nextInt(9000) + 1000
 
-	    	/**
-		 		 * generate a reg token
-		 		 */
-		    val time_span_minutes = Sercurity.getTimeSpanWith10Minutes
-		    val reg_token = Sercurity.md5Hash(phoneNo + time_span_minutes)
-		
-		    val builder = MongoDBObject.newBuilder
-		    builder += "phoneNo" -> phoneNo
-		    builder += "code" -> code
-		    builder += "reg_token" -> reg_token
-		
-		    val rel = from db() in "reg" where ("phoneNo" -> phoneNo) select (x => x) 
-		    if (rel.empty) _data_connection.getCollection("reg") += builder.result
-		    else _data_connection.getCollection("reg").update(DBObject("phoneNo" -> phoneNo), builder.result)
+    	/**
+	 	 * generate a reg token
+	 	 */
+	    val time_span_minutes = Sercurity.getTimeSpanWith10Minutes
+	    val reg_token = Sercurity.md5Hash(phoneNo + time_span_minutes)
+	
+	    val builder = MongoDBObject.newBuilder
+	    builder += "phoneNo" -> phoneNo
+	    builder += "code" -> code
+	    builder += "reg_token" -> reg_token
+	
+	    val rel = from db() in "reg" where ("phoneNo" -> phoneNo) select (x => x) 
+	    if (rel.empty) _data_connection.getCollection("reg") += builder.result
+	    else _data_connection.getCollection("reg").update(DBObject("phoneNo" -> phoneNo), builder.result)
 
-		    /**
-		 		 * send code to the phone
-		 		 */	
-//  		import play.api.Play.current
-//  		smsModule().sendSMS(phoneNo, code.toString)
-		
-	    	/**
-		 		 * is register 
-				 */
-		    val is_reg = (from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)).toList match {
-		                case Nil => false
-		                case _ => true
-		             }
-		
-		    Json.toJson(Map("status" -> toJson("ok"), "result" -> 
-				     toJson(Map("reg_token" -> toJson(reg_token), 
-				                "phoneNo" -> toJson(phoneNo),
-				                "is_reg" -> toJson(is_reg)))))   
+	    /**
+	 		 * send code to the phone
+	 		 */	
+ 		import play.api.Play.current
+ 		smsModule().sendSMS(phoneNo, code.toString)
+	
+    	/**
+	 		 * is register 
+			 */
+	    val is_reg = (from db() in "users" where ("phoneNo" -> phoneNo) select (x => x)).toList match {
+	                case Nil => false
+	                case _ => true
+	             }
+	
+	    Json.toJson(Map("status" -> toJson("ok"), "result" -> 
+			     toJson(Map("reg_token" -> toJson(reg_token), 
+			                "phoneNo" -> toJson(phoneNo),
+			                "is_reg" -> toJson(is_reg)))))   
     }
     
     def checkSMSCode(data : JsValue) : JsValue = {

@@ -146,7 +146,6 @@ object orderModule {
     
     def payOrder(data : JsValue) : JsValue = {
         try {
-          println(data)
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
           
             (from db() in "orders" where ("order_id" -> order_id) select (x => x)).toList match {
