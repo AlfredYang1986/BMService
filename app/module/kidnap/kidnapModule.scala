@@ -18,6 +18,18 @@ import scala.util.Random
 import module.sercurity.Sercurity
 import module.profile.ProfileModule
 
+object weekDay {  
+    case object Mon extends weekDayDefines(0, "Mongday")
+    case object Tus extends weekDayDefines(1, "Tuesday")
+    case object Wed extends weekDayDefines(2, "Wednesday")
+    case object Thu extends weekDayDefines(3, "Thursday")
+    case object Fri extends weekDayDefines(4, "Friday")
+    case object Sat extends weekDayDefines(5, "Saturday")
+    case object Sun extends weekDayDefines(6, "Sunday")
+}
+
+sealed abstract class weekDayDefines(val t : Int, val des : String)
+
 object kidnapModule {
   
     def queryServiceStatus(service_id : Option[String]) : (Int, MongoDBObject) = {
@@ -45,14 +57,50 @@ object kidnapModule {
   	        service_builder += "service_id" -> service_id
   	        service_builder += "owner_id" -> owner_id
   	        
-  	        val offer_date = MongoDBObject.newBuilder
-  	        (data \ "offer_date").asOpt[JsValue].map { date => 
-  	            offer_date += "start" -> (date \ "start").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
-  	            offer_date += "end" -> (date \ "end").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
-  	        }.getOrElse {
-  	            offer_date += "start" -> 0.longValue
-  	            offer_date += "end" -> 0.longValue
-  	        }
+  	        // val offer_date = MongoDBObject.newBuilder
+  	        // (data \ "offer_date").asOpt[JsValue].map { date => 
+  	        //     offer_date += "start" -> (date \ "start").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
+  	        //     offer_date += "end" -> (date \ "end").asOpt[Long].map (tmp => tmp).getOrElse(0.longValue)   
+  	        // }.getOrElse {
+  	        //     offer_date += "start" -> 0.longValue
+  	        //     offer_date += "end" -> 0.longValue
+  	        // }
+
+            val offer_date = MongoDBList.newBuilder
+            (data \ "offer_date").asOpt[List[JsValue]].map { lst => 
+                lst map { date =>
+                    val one_date = MongoDBObject.newBuilder
+                    one_date += "day" -> (date \ "day").asOpt[Int].get
+
+                    val se_lst = MongoDBList.newBuilder
+                    (date \ "occurance").asOpt[List[JsValue]].get map { occ => 
+                        val se = MongoDBObject.newBuilder
+                        se += "start" -> (occ \ "start").asOpt[Int].get
+                        se += "end" -> (occ \ "end").asOpt[Int].get
+                        se_lst += se.result
+                    }
+                    one_date += "occurance" -> se_lst.result
+			        offer_date += one_date.result
+                }
+            }.getOrElse {
+                import weekDay._
+                (Mon :: Tus :: Wed :: Thu :: Fri :: Sat :: Sun :: Nil) map { day => 
+                    val one_date = MongoDBObject.newBuilder
+                    one_date += "day" -> day.t.asInstanceOf[Number]
+
+                    val se_lst = MongoDBList.newBuilder
+                    
+                    val se = MongoDBObject.newBuilder
+                    se += "start" -> 0
+                    se += "end" -> 2400
+                    se_lst += se.result
+
+                    one_date += "occurance" -> se_lst.result
+                    println(one_date.result)
+
+	                offer_date += one_date.result
+                }
+            }
   	        service_builder += "offer_date" -> offer_date.result
   	       
   	        val location = MongoDBObject.newBuilder
@@ -150,12 +198,31 @@ object kidnapModule {
   	            origin += "location" -> location.result            
             }.getOrElse(Unit)
             
-            (data \ "offer_date").asOpt[JsValue].map { date =>
-                val offer_date = MongoDBObject.newBuilder
-  	            offer_date += "start" -> (date \ "start").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
-  	            offer_date += "end" -> (date \ "end").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
-  	            origin += "offer_date" -> offer_date.result            
-            }.getOrElse(Unit)
+            // (data \ "offer_date").asOpt[JsValue].map { date =>
+            //     val offer_date = MongoDBObject.newBuilder
+  	        //     offer_date += "start" -> (date \ "start").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
+  	        //     offer_date += "end" -> (date \ "end").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
+  	        //     origin += "offer_date" -> offer_date.result            
+            // }.getOrElse(Unit)
+
+            val offer_date = MongoDBList.newBuilder
+            (data \ "offer_date").asOpt[List[JsValue]].map { lst => 
+                lst map { date =>
+                    val one_date = MongoDBObject.newBuilder
+                    one_date += "day" -> (date \ "day").asOpt[Int].get
+
+                    val se_lst = MongoDBList.newBuilder
+                    (date \ "occurance").asOpt[List[JsValue]].get map { occ => 
+                        val se = MongoDBObject.newBuilder
+                        se += "start" -> (occ \ "start").asOpt[Int].get
+                        se += "end" -> (occ \ "end").asOpt[Int].get
+                        se_lst += se.result
+                    }
+                    one_date += "occurance" -> se_lst.result
+                    offer_date += one_date.result
+                }
+            }.getOrElse (Unit) 
+            origin += "offer_date" -> offer_date.result
            
             (data \ "cans").asOpt[Long].map (cans => origin += "cans" -> cans.asInstanceOf[Number]).getOrElse(Unit)
             (data \ "facility").asOpt[Long].map (cans => origin += "facility" -> cans.asInstanceOf[Number]).getOrElse(Unit)
@@ -224,7 +291,16 @@ object kidnapModule {
   	    }
   	}
   	
-  	def DB2JsValue(x : MongoDBObject) : JsValue = 
+  	def DB2JsValue(x : MongoDBObject) : JsValue = {
+        val offer_date = toJson(x.getAs[MongoDBList]("offer_date").map { x => x.toList.asInstanceOf[List[BasicDBObject]].map { one_date => 
+                            toJson(Map("day" -> toJson(one_date.get("day").asInstanceOf[Number].intValue),
+                                       "occurance" -> toJson(one_date.get("occurance").asInstanceOf[BasicDBList].toList.asInstanceOf[List[BasicDBObject]].map { occ => 
+                                            toJson(Map("start" -> toJson(occ.getAs[Number]("start").get.intValue),
+                                                       "end" -> toJson(occ.getAs[Number]("end").get.intValue)))
+                                        })
+                                    ))
+                         }}.getOrElse(Nil))
+
   	    if (x == null) ErrorCode.errorToJson("service not existing")
   	    else toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get),
   	               "title" -> toJson(x.getAs[String]("title").get),
@@ -232,8 +308,7 @@ object kidnapModule {
   	               "capacity" -> toJson(x.getAs[Number]("capacity").get.intValue),
   	               "price" -> toJson(x.getAs[Number]("price").get.floatValue),
   	               "owner_id" -> toJson(x.getAs[String]("owner_id").get),
-  	               "offer_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("start").get.longValue),
-  	                                          "end" -> toJson(x.getAs[MongoDBObject]("offer_date").get.getAs[Number]("end").get.longValue))),
+  	               "offer_date" -> offer_date,
   	               "location" -> toJson(Map("latitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("latitude").get.floatValue),
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
   	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
@@ -248,6 +323,7 @@ object kidnapModule {
   	               "adjust_address" -> toJson(x.getAs[String]("adjust_address").map (y => y).getOrElse("")),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               ))
+    }
   
   	def queryKidnapServiceDetail(data : JsValue) : JsValue = {
   	    try {
