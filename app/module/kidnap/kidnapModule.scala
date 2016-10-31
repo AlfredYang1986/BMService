@@ -15,6 +15,8 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
 import scala.util.Random
 
+import java.util.Date
+
 import module.sercurity.Sercurity
 import module.profile.ProfileModule
 
@@ -144,6 +146,7 @@ object kidnapModule {
   	        service_builder += "allow_leave" -> (data \ "allow_leave").asOpt[Int].map (x => x).getOrElse(0)
   	        service_builder += "service_cat" -> (data \ "service_cat").asOpt[Int].map (x => x).getOrElse(0)
   	        
+  	        service_builder += "date" -> new Date().getTime
   	        service_builder += "reserve1" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
@@ -315,6 +318,7 @@ object kidnapModule {
   	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
+  	               "date" -> toJson(x.getAs[Number]("date").get.longValue),
   	               "distinct" -> toJson(x.getAs[String]("distinct").map(x => x).getOrElse("")),
   	               "address" -> toJson(x.getAs[String]("address").get),
   	               "least_hours" -> toJson(x.getAs[Number]("least_hours").map (y => y.intValue).getOrElse(0)),
@@ -339,12 +343,14 @@ object kidnapModule {
   	               
   	def searchKidnapService(data : JsValue) : JsValue = {
   	    try {
-  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(100.intValue)
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
   	      
   	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
-      	        (from db() in "kidnap" where ("status" -> kidnapServiceStatus.online.t)).
-      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
+      	        (from db() in "kidnap" where ("status" -> kidnapServiceStatus.online.t, "date" $lte date)).
+//      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
+      	            selectSkipTop(skip)(take)("date")(DB2JsValue(_)).toList)))
   	      
   	    } catch {
   	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
@@ -355,12 +361,13 @@ object kidnapModule {
   	    try {
   	        val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
 
-  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20.intValue)
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
   	       
   	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(
       	        (from db() in "kidnap" where ("owner_id" -> owner_id)).
-      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
+//      	            selectSkipTop(skip)(take)("offer_date.start")(DB2JsValue(_)).toList)))
+      	            selectSkipTop(skip)(take)("date")(DB2JsValue(_)).toList)))
   	      
   	    } catch {
   	      case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
@@ -381,9 +388,14 @@ object kidnapModule {
   	          case head :: tail => conditions(tail, conditionsAcc(head, o))
   	        }
   	        
+  	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(100.intValue)
+  	      
   	        val reVal = conditions(lst, None) match {
   	          case None => toJson(List[String]())
-  	          case Some(x) => toJson((from db() in "kidnap" where x select(DB2JsValue(_))).toList)
+  	          case Some(x) => {
+  	        	  toJson((from db() in "kidnap" where x).selectSkipTop(skip)(take)("date")(DB2JsValue(_)).toList)   //select(DB2JsValue(_))).toList)
+  	          }
   	        }
   
   	        toJson(Map("status" -> toJson("ok"), "result" -> reVal))

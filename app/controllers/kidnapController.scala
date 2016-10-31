@@ -29,4 +29,31 @@ object kidnapController extends Controller {
   	def collecteKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.collectKidnapService))
   	def unCollecteKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.unCollectKidnapService))
   	def queryCollectKidnapService = Action (request => requestArgs(request)(kidnapCollectionModule.userCollectionsLst))
+
+  	def resetDate = Action { request => 
+  		
+  		import util.dao.from
+		import util.dao._data_connection
+		import util.errorcode.ErrorCode
+		import com.mongodb.casbah.Imports._
+		import java.util.Date
+		import play.api.libs.json.Json
+		import play.api.libs.json.Json.{toJson}
+		import play.api.libs.json.JsValue
+  		
+  		val change = (from db() in "kidnap" select (x => x)).toList
+  		val count = change.length
+  		val date = new Date().getTime - 3 * count
+  		
+  		(change zipWithIndex).map { x => 
+  			val iter = x._1
+  			val index = x._2
+  			val service_id = iter.getAs[String]("service_id").get
+  			
+  			iter += "date" -> (date + index * 2).asInstanceOf[Number]
+  			_data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), iter)
+  		} 
+  		
+  	    Ok(toJson(Map("status" -> "ok", "result" -> "success")))
+  	}
 }

@@ -133,6 +133,8 @@ POST	/kidnap/collect								controllers.kidnapController.collecteKidnapService
 POST	/kidnap/uncollect							controllers.kidnapController.unCollecteKidnapService
 POST	/kidnap/lst/collect							controllers.kidnapController.queryCollectKidnapService
 
+GET		/kidnap/reset/date							controllers.kidnapController.resetDate
+
 # order module
 POST	/order/push									controllers.orderController.pushOrder
 POST	/order/pay 									controllers.orderController.payOrder
