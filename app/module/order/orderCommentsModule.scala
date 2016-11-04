@@ -77,8 +77,10 @@ object orderCommentsModule {
     }
    
     def queryOverallComments(data : JsValue) : JsValue = {
-      
-        def overallAcc(r : List[Float], lst : List[List[Float]]) : List[Float] = lst match { 
+     
+    	def average(lst : List[Double], count : Int) : List[Double] = lst map (x => x / count)
+    	
+        def overallAcc(r : List[Double], lst : List[List[Double]]) : List[Double] = lst match { 
           case Nil => r
           case head :: Nil => r match {
             case Nil => head
@@ -88,12 +90,13 @@ object orderCommentsModule {
       
         try {
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-    
+   
+            val result = (from db() in "service_comments" where ("service_id" -> service_id) select (x => x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]])).toList
             toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id), "points" -> toJson(
-                        overallAcc(Nil, (from db() in "service_comments" where ("service_id" -> service_id) select (x => x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Float]])).toList)
+                        average(overallAcc(Nil, result), result.length)
                         )))))
         } catch {
-          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+          case ex : Exception => ex.printStackTrace(); ErrorCode.errorToJson(ex.getMessage)
         }
     }
     
