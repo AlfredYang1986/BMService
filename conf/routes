@@ -157,6 +157,15 @@ POST	/order/comments/overall						controllers.orderController.queryOverAllCommen
 POST 	/expose/user								controllers.exposeController.expostUser
 POST 	/expose/content								controllers.exposeController.expostContent
 
+# refactor, will replace old interface
+POST	/v2/auth/code								controllers.v2.AuthController.authWithPhoneCode
+POST	/v2/auth/third								controllers.v2.AuthController.authWithThird
+
+POST	/v2/phone/code/send							controllers.v2.PhoneSMSController.sendSMSCode
+POST	/v2/phone/code/check						controllers.v2.PhoneSMSController.checkSMSCode
+
+POST	/v2/profile/update							controllers.v2.ProfileController.updateUserProfile
+POST	/v2/profile/query							controllers.v2.ProfileController.queryUserProfile
 
 # web pay controller
 # POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID

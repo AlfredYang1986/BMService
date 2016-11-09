@@ -18,6 +18,8 @@ case class 	DDNDismissChatRoom(val parameters : (String, JsValue)*)
 case class 	DDNCreateChatGroup(val parameters : (String, JsValue)*)
 case class 	DDNDismissChatGroup(val parameters : (String, JsValue)*)
 
+case class 	DDNRegisterUser(val parameters : (String, JsValue)*)
+
 class DDNActor extends Actor {
 	
 	def parameters2Map(parameters : List[(String, JsValue)]) : Map[String, JsValue] = {
@@ -29,7 +31,6 @@ class DDNActor extends Actor {
 	def receive = {
 	  case DDNInit => DDNEMNotification.getAuthTokenForEM //DDNNotification.getAuthTokenForXMPP
 	  case notify : DDNNotifyUsers => {
-//		  DDNNotification.nofity(parameters2Map(notify.parameters.toList))
 		  DDNEMNotification.nofity(parameters2Map(notify.parameters.toList))
 	  }
 	  case create : DDNCreateChatRoom => {
@@ -43,6 +44,9 @@ class DDNActor extends Actor {
 	  }
 	  case dg : DDNDismissChatGroup => { 
 	    sender ! DDNEMNotification.dismissChatGroup(parameters2Map(dg.parameters.toList))     
+	  }
+	  case rg : DDNRegisterUser => {
+	 	  sender ! DDNEMNotification.registerUser(parameters2Map(rg.parameters.toList))
 	  }
 	  case _ => 
 	}

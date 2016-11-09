@@ -26,6 +26,9 @@ object ErrorCode {
   		new ErrorNode("service not existing", -16, "service not exist"),
   		new ErrorNode("wechat pay error", -17, "wechat pay error"),
 
+		new ErrorNode("wrong input", -18, "arguments error for server invoke"),
+  		new ErrorNode("em register error", -19, "em register error"),
+  		
   		new ErrorNode("unknown error", -999, "unknown error")
   	)
   

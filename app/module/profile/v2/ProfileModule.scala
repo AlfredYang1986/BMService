@@ -1,0 +1,183 @@
+package module.profile.v2
+
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json.toJson
+import com.mongodb.casbah.Imports._
+
+import module.sercurity.Sercurity
+import module.sms.smsModule
+
+import util.dao.from
+import util.dao._data_connection
+
+import dongdamessages.MessageDefines
+import pattern.ModuleTrait
+import ProfileMessages._
+
+import util.errorcode.ErrorCode
+import java.util.Date
+
+object ProfileModule extends ModuleTrait {
+		
+	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
+//		case msg_CreateProfile(data) => createUserProfile(data)(pr)
+		case msg_UpdateProfile(data) => updateUserProfile(data)(pr)
+		case msg_QueryProfile(data) => queryUserProfile(data)
+		case _ => ???
+	}
+	
+	def createUserProfile(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		null
+	}
+
+	def updateUserProfile(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			var user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse (pr match {
+				case None => throw new Exception("wrong input")
+				case Some(m) => m.get("user_id").map (x => x.asOpt[String].map (y => y).getOrElse(throw new Exception("wrong input"))).getOrElse(throw new Exception("wrong input"))
+			})
+			var auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse(pr match {
+				case None => ""
+				case Some(m) => m.get("auth_token").map (x => x.asOpt[String].map (y => y).getOrElse("")).getOrElse("")
+			})
+			val screen_name = (data \ "screen_name").asOpt[String].map(x => x).getOrElse(pr match {
+				case None => ""
+				case Some(m) => m.get("screen_name").map (x => x.asOpt[String].map (y => y).getOrElse("")).getOrElse("")
+			})
+			val screen_photo = (data \ "screen_photo").asOpt[String].map(x => x).getOrElse(pr match {
+				case None => ""
+				case Some(m) => m.get("screen_photo").map (x => x.asOpt[String].map (y => y).getOrElse("")).getOrElse("")
+			})
+	
+			(from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
+				case Nil => {
+					val builder = MongoDBObject.newBuilder
+					
+					builder += "user_id" -> user_id // c_r_user_id
+					builder += "screen_name" -> screen_name
+					builder += "screen_photo" -> screen_photo
+					builder += "isLogin" -> (data \ "isLogin").asOpt[Int].map(x => x).getOrElse(1)
+					builder += "gender" -> (data \ "gender").asOpt[Int].map(x => x).getOrElse(0)
+					
+					builder += "school" -> (data \ "school").asOpt[String].map (x => x).getOrElse("")
+					builder += "company" -> (data \ "company").asOpt[String].map (x => x).getOrElse("")
+					builder += "occupation" -> (data \ "occupation").asOpt[String].map (x => x).getOrElse("")
+					builder += "personal_description" -> (data \ "personal_description").asOpt[String].map (x => x).getOrElse("")
+					
+					builder += "is_service_provider" -> (data \ "is_service_provider").asOpt[Int].map (x => x).getOrElse(0)
+	
+					val coordinate = MongoDBObject.newBuilder
+					coordinate += "longtitude" -> (data \ "longtitude").asOpt[Float].map(x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+					coordinate += "latitude" -> (data \ "latitude").asOpt[Float].map(x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+					builder += "coordinate" -> coordinate.result
+					
+					builder += "address" -> (data \ "address").asOpt[String].map (x => x).getOrElse("")
+					builder += "date" -> new Date().getTime
+					builder += "dob" -> (data \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+					builder += "about" -> (data \ "about").asOpt[String].map (x => x).getOrElse("")
+					
+					builder += "contact_no" -> (data \ "phoneNo").asOpt[String].map (x => x).getOrElse("")
+					
+					(data \ "kids").asOpt[List[JsValue]].map { lst => 
+					    val kids = MongoDBList.newBuilder
+					    lst foreach { tmp => 
+					        val kid = MongoDBObject.newBuilder
+					        kid += "gender" -> (tmp \ "gender").asOpt[Int].map (x => x).getOrElse(0)
+					        kid += "dob" -> (tmp \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+	
+					        kids += kid.result
+					    }
+					    builder += "kids" -> kids.result
+					}.getOrElse(builder += "kids" -> MongoDBList.newBuilder.result)
+					
+			        val result = builder.result
+					_data_connection.getCollection("user_profile") += result
+	    			(Some(DB2Map(result, auth_token)), None)
+				}
+				case user :: Nil => {
+					List("signature", "role_tag", "screen_name", "screen_photo", "about", "address", "school", "company", "occupation", "personal_description", "contact_no") foreach { x =>
+						(data \ x).asOpt[String].map { value =>
+							user += x -> value
+						}.getOrElse(Unit)
+					}
+					
+					List("followings_count", "followers_count", "posts_count", "friends_count", "cycle_count", "isLogin", "gender", "is_service_provider") foreach { x => 
+						(data \ x).asOpt[Int].map { value =>
+							user += x -> new Integer(value)
+						}.getOrElse(Unit)
+					}
+	
+					List("dob") foreach { x => 
+						(data \ x).asOpt[Long].map { value =>
+							user += x -> value.asInstanceOf[Number]
+						}.getOrElse(Unit)
+					}
+				
+					List("longtitude", "latitude") foreach { x => 
+						(data \ x).asOpt[Float].map { value =>
+							val co = user.getAs[MongoDBObject]("coordinate").get
+							co += x -> x.asInstanceOf[Number]
+						}.getOrElse(Unit)
+					}
+					
+					(data \ "kids").asOpt[List[JsValue]].map { lst => 
+					    val kids = MongoDBList.newBuilder
+					    lst foreach { tmp => 
+					        val kid = MongoDBObject.newBuilder
+					        kid += "gender" -> (tmp \ "gender").asOpt[Int].map (x => x).getOrElse(0)
+					        kid += "dob" -> (tmp \ "dob").asOpt[Long].map (x => x).getOrElse(0.toFloat.asInstanceOf[Number])
+	
+					        kids += kid.result
+					    }
+					    user += "kids" -> kids.result
+					}.getOrElse(Unit)
+			
+					_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), user)
+	    			(Some(DB2Map(user, auth_token)), None)
+				}
+				case _ => ???
+			}
+			
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+	
+	def DB2Map(obj : MongoDBObject, token : String) : Map[String, JsValue] = {
+		Map("auth_token" -> toJson(token),
+			"user_id" -> toJson(obj.getAs[String]("user_id").get),
+			"isLogin" -> toJson(obj.getAs[Number]("isLogin").get.intValue),
+			"gender" -> toJson(obj.getAs[Number]("gender").get.intValue),
+			"screen_name" -> toJson(obj.getAs[String]("screen_name").get),
+			"screen_photo" -> toJson(obj.getAs[String]("screen_photo").get),
+			"school" -> toJson(obj.getAs[String]("school").get),
+			"company" -> toJson(obj.getAs[String]("company").get),
+			"occupation" -> toJson(obj.getAs[String]("occupation").get),
+			"personal_description" -> toJson(obj.getAs[String]("personal_description").get),
+			"is_service_provider" -> toJson(obj.getAs[Number]("is_service_provider").get.intValue),
+			"about" -> toJson(obj.getAs[String]("about").get),
+			"address" -> toJson(obj.getAs[String]("address").get),
+			"contact_no" -> toJson(obj.getAs[String]("contact_no").get),
+			"dob" -> toJson(obj.getAs[Number]("dob").get.longValue),
+			"coordinate" -> toJson(Map(
+								"longtitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("longtitude").asInstanceOf[Number].floatValue,
+								"latitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("latitude").asInstanceOf[Number].floatValue))
+			)
+	}
+	
+	def queryUserProfile(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val query_user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
+			val query_auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
+			val owner_user_id = (data \ "owner_user_id").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
+		
+			(from db() in "user_profile" where ("user_id" -> owner_user_id) select (x => x)).toList match {
+				case head :: Nil => (Some(DB2Map(head, query_auth_token)), None)
+				case _ => throw new Exception("unknown user")
+			}
+			
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+}

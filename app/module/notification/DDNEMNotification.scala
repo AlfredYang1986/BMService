@@ -103,8 +103,16 @@ object DDNEMNotification {
   	
   	def nofity(pm : Map[String, JsValue]) = {
     		var pushMsg = pm
-    		println(pushMsg)
     		(HTTP(em_host + org_name + "/" + app_name + "/messages").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).
     		  		post(toJson(pushMsg)) \ "error").asOpt[String].map (x => println("notification sent error %s", x)).getOrElse(println("notification sent success"))
+  	}
+  	
+  	def registerUser(pm : Map[String, JsValue]) : JsValue = {
+  		try {
+	  		var pushMsg = pm
+	    	HTTP(em_host + org_name + "/" + app_name + "/users").header("Accept" -> "application/json", "Content-Type" -> "application/json", "Authorization" -> ("Bearer " + getAuthTokenForEM)).post(toJson(pushMsg))
+  		} catch {
+  			case ex : Exception => toJson(Map("error" -> "user existing"))
+  		}
   	}
 }
