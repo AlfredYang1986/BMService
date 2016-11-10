@@ -18,6 +18,7 @@ import module.auth.{ AuthModule, msg_AuthCommand }
 import module.phonecode.{ msg_PhoneCodeCommand, PhoneCodeModule }
 import module.profile.v2.{ msg_ProfileCommand, ProfileModule }
 import module.emxmpp.{ msg_EMMessageCommand, EMModule }
+import module.kidnap.v2.{ msg_KidnapServiceCommand, kidnapModule }
 
 object PipeFilterActor {
 	def apply(originSender : ActorRef, msr : MessageRoutes) = {
@@ -73,6 +74,28 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 			}
 			rstReturn
 		}
+		case cmd : msg_KidnapServiceCommand => {
+			tmp = Some(true)
+			kidnapModule.dispatchMsg(cmd)(rst) match {
+				case (_, Some(err)) => {
+					originSender ! error(err)
+					cancelActor
+				}
+				case (Some(r), _) => rst = Some(r)
+			}
+			rstReturn
+		}
+		case cmd : msg_ResultCommand => {
+			tmp = Some(true)
+			ResultModule.dispatchMsg(cmd)(rst) match {
+				case (_, Some(err)) => {
+					originSender ! error(err)
+					cancelActor
+				}
+				case (Some(r), _) => rst = Some(r)
+			}
+			rstReturn
+		}
 		case timeout() => {
 			originSender ! new timeout
 			cancelActor
@@ -87,7 +110,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 			case Some(r) => 
 				msr.lst match {
 					case Nil => {
-						originSender ! result(toJson(Map("status" -> toJson("ok"), "result" -> toJson(r))))
+						originSender ! result(toJson(r))
 					}
 					case head :: tail => {
 						val handle = PipeFilterActor(originSender, MessageRoutes(tail, rst))

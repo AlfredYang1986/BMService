@@ -21,6 +21,7 @@ object AuthModule extends ModuleTrait {
 	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
 		case msg_AuthPhoneCode(data) => authWithPhoneCode(data)
 		case msg_AuthThird(data) => authWithThird(data)
+		case msg_AuthSignOut(data) => authSignOut(data)
 		case _ => ???
 	}
 	
@@ -153,6 +154,19 @@ object AuthModule extends ModuleTrait {
 				case _ => ???
 			}
 				
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+	
+	def authSignOut(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+			val auth_token = (data \ "auth_token").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+			val device_token = (data \ "device_token").asOpt[String].map (x => x).getOrElse("")
+	
+			(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token) )), None)
+			
 		} catch {
 			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}

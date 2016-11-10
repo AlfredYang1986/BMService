@@ -167,6 +167,10 @@ POST	/v2/phone/code/check						controllers.v2.PhoneSMSController.checkSMSCode
 POST	/v2/profile/update							controllers.v2.ProfileController.updateUserProfile
 POST	/v2/profile/query							controllers.v2.ProfileController.queryUserProfile
 
+POST	/v2/kidnap/mine								controllers.v2.KidnapController.queryMineServices
+POST	/v2/kidnap/search							controllers.v2.KidnapController.searchServices
+POST	/v2/kidnap/query							controllers.v2.KidnapController.queryMultiServices
+
 # web pay controller
 # POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID
 
