@@ -42,7 +42,7 @@ object kidnapModule extends ModuleTrait {
 		case msg_PushService(data) => pushKidnapService(data)
 		case msg_RevertService(data) => revertKidnapService(data)
 		case msg_UpdateService(data) => updateKidnapService(data)
-		case msg_PublishService(data) => publishKidnapService(data)
+		case msg_PublishService(data) => publishKidnapService(data)(pr)
 		case msg_PopService(data) => popKidnapService(data)
 		case msg_QueryServiceDetail(data) => queryKidnapServiceDetail(data)
 		case msg_QueryMultiServices(data) => queryMultipleService(data)
@@ -117,7 +117,6 @@ object kidnapModule extends ModuleTrait {
                     se_lst += se.result
 
                     one_date += "occurance" -> se_lst.result
-                    println(one_date.result)
 
 	                offer_date += one_date.result
                 }
@@ -128,7 +127,10 @@ object kidnapModule extends ModuleTrait {
   	        (data \ "location").asOpt[JsValue].map { loc => 
   	            location += "latitude" -> (loc \ "latitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
   	            location += "longtitude" -> (loc \ "longtitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
-  	        }.getOrElse(throw new Exception("wrong input"))
+  	        }.getOrElse {
+  	            location += "latitude" -> 0.floatValue
+  	            location += "longtitude" -> 0.floatValue
+  	        }
   	        service_builder += "location" -> location.result
   	        
   	        service_builder += "comments" -> MongoDBList.newBuilder.result
@@ -173,7 +175,7 @@ object kidnapModule extends ModuleTrait {
 //  	        ProfileModule.updateUserProfile(toJson(Map("user_id" -> toJson(owner_id), "is_service_provider" -> toJson(1))))
   	        
 //  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
-  	        (Some(Map("service_id" -> toJson(service_id))), None)
+  	        (Some(Map("service_id" -> toJson(service_id), "user_id" -> toJson(owner_id))), None)
   	      
   	    } catch {
   	      case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
@@ -183,6 +185,7 @@ object kidnapModule extends ModuleTrait {
   	
   	def popKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
   	    val (status, origin) = this.queryServiceStatus((data \ "service_id").asOpt[String])
+  	    println(status)
   	    kidnapProp(status).pop(data, origin)
   	}
   	
@@ -280,9 +283,21 @@ object kidnapModule extends ModuleTrait {
   	    }
   	}
   	
-  	def publishKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-  	    val (status, origin) = this.queryServiceStatus((data \ "service_id").asOpt[String])
-  	    kidnapProp(status).publish(data, origin)
+  	def publishKidnapService(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+  	
+  		try {
+  			val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse { pr match {
+	  			case None => throw new Exception("wrong input")
+	  			case Some(r) => r.get("service_id").map (x => x.asOpt[String].map (y => y).getOrElse(throw new Exception("wrong input"))).getOrElse(throw new Exception("wrong input")) 
+	  		}}
+	  	
+	  	    val (status, origin) = this.queryServiceStatus(Some(service_id))
+	  	    kidnapProp(status).publish(toJson(Map("service_id" -> service_id)), origin)
+  			
+  		} catch {
+  	    	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+  		}
+
   	}
   	
   	def publishKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = {
@@ -291,15 +306,17 @@ object kidnapModule extends ModuleTrait {
   	        origin += "status" -> kidnapServiceStatus.online.t.asInstanceOf[Number]
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
+            val owner_id = origin.getAs[String]("owner_id").get
+            
 //            toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
-            (Some(Map("service_id" -> toJson(service_id))), None)
+            (Some(Map("service_id" -> toJson(service_id), "user_id" -> toJson(owner_id))), None)
   	      
   	    } catch {
   	      case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
   	    }
   	}
   	
-  	def revertKidnapService(data : JsValue) :  (Option[Map[String, JsValue]], Option[JsValue]) = { 
+  	def revertKidnapService(data : JsValue) :  (Option[Map[String, JsValue]], Option[JsValue]) = {
   	    val (status, origin) = this.queryServiceStatus((data \ "service_id").asOpt[String])
   	    kidnapProp(status).revert(data, origin)
   	}

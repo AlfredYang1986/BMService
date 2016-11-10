@@ -22,6 +22,7 @@ object ProfileModule extends ModuleTrait {
 	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
 //		case msg_CreateProfile(data) => createUserProfile(data)(pr)
 		case msg_UpdateProfile(data) => updateUserProfile(data)(pr)
+		case msg_UpdateProfileWithoutResult(data) => updateProfileWithoutResult(data)(pr)
 		case msg_QueryProfile(data) => queryUserProfile(data)
 		case _ => ???
 	}
@@ -142,6 +143,12 @@ object ProfileModule extends ModuleTrait {
 			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}
 	}
+
+	def updateProfileWithoutResult(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = updateUserProfile(data)(pr) match {
+			case (Some(x), None) => (pr, None)
+			case (None, Some(err)) => (None, Some(err))
+			case _ => ???
+		}
 	
 	def DB2Map(obj : MongoDBObject, token : String) : Map[String, JsValue] = {
 		Map("auth_token" -> toJson(token),
