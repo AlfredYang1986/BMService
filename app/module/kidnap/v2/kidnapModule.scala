@@ -168,6 +168,7 @@ object kidnapModule extends ModuleTrait {
   	        service_builder += "service_cat" -> (data \ "service_cat").asOpt[Int].map (x => x).getOrElse(0)
   	        
   	        service_builder += "date" -> new Date().getTime
+	        service_builder += "servant_no" -> (data \ "servant_no").asOpt[Int].map (x => x).getOrElse(1)
   	        service_builder += "reserve1" -> ""
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
@@ -366,6 +367,7 @@ object kidnapModule extends ModuleTrait {
   	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(1)),
   	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(0)),
   	               "adjust_address" -> toJson(x.getAs[String]("adjust_address").map (y => y).getOrElse("")),
+				   "servant_no" -> toJson(x.getAs[Number]("servant_no").map (x => x.intValue).getOrElse(1)),
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
   	               )
     }

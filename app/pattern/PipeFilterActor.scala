@@ -19,6 +19,7 @@ import module.phonecode.{ msg_PhoneCodeCommand, PhoneCodeModule }
 import module.profile.v2.{ msg_ProfileCommand, ProfileModule }
 import module.emxmpp.{ msg_EMMessageCommand, EMModule }
 import module.kidnap.v2.{ msg_KidnapServiceCommand, kidnapModule }
+import module.order.v2.{ msg_OrderCommand, orderModule }
 
 object PipeFilterActor {
 	def apply(originSender : ActorRef, msr : MessageRoutes) = {
@@ -27,75 +28,29 @@ object PipeFilterActor {
 }
 
 class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Actor with ActorLogging {
+	
+	def dispatchImpl(cmd : CommonMessage, module : ModuleTrait) = {
+		tmp = Some(true)
+		module.dispatchMsg(cmd)(rst) match {
+			case (_, Some(err)) => {
+				originSender ! error(err)
+				cancelActor					
+			}
+			case (Some(r), _) => rst = Some(r) 
+		}
+		rstReturn
+	}
+	
 	var tmp : Option[Boolean] = None
 	var rst : Option[Map[String, JsValue]] = msr.rst
 	def receive = {
-		case cmd : msg_AuthCommand => {
-	 	 	tmp = Some(true)
-			AuthModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor					
-				}
-				case (Some(r), _) => rst = Some(r) 
-			}
-			rstReturn
-		}
-		case cmd : msg_PhoneCodeCommand => {
-			tmp = Some(true)
-			PhoneCodeModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor
-				}
-				case (Some(r), _) => rst = Some(r)
-			}
-			rstReturn
-		}
-		case cmd : msg_ProfileCommand => {
-			tmp = Some(true)
-			ProfileModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor
-				}
-				case (Some(r), _) => rst = Some(r)
-			}
-			rstReturn
-		}
-		case cmd : msg_EMMessageCommand => {
-			tmp = Some(true)
-			EMModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor
-				}
-				case (Some(r), _) => rst = Some(r)
-			}
-			rstReturn
-		}
-		case cmd : msg_KidnapServiceCommand => {
-			tmp = Some(true)
-			kidnapModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor
-				}
-				case (Some(r), _) => rst = Some(r)
-			}
-			rstReturn
-		}
-		case cmd : msg_ResultCommand => {
-			tmp = Some(true)
-			ResultModule.dispatchMsg(cmd)(rst) match {
-				case (_, Some(err)) => {
-					originSender ! error(err)
-					cancelActor
-				}
-				case (Some(r), _) => rst = Some(r)
-			}
-			rstReturn
-		}
+		case cmd : msg_AuthCommand => dispatchImpl(cmd, AuthModule)
+		case cmd : msg_PhoneCodeCommand => dispatchImpl(cmd, PhoneCodeModule)
+		case cmd : msg_ProfileCommand => dispatchImpl(cmd, ProfileModule)
+		case cmd : msg_EMMessageCommand => dispatchImpl(cmd, EMModule)  
+		case cmd : msg_KidnapServiceCommand => dispatchImpl(cmd, kidnapModule)
+		case cmd : msg_OrderCommand => dispatchImpl(cmd, orderModule)
+		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
 		case timeout() => {
 			originSender ! new timeout
 			cancelActor

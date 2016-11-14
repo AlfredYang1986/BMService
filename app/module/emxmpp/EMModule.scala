@@ -28,7 +28,7 @@ import akka.pattern.ask
 import scala.concurrent.Future
 import scala.concurrent.Await
 
-object EMModule {
+object EMModule extends ModuleTrait {
 	val ddn = Akka.system(play.api.Play.current).actorOf(Props[DDNActor])
 	implicit val timeout = Timeout(3 second)
 	lazy val dongda_common_password = "PassW0rd"

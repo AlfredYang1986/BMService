@@ -160,6 +160,7 @@ POST 	/expose/content								controllers.exposeController.expostContent
 # refactor, will replace old interface
 POST	/v2/auth/code								controllers.v2.AuthController.authWithPhoneCode
 POST	/v2/auth/third								controllers.v2.AuthController.authWithThird
+POST	/v2/auth/signout							controllers.v2.AuthController.authSignOut
 
 POST	/v2/phone/code/send							controllers.v2.PhoneSMSController.sendSMSCode
 POST	/v2/phone/code/check						controllers.v2.PhoneSMSController.checkSMSCode
@@ -174,6 +175,14 @@ POST	/v2/kidnap/query							controllers.v2.KidnapController.queryMultiServices
 POST	/v2/kidnap/push								controllers.v2.KidnapController.pushService
 POST	/v2/kidnap/pop								controllers.v2.KidnapController.popService
 POST	/v2/kidnap/update							controllers.v2.KidnapController.updateService
+
+POST	/v2/order/push								controllers.v2.OrderController.pushOrder
+POST	/v2/order/pop								controllers.v2.OrderController.popOrder
+POST	/v2/order/query								controllers.v2.OrderController.queryOrders
+POST	/v2/order/accept							controllers.v2.OrderController.acceptOrder
+POST	/v2/order/accomplish						controllers.v2.OrderController.accomplishOrder
+POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
+POST	/v2/order/query/owner						controllers.v2.OrderController.queryOwnerOrders
 
 # web pay controller
 # POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID

@@ -161,11 +161,11 @@ object orderModule {
                       val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
                       
                       var content : Map[String, JsValue] = Map.empty
-            					content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
-            					content += "sender_id" -> toJson(user_id)
-            					content += "date" -> toJson(new Date().getTime)
-            					content += "receiver_id" -> toJson(owner_id)
-            					content += "order_id" -> toJson(order_id)
+            		  content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
+            		  content += "sender_id" -> toJson(user_id)
+            		  content += "date" -> toJson(new Date().getTime)
+            	      content += "receiver_id" -> toJson(owner_id)
+            		  content += "order_id" -> toJson(order_id)
             					content += "service_id" -> toJson(service_id)
                       content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
           					
@@ -280,15 +280,15 @@ object orderModule {
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
-  					content += "type" -> toJson(module.common.AcitionType.orderAccecpted.index)
-  					content += "sender_id" -> toJson(owner_id)
-  					content += "date" -> toJson(new Date().getTime)
-  					content += "receiver_id" -> toJson(user_id)
-  					content += "order_id" -> toJson(order_id)
+  			content += "type" -> toJson(module.common.AcitionType.orderAccecpted.index)
+  			content += "sender_id" -> toJson(owner_id)
+  			content += "date" -> toJson(new Date().getTime)
+  			content += "receiver_id" -> toJson(user_id)
+  			content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
             content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
-    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+    		ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
                                      "from" -> toJson("dongda_master"))
             
@@ -307,15 +307,15 @@ object orderModule {
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
-  					content += "type" -> toJson(module.common.AcitionType.orderRejected.index)
-  					content += "sender_id" -> toJson(owner_id)
-  					content += "date" -> toJson(new Date().getTime)
-  					content += "receiver_id" -> toJson(user_id)
-  					content += "order_id" -> toJson(order_id)
+  			content += "type" -> toJson(module.common.AcitionType.orderRejected.index)
+  			content += "sender_id" -> toJson(owner_id)
+  			content += "date" -> toJson(new Date().getTime)
+  			content += "receiver_id" -> toJson(user_id)
+  			content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
             content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
-    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+    		ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
                                      "from" -> toJson("dongda_master"))
             
@@ -334,15 +334,15 @@ object orderModule {
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
             
             var content : Map[String, JsValue] = Map.empty
-  					content += "type" -> toJson(module.common.AcitionType.orderAccomplished.index)
-  					content += "sender_id" -> toJson(owner_id)
-  					content += "date" -> toJson(new Date().getTime)
-  					content += "receiver_id" -> toJson(user_id)
-  					content += "order_id" -> toJson(order_id)
+  			content += "type" -> toJson(module.common.AcitionType.orderAccomplished.index)
+  			content += "sender_id" -> toJson(owner_id)
+  			content += "date" -> toJson(new Date().getTime)
+  			content += "receiver_id" -> toJson(user_id)
+  			content += "order_id" -> toJson(order_id)
             content += "service_id" -> toJson(service_id)
             content += "sign" -> toJson(Sercurity.md5Hash(user_id + order_id + service_id + Sercurity.getTimeSpanWithMillSeconds))
 					
-    		    ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
+    		ddn ! new DDNNotifyUsers("target_type" -> toJson("users"), "target" -> toJson(List(user_id).distinct),
                                      "msg" -> toJson(Map("type" -> toJson("txt"), "msg"-> toJson(toJson(content).toString))),
                                      "from" -> toJson("dongda_master"))
             

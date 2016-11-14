@@ -21,7 +21,7 @@ object AuthController extends Controller {
 		})
 	def authWithThird = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
-			MessageRoutes(msg_CheckSMSCode(jv) :: msg_AuthThird(jv) :: msg_UpdateProfile(jv) :: msg_RegisterEMUser(jv) :: msg_CommonResultMessage() :: Nil, None)
+			MessageRoutes(msg_AuthThird(jv) :: msg_UpdateProfile(jv) :: msg_RegisterEMUser(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def authSignOut = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result

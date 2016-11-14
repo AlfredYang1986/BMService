@@ -86,7 +86,7 @@ object AuthModule extends ModuleTrait {
 					val time_span = Sercurity.getTimeSpanWithMillSeconds
 					val user_id = Sercurity.md5Hash(provide_name + provide_token + time_span)
 					val auth_token = Sercurity.md5Hash(user_id + uuid + time_span)
-					
+				
 					new_builder  += "user_id" -> user_id
 					new_builder  += "auth_token" -> auth_token
 					new_builder  += "phoneNo" -> ""
@@ -109,7 +109,7 @@ object AuthModule extends ModuleTrait {
 					new_builder  += "third" -> new_third_builder.result
 				 
 					_data_connection.getCollection("users") += new_builder.result
-					(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo))), None)
+					(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name))), None)
 				}
 				case user :: Nil => {
 					val auth_token = user.get("auth_token").get.asInstanceOf[String]
@@ -149,7 +149,7 @@ object AuthModule extends ModuleTrait {
 						}
 					}
 					
-					(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name), "screen_photo" -> toJson(provide_screen_photo))), None)
+					(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token), "screen_name" -> toJson(provide_screen_name))), None)
 				}
 				case _ => ???
 			}

@@ -15,7 +15,7 @@ import dongdamessages.MessageDefines
 import pattern.ModuleTrait
 import util.errorcode.ErrorCode
 
-object PhoneCodeModule {
+object PhoneCodeModule extends ModuleTrait {
 	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
 		case msg_SendSMSCode(data) => sendSMSCode(data)
 		case msg_CheckSMSCode(data) => checkSMSCode(data)

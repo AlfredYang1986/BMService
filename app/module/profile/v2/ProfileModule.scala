@@ -49,7 +49,7 @@ object ProfileModule extends ModuleTrait {
 				case None => ""
 				case Some(m) => m.get("screen_photo").map (x => x.asOpt[String].map (y => y).getOrElse("")).getOrElse("")
 			})
-	
+
 			(from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
 				case Nil => {
 					val builder = MongoDBObject.newBuilder
