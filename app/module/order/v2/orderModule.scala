@@ -290,16 +290,15 @@ object orderModule extends ModuleTrait {
         service._1 match {
         	case None => throw new Exception ("service not valid")
         	case Some(s) => {
-        		s.get("status").map { status =>
-        			if (status.asOpt[String].get == "error") throw new Exception("service not valid")
-        			else builder += "owner_id" -> (s.get("result").get \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+        		s.get("owner_id").map { owner_id =>
+        			builder += "owner_id" -> owner_id.asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
         		}.getOrElse(throw new Exception("wrong input"))
         	}
         }
-        
+
         builder += "date" -> new Date().getTime
         builder += "status" -> orderStatus.ready.t
-        
+      
         builder += "order_thumbs" -> (data \ "order_thumbs").asOpt[String].map (x => x).getOrElse(throw new Exception)
         builder += "order_title" -> (data \ "order_title").asOpt[String].map (x => x).getOrElse(throw new Exception)
 
@@ -354,10 +353,7 @@ object orderModule extends ModuleTrait {
         service._1 match {
         	case None => service
         	case Some(s) => {
-        		val re = s.get("status").map { status =>
-        			if (status.asOpt[String].get == "error") throw new Exception("service not valid")
-        			else {
-        				Map("user_id" -> toJson(x.getAs[String]("user_id").get),
+        		val re = Map("user_id" -> toJson(x.getAs[String]("user_id").get),
 	                       "service_id" -> toJson(x.getAs[String]("service_id").get),
 	                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
 	                       "date" -> toJson(x.getAs[Long]("date").get),
@@ -371,9 +367,7 @@ object orderModule extends ModuleTrait {
 	                       "servant_no" -> toJson(x.getAs[Number]("servant_no").map (x => x.intValue).getOrElse(1)),
 	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
 	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
-	                       "service" -> s.get("result").get)
-        			}
-        		}.getOrElse(throw new Exception("wrong input"))
+	                       "service" -> toJson(s))
         		(Some(re), None)
         	}
         }
