@@ -22,6 +22,7 @@ object AuthModule extends ModuleTrait {
 		case msg_AuthPhoneCode(data) => authWithPhoneCode(data)
 		case msg_AuthThird(data) => authWithThird(data)
 		case msg_AuthSignOut(data) => authSignOut(data)
+		case msg_AuthQuery(data) => authDataQuery(data)(pr)
 		case _ => ???
 	}
 	
@@ -167,6 +168,34 @@ object AuthModule extends ModuleTrait {
 	
 			(Some(Map("user_id" -> toJson(user_id), "auth_token" -> toJson(auth_token) )), None)
 			
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+	
+	def authDataQuery(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse { pr match {
+				case None => throw new Exception("wrong input")
+				case Some(m) => m.get("user_id").map (x => x.asOpt[String].map (y => y).getOrElse(throw new Exception("wrong input"))).getOrElse(throw new Exception("wrong input"))
+			}}
+			
+			(from db() in "users" where ("user_id" -> user_id) select(x => x)).toList match {
+				case head :: Nil => pr match {
+					case None => throw new Exception("wrong input")
+					case Some(m) => {
+						var npr = m + ("is_real_name_cert" -> toJson(head.getAs[MongoDBObject]("real_name").map { x => 
+															              x.getAs[Number]("status").get.intValue == 1
+															          }.getOrElse(false)))
+
+						if (m.get("has_phone").get.asOpt[Boolean].get == false) 
+							npr = npr + ("has_phone" -> toJson(head.getAs[String]("phoneNo").map (x => x.length > 0).getOrElse(false)))
+					
+						(Some(npr), None)
+					}
+				}
+				case _ => throw new Exception("wrong input")
+			}
 		} catch {
 			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}

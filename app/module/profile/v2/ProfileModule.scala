@@ -151,6 +151,8 @@ object ProfileModule extends ModuleTrait {
 		}
 	
 	def DB2Map(obj : MongoDBObject, token : String) : Map[String, JsValue] = {
+	    var has_phone = obj.getAs[String]("contact_no").map (x => x.length > 0).getOrElse(false)
+		
 		Map("auth_token" -> toJson(token),
 			"user_id" -> toJson(obj.getAs[String]("user_id").get),
 			"isLogin" -> toJson(obj.getAs[Number]("isLogin").get.intValue),
@@ -165,7 +167,9 @@ object ProfileModule extends ModuleTrait {
 			"about" -> toJson(obj.getAs[String]("about").get),
 			"address" -> toJson(obj.getAs[String]("address").get),
 			"contact_no" -> toJson(obj.getAs[String]("contact_no").get),
+			"has_phone" -> toJson(has_phone),
 			"dob" -> toJson(obj.getAs[Number]("dob").get.longValue),
+			"date" -> toJson(obj.getAs[Number]("date").get.longValue),
 			"coordinate" -> toJson(Map(
 								"longtitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("longtitude").asInstanceOf[Number].floatValue,
 								"latitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("latitude").asInstanceOf[Number].floatValue))

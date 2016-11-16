@@ -5,6 +5,7 @@ import akka.actor.Props
 import akka.actor.ActorSystem
 import akka.actor.ActorLogging
 import akka.actor.ActorRef
+import akka.actor.ActorContext
 import play.api.Application
 import play.api.libs.concurrent.Akka
 import dongdamessages._
@@ -22,9 +23,11 @@ import module.kidnap.v2.{ msg_KidnapServiceCommand, kidnapModule }
 import module.order.v2.{ msg_OrderCommand, orderModule }
 
 object PipeFilterActor {
-	def apply(originSender : ActorRef, msr : MessageRoutes) = {
-		ActorSystem("sys").actorOf(Props(new PipeFilterActor(originSender, msr)), "pipe")
+	def apply(originSender : ActorRef, msr : MessageRoutes)(implicit c : ActorContext) = {
+		c.actorOf(PipeFilterActor.prop(originSender, msr), "pipe")
 	}
+	
+	def prop(originSender : ActorRef, msr : MessageRoutes) : Props = Props(new PipeFilterActor(originSender, msr))
 }
 
 class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Actor with ActorLogging {
