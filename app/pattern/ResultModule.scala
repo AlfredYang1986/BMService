@@ -8,6 +8,11 @@ import ResultMessage.msg_CommonResultMessage
 
 object ResultModule extends ModuleTrait {
 	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
-		case cmd : msg_CommonResultMessage => cmd.func(pr.get)
+		case cmd : msg_CommonResultMessage => {
+			println("handle result")
+			println(pr)
+			cmd.func(pr.get)
+		}
+		case _ => println("wrong result message"); null
 	}
 }

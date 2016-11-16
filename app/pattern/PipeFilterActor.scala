@@ -1,33 +1,35 @@
 package pattern
 
+import scala.concurrent.duration._
+
 import akka.actor.Actor
-import akka.actor.Props
-import akka.actor.ActorSystem
+import akka.actor.ActorContext
 import akka.actor.ActorLogging
 import akka.actor.ActorRef
-import akka.actor.ActorContext
-import play.api.Application
-import play.api.libs.concurrent.Akka
+import akka.actor.ActorSystem
+import akka.actor.Props
 import dongdamessages._
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.{toJson}
-import akka.util.Timeout
-import scala.concurrent.duration._
+import module.auth.AuthModule
+import module.auth.msg_AuthCommand
+import module.emxmpp.EMModule
+import module.emxmpp.msg_EMMessageCommand
+import module.kidnap.v2.kidnapModule
+import module.kidnap.v2.msg_KidnapServiceCommand
+import module.order.v2.msg_OrderCommand
+import module.order.v2.orderModule
+import module.phonecode.PhoneCodeModule
+import module.phonecode.msg_PhoneCodeCommand
+import module.profile.v2.ProfileModule
+import module.profile.v2.msg_ProfileCommand
+import play.api.Application
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import module.auth.{ AuthModule, msg_AuthCommand }
-import module.phonecode.{ msg_PhoneCodeCommand, PhoneCodeModule }
-import module.profile.v2.{ msg_ProfileCommand, ProfileModule }
-import module.emxmpp.{ msg_EMMessageCommand, EMModule }
-import module.kidnap.v2.{ msg_KidnapServiceCommand, kidnapModule }
-import module.order.v2.{ msg_OrderCommand, orderModule }
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json.toJson
 
 object PipeFilterActor {
-	def apply(originSender : ActorRef, msr : MessageRoutes)(implicit c : ActorContext) = {
-		c.actorOf(PipeFilterActor.prop(originSender, msr), "pipe")
+	def prop(originSender : ActorRef, msr : MessageRoutes) : Props = {
+		Props(new PipeFilterActor(originSender, msr))
 	}
-	
-	def prop(originSender : ActorRef, msr : MessageRoutes) : Props = Props(new PipeFilterActor(originSender, msr))
 }
 
 class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Actor with ActorLogging {
@@ -39,13 +41,17 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 				originSender ! error(err)
 				cancelActor					
 			}
-			case (Some(r), _) => rst = Some(r) 
+			case (Some(r), _) => {
+				rst = Some(r) 
+			}
+			case _ => println("never go here")
 		}
 		rstReturn
 	}
 	
 	var tmp : Option[Boolean] = None
 	var rst : Option[Map[String, JsValue]] = msr.rst
+	var next : ActorRef = null
 	def receive = {
 		case cmd : msg_AuthCommand => dispatchImpl(cmd, AuthModule)
 		case cmd : msg_PhoneCodeCommand => dispatchImpl(cmd, PhoneCodeModule)
@@ -71,18 +77,21 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 						originSender ! result(toJson(r))
 					}
 					case head :: tail => {
-						val handle = PipeFilterActor(originSender, MessageRoutes(tail, rst))
-						handle ! head
+						println(2222)
+						next = context.actorOf(PipeFilterActor.prop(originSender, MessageRoutes(tail, rst)), "pipe")
+						next ! head
+						println(next)
 					}
+					case _ => println("msr error")
 				}
 				cancelActor
 			case _ => Unit
 		}}
-		case _ => Unit
+		case _ => println("never go here"); Unit
 	}
 	
 	def cancelActor = {
 		timeOutSchdule.cancel
-		context.stop(self)
+//		context.stop(self)
 	}
 }

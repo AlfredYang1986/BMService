@@ -21,6 +21,7 @@ import dongdamessages.excute
 import pattern.RoutesActor
 
 import com.mongodb.casbah.Imports._
+import play.api.libs.concurrent.Akka
 
 object requestArgsQuery extends Controller {
 	implicit val t = Timeout(3 seconds)
@@ -47,6 +48,7 @@ object requestArgsQuery extends Controller {
 	
   	def requestArgsV2(request : Request[AnyContent])(func : JsValue => MessageRoutes) : Result = {
   		try {
+  			implicit val app = play.api.Play.current
   			request.body.asJson.map { x => 
   				Ok(commonExcution(func(x)))
   			}.getOrElse (BadRequest("Bad Request for input"))
@@ -55,10 +57,11 @@ object requestArgsQuery extends Controller {
   		}  		   
 	}
   	
-  	def commonExcution(msr : MessageRoutes) : JsValue = {
-		val act = ActorSystem("sys").actorOf(Props[RoutesActor], "main")
+  	def commonExcution(msr : MessageRoutes)(implicit app : Application) : JsValue = {
+		val act = Akka.system(app).actorOf(Props[RoutesActor], "main")
 		val r = act ? excute(msr)
-		Await.result(r.mapTo[JsValue], t.duration)
+		val re = Await.result(r.mapTo[JsValue], t.duration)
+		re
 	}
  
   	def uploadRequestArgs(request : Request[AnyContent])(func : MultipartFormData[TemporaryFile] => JsValue) : Result = {
