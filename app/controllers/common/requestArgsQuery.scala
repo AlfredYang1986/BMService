@@ -60,8 +60,7 @@ object requestArgsQuery extends Controller {
   	def commonExcution(msr : MessageRoutes)(implicit app : Application) : JsValue = {
 		val act = Akka.system(app).actorOf(Props[RoutesActor], "main")
 		val r = act ? excute(msr)
-		val re = Await.result(r.mapTo[JsValue], t.duration)
-		re
+		Await.result(r.mapTo[JsValue], t.duration)
 	}
  
   	def uploadRequestArgs(request : Request[AnyContent])(func : MultipartFormData[TemporaryFile] => JsValue) : Result = {

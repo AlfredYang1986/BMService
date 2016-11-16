@@ -77,7 +77,6 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 						originSender ! result(toJson(r))
 					}
 					case head :: tail => {
-						println(2222)
 						next = context.actorOf(PipeFilterActor.prop(originSender, MessageRoutes(tail, rst)), "pipe")
 						next ! head
 						println(next)
