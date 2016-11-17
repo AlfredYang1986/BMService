@@ -79,7 +79,6 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 					case head :: tail => {
 						next = context.actorOf(PipeFilterActor.prop(originSender, MessageRoutes(tail, rst)), "pipe")
 						next ! head
-						println(next)
 					}
 					case _ => println("msr error")
 				}
