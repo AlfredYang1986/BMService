@@ -186,7 +186,6 @@ object kidnapModule extends ModuleTrait {
   	
   	def popKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
   	    val (status, origin) = this.queryServiceStatus((data \ "service_id").asOpt[String])
-  	    println(status)
   	    kidnapProp(status).pop(data, origin)
   	}
   	

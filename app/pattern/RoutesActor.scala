@@ -9,6 +9,7 @@ import play.api.libs.json.Json.toJson
 
 import dongdamessages._
 import module.auth.AuthMessage._
+import akka.actor.Terminated
 
 class RoutesActor extends Actor with ActorLogging {
 	var originSender : ActorRef = null
@@ -21,6 +22,7 @@ class RoutesActor extends Actor with ActorLogging {
 				case head :: tail => {
 					next = context.actorOf(PipeFilterActor.prop(self, MessageRoutes(tail, msr.rst)), "gate")
 					next ! head
+					context.watch(next)
 				}
 			}
 		}
@@ -36,7 +38,8 @@ class RoutesActor extends Actor with ActorLogging {
 			originSender ! toJson("timeout")
 			cancelActor
 		}
-		case _ => ???
+		case Terminated(actorRef) => println("Actor {} terminated", actorRef)
+		case _ => Unit
  	}
 	
 	def cancelActor = {

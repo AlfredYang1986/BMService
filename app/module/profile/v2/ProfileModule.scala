@@ -24,6 +24,7 @@ object ProfileModule extends ModuleTrait {
 		case msg_UpdateProfile(data) => updateUserProfile(data)(pr)
 		case msg_UpdateProfileWithoutResult(data) => updateProfileWithoutResult(data)(pr)
 		case msg_QueryProfile(data) => queryUserProfile(data)
+		case mag_ChangeToServiceProvider(data) => changeServiceProvider(data)(pr)
 		case _ => ???
 	}
 	
@@ -152,28 +153,29 @@ object ProfileModule extends ModuleTrait {
 	
 	def DB2Map(obj : MongoDBObject, token : String) : Map[String, JsValue] = {
 	    var has_phone = obj.getAs[String]("contact_no").map (x => x.length > 0).getOrElse(false)
-		
-		Map("auth_token" -> toJson(token),
-			"user_id" -> toJson(obj.getAs[String]("user_id").get),
-			"isLogin" -> toJson(obj.getAs[Number]("isLogin").get.intValue),
-			"gender" -> toJson(obj.getAs[Number]("gender").get.intValue),
-			"screen_name" -> toJson(obj.getAs[String]("screen_name").get),
-			"screen_photo" -> toJson(obj.getAs[String]("screen_photo").get),
-			"school" -> toJson(obj.getAs[String]("school").get),
-			"company" -> toJson(obj.getAs[String]("company").get),
-			"occupation" -> toJson(obj.getAs[String]("occupation").get),
-			"personal_description" -> toJson(obj.getAs[String]("personal_description").get),
-			"is_service_provider" -> toJson(obj.getAs[Number]("is_service_provider").get.intValue),
-			"about" -> toJson(obj.getAs[String]("about").get),
-			"address" -> toJson(obj.getAs[String]("address").get),
-			"contact_no" -> toJson(obj.getAs[String]("contact_no").get),
-			"has_phone" -> toJson(has_phone),
-			"dob" -> toJson(obj.getAs[Number]("dob").get.longValue),
-			"date" -> toJson(obj.getAs[Number]("date").get.longValue),
-			"coordinate" -> toJson(Map(
-								"longtitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("longtitude").asInstanceOf[Number].floatValue,
-								"latitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("latitude").asInstanceOf[Number].floatValue))
-			)
+	    
+		val re = Map("user_id" -> toJson(obj.getAs[String]("user_id").get),
+					"isLogin" -> toJson(obj.getAs[Number]("isLogin").get.intValue),
+					"gender" -> toJson(obj.getAs[Number]("gender").get.intValue),
+					"screen_name" -> toJson(obj.getAs[String]("screen_name").get),
+					"screen_photo" -> toJson(obj.getAs[String]("screen_photo").get),
+					"school" -> toJson(obj.getAs[String]("school").get),
+					"company" -> toJson(obj.getAs[String]("company").get),
+					"occupation" -> toJson(obj.getAs[String]("occupation").get),
+					"personal_description" -> toJson(obj.getAs[String]("personal_description").get),
+					"is_service_provider" -> toJson(obj.getAs[Number]("is_service_provider").get.intValue),
+					"about" -> toJson(obj.getAs[String]("about").get),
+					"address" -> toJson(obj.getAs[String]("address").get),
+					"contact_no" -> toJson(obj.getAs[String]("contact_no").get),
+					"has_phone" -> toJson(has_phone),
+					"dob" -> toJson(obj.getAs[Number]("dob").get.longValue),
+					"date" -> toJson(obj.getAs[Number]("date").get.longValue),
+					"coordinate" -> toJson(Map(
+										"longtitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("longtitude").asInstanceOf[Number].floatValue,
+										"latitude" -> obj.getAs[BasicDBObject]("coordinate").get.get("latitude").asInstanceOf[Number].floatValue))
+					)
+		if (token.isEmpty) re
+		else re + ("auth_token" -> toJson(token))
 	}
 	
 	def queryUserProfile(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
@@ -183,8 +185,31 @@ object ProfileModule extends ModuleTrait {
 			val owner_user_id = (data \ "owner_user_id").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
 		
 			(from db() in "user_profile" where ("user_id" -> owner_user_id) select (x => x)).toList match {
-				case head :: Nil => (Some(DB2Map(head, query_auth_token)), None)
+				case head :: Nil => (Some(DB2Map(head, "")), None)
 				case _ => throw new Exception("unknown user")
+			}
+			
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+	
+	def changeServiceProvider(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			var user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse (pr match {
+				case None => throw new Exception("wrong input")
+				case Some(m) => m.get("user_id").map (x => x.asOpt[String].map (y => y).getOrElse(throw new Exception("wrong input"))).getOrElse(throw new Exception("wrong input"))
+			})
+			
+			(from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
+				case head :: Nil => {
+					if (head.getAs[Number]("is_service_provider").get.intValue == 0) {
+						head += "is_service_provider" -> 1.asInstanceOf[Number]
+						_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+					}
+					(pr, None)
+				}
+				case _ => throw new Exception("unknow user")
 			}
 			
 		} catch {

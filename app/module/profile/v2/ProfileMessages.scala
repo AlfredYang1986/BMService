@@ -12,4 +12,5 @@ object ProfileMessages {
 	case class msg_UpdateProfile(data : JsValue) extends msg_ProfileCommand
 	case class msg_UpdateProfileWithoutResult(data : JsValue) extends msg_ProfileCommand
 	case class msg_QueryProfile(data : JsValue) extends msg_ProfileCommand
+	case class mag_ChangeToServiceProvider(data : JsValue) extends msg_ProfileCommand
 }

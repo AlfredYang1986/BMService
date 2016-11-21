@@ -8,12 +8,12 @@ import controllers.common.requestArgsQuery._
 import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
 import module.kidnap.v2.kidnapMessages._
-import module.profile.v2.ProfileMessages.msg_UpdateProfileWithoutResult
+import module.profile.v2.ProfileMessages.{ msg_UpdateProfileWithoutResult, mag_ChangeToServiceProvider }
 
 object KidnapController extends Controller {
 	def pushService = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
-			MessageRoutes(msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv) :: msg_CommonResultMessage() :: Nil, None)
+			MessageRoutes(msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv) :: mag_ChangeToServiceProvider(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def popService = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
