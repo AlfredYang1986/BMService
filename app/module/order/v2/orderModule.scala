@@ -269,7 +269,7 @@ object orderModule extends ModuleTrait {
             (data \ "date").asOpt[Long].map (x => condition = conditionsAcc(condition, "date", x)).getOrElse(Unit)
             (data \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
             (data \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
-          
+        
             if (condition.isEmpty) throw new Exception("wrong input")
             else (Some(Map("result" -> toJson((from db() in "orders" where condition.get select (DB2JsValue(_))).toList))), None)
         } catch {
@@ -324,26 +324,21 @@ object orderModule extends ModuleTrait {
         service._1 match {
         	case None => throw new Exception("wrong input")
         	case Some(s) => {
-        		s.get("status").map { status =>
-        			if (status.asOpt[String].get == "error") throw new Exception("service not valid")
-        			else {
-			            toJson(Map("user_id" -> toJson(x.getAs[String]("user_id").get),
-			                       "service_id" -> toJson(x.getAs[String]("service_id").get),
-			                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
-			                       "date" -> toJson(x.getAs[Long]("date").get),
-			                       "status" -> toJson(x.getAs[Int]("status").get),
-			                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
-			                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
-			                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
-			                       "is_read" -> toJson(x.getAs[Int]("is_read").get),
-			                       "order_id" -> toJson(x.getAs[String]("order_id").get),
-			                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
-			                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
-			                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
-			                       "service" ->s.get("result").get 
-			                  ))
-        			}
-        		}.getOrElse(throw new Exception("wrong input"))
+	            toJson(Map("user_id" -> toJson(x.getAs[String]("user_id").get),
+	                       "service_id" -> toJson(x.getAs[String]("service_id").get),
+	                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
+	                       "date" -> toJson(x.getAs[Long]("date").get),
+	                       "status" -> toJson(x.getAs[Int]("status").get),
+	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
+	                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
+	                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
+	                       "is_read" -> toJson(x.getAs[Int]("is_read").get),
+	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
+	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
+	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
+	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
+	                       "service" -> toJson(s)
+	                  ))
           	}
         }
     }
