@@ -184,6 +184,9 @@ POST	/v2/order/accomplish						controllers.v2.OrderController.accomplishOrder
 POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
 POST	/v2/order/query/owner						controllers.v2.OrderController.queryOwnerOrders
 
+POST	/alipay/callback							controllers.v2.AlipayController.alipaycallback
+POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
+
 # web pay controller
 # POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID
 
