@@ -8,9 +8,21 @@ import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
+import pattern.ModuleTrait
 
-object kidnapCollectionModule {
-    def collectKidnapService(data : JsValue) : JsValue = 
+import dongdamessages.MessageDefines
+import kidnapCollectionMessages._
+
+object kidnapCollectionModule extends ModuleTrait {
+	
+	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
+		case msg_CollectionService(data) => collectKidnapService(data)
+		case msg_UncollectionService(data) => unCollectKidnapService(data)
+		case msg_UserCollectionLst(data) => userCollectionsLst(data)
+		case _ => ???
+	}
+	
+    def collectKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = 
         try {
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
@@ -53,14 +65,15 @@ object kidnapCollectionModule {
                   case _ => ???
                 }
          
-            if (pushUserService && pushServiceUser) toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+//            if (pushUserService && pushServiceUser) toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+            if (pushUserService && pushServiceUser) (Some(Map("result" -> toJson("success"))), None)
             else throw new Exception("something wrong")    
             
         } catch {
-          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+          case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
     
-    def unCollectKidnapService(data : JsValue) : JsValue = 
+    def unCollectKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = 
         try {
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
@@ -88,26 +101,28 @@ object kidnapCollectionModule {
                 }
             }
             
-            if (popUserService && popServiceUser) toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+//            if (popUserService && popServiceUser) toJson(Map("status" -> toJson("ok"), "result" -> toJson("success")))
+            if (popUserService && popServiceUser) (Some(Map("result" -> toJson("success"))), None)
             else throw new Exception("something wrong")
             
         } catch {
-          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+          case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
         
-    def userCollectionsLst(data : JsValue) : JsValue = 
+    def userCollectionsLst(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = 
         try {
             val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-            println(user_id)
             val lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
                           x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
                         
             lst match {
-              case Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson(List[String]())))
-              case head :: Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson((kidnapModule.queryMultipleService(toJson(Map("lst" -> head))))._1.get)))
+//              case Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson(List[String]())))
+              case Nil => (Some(Map("result" -> toJson(List.empty[String]))), None)
+//              case head :: Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson((kidnapModule.queryMultipleService(toJson(Map("lst" -> head))))._1.get)))
+              case head :: Nil => (Some(Map("result" -> toJson(kidnapModule.queryMultipleService(toJson(Map("lst" -> head)))._1.get))), None)
               case _ => throw new Exception("wrong input")
             }
         } catch {
-          case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+          case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
 }

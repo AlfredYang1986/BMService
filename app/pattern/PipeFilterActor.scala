@@ -15,6 +15,8 @@ import module.emxmpp.EMModule
 import module.emxmpp.msg_EMMessageCommand
 import module.kidnap.v2.kidnapModule
 import module.kidnap.v2.msg_KidnapServiceCommand
+import module.kidnap.v2.kidnapCollectionModule
+import module.kidnap.v2.msg_KidnapServiceCollectionCommand
 import module.order.v2.msg_OrderCommand
 import module.order.v2.orderModule
 import module.phonecode.PhoneCodeModule
@@ -62,6 +64,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 		case cmd : msg_ProfileCommand => dispatchImpl(cmd, ProfileModule)
 		case cmd : msg_EMMessageCommand => dispatchImpl(cmd, EMModule)  
 		case cmd : msg_KidnapServiceCommand => dispatchImpl(cmd, kidnapModule)
+		case cmd : msg_KidnapServiceCollectionCommand => dispatchImpl(cmd, kidnapCollectionModule)
 		case cmd : msg_OrderCommand => dispatchImpl(cmd, orderModule)
 		case cmd : msg_OrderCommentsCommand => dispatchImpl(cmd, orderCommentsModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
