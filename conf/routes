@@ -184,6 +184,12 @@ POST	/v2/order/accomplish						controllers.v2.OrderController.accomplishOrder
 POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
 POST	/v2/order/query/owner						controllers.v2.OrderController.queryOwnerOrders
 
+POST	/v2/order/comment/push						controllers.v2.OrderCommentsController.pushOrderComments
+POST	/v2/order/comment/update					controllers.v2.OrderCommentsController.updateOrderComments
+POST	/v2/order/comment/pop						controllers.v2.OrderCommentsController.popOrderComments
+POST	/v2/order/comment/query						controllers.v2.OrderCommentsController.queryComments
+POST	/v2/order/comment/overall					controllers.v2.OrderCommentsController.queryOverAllComments
+
 POST	/alipay/callback							controllers.v2.AlipayController.alipaycallback
 POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
 

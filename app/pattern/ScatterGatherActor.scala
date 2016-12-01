@@ -16,6 +16,7 @@ import scala.concurrent.duration._
 import dongdamessages.timeout
 import dongdamessages.error
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import dongdamessages.CommonMessage
 
 object ScatterGatherActor {
 	def prop(originSender : ActorRef, msr : MessageRoutes) : Props = {
@@ -63,8 +64,16 @@ class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes)(implicit 
 			}
 			case head :: tail => {
 				val rst = Some(f(tmp_result.single.get))
-				next = context.actorOf(PipeFilterActor.prop(originSender, MessageRoutes(tail, rst)), "pipe")
-				next ! head
+				head match {
+					case p : ParallelMessage => {
+						next = context.actorOf(ScatterGatherActor.prop(originSender, MessageRoutes(tail, rst)), "scat")
+						next ! head
+					}
+					case c : CommonMessage => {
+						next = context.actorOf(PipeFilterActor.prop(originSender, MessageRoutes(tail, rst)), "pipe")
+						next ! head
+					}
+				}
 			}
 			case _ => println("msr error")
 		}
