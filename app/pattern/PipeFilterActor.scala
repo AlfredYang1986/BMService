@@ -21,6 +21,8 @@ import module.phonecode.PhoneCodeModule
 import module.phonecode.msg_PhoneCodeCommand
 import module.profile.v2.ProfileModule
 import module.profile.v2.msg_ProfileCommand
+import module.test.msg_TestCommand
+import module.test.testModule
 import play.api.Application
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.JsValue
@@ -60,6 +62,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 		case cmd : msg_KidnapServiceCommand => dispatchImpl(cmd, kidnapModule)
 		case cmd : msg_OrderCommand => dispatchImpl(cmd, orderModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
+		case cmd : msg_TestCommand => dispatchImpl(cmd, testModule)
 		case timeout() => {
 			originSender ! new timeout
 			cancelActor
