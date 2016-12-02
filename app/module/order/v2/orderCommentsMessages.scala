@@ -11,4 +11,6 @@ object orderCommentsMessages {
 	case class msg_PopOrderComment(data : JsValue) extends msg_OrderCommentsCommand
 	case class msg_OverallOrderComment(data : JsValue) extends msg_OrderCommentsCommand
 	case class msg_queryOrderComment(data : JsValue) extends msg_OrderCommentsCommand
+	
+	case class msg_OverallOrderLst(data : JsValue) extends msg_OrderCommentsCommand
 }

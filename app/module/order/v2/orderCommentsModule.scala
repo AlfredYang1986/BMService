@@ -1,19 +1,19 @@
 package module.order.v2
 
-import play.api.libs.json.Json
-import play.api.libs.json.Json.{toJson}
-import play.api.libs.json.JsValue
+import java.util.Date
 
-import util.dao.from
-import util.dao._data_connection
-import util.errorcode.ErrorCode
 import com.mongodb.casbah.Imports._
 
-import java.util.Date
-import module.sercurity.Sercurity
-import pattern.ModuleTrait
-import orderCommentsMessages._
 import dongdamessages.MessageDefines
+import module.sercurity.Sercurity
+import orderCommentsMessages._
+import pattern.ModuleTrait
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json.toJson
+import util.dao._data_connection
+import util.dao.from
+import util.errorcode.ErrorCode
 
 object orderCommentsModule extends ModuleTrait {
 
@@ -23,6 +23,8 @@ object orderCommentsModule extends ModuleTrait {
 		case msg_PopOrderComment(data) => popComments(data)
 		case msg_OverallOrderComment(data) => queryOverallComments(data)
 		case msg_queryOrderComment(data) => queryComments(data)
+		
+		case msg_OverallOrderLst(data) => queryOverallOrderLst(data)(pr)
 		case _ => ???
 	}
 	
@@ -88,19 +90,18 @@ object orderCommentsModule extends ModuleTrait {
           case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
     }
-   
-    def queryOverallComments(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-     
-    	def average(lst : List[Double], count : Int) : List[Double] = lst map (x => x / count)
+  
+    def average(lst : List[Double], count : Int) : List[Double] = lst map (x => x / count)
     	
-        def overallAcc(r : List[Double], lst : List[List[Double]]) : List[Double] = lst match { 
-          case Nil => r
-          case head :: Nil => r match {
-            case Nil => head
-            case _ => (r zip head).map (x => x._1 + x._2)
-          }
+    def overallAcc(r : List[Double], lst : List[List[Double]]) : List[Double] = lst match { 
+    	case Nil => r
+        case head :: tail => r match {
+            case Nil => overallAcc(head, tail)
+            case _ => overallAcc((r zip head).map (x => x._1 + x._2), tail) 
         }
-      
+    }
+    
+    def queryOverallComments(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
         try {
             val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
    
@@ -124,6 +125,38 @@ object orderCommentsModule extends ModuleTrait {
         } catch {
           case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
+    }
+    
+    def queryOverallOrderLst(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+    	try {
+    		val lst = pr match {
+    			case None => throw new Exception("wrong input")
+    			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+    		}
+    		val condition = $or(lst map (x => DBObject("service_id" -> (x \ "service_id").asOpt[String].get)))
+    	
+    		val group = (from db() in "service_comments" where condition select { x => 
+    			val service_id = x.getAs[String]("service_id").get
+    			val points = x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]]
+    			(service_id, points)
+    		}).toList.groupBy(_._1)
+    	
+    		val result = group map { iter => 
+    			val points = (iter._2.map (x => x._2))
+    			val avg = average(overallAcc(Nil, points), points.length)
+    			(iter._1, avg)
+    		}
+
+    		val fr = lst map { iter => 
+    			result.find(p => p._1 == (iter \ "service_id").asOpt[String].get).map { tmp => 
+    				toJson((iter.as[JsObject].value.toMap + ("points" -> toJson(tmp._2))))
+    			}.getOrElse(iter)
+    		}
+    		
+    		(Some(Map("result" -> toJson(fr))), None)
+    	} catch {
+          case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+    	}
     }
    
     def DB2Map(x : MongoDBObject) : Map[String, JsValue] = 

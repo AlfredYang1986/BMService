@@ -3,6 +3,7 @@ package module.kidnap.v2
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{toJson}
 import play.api.libs.json.JsValue
+import play.api.libs.json.JsObject
 
 import util.dao.from
 import util.dao._data_connection
@@ -445,4 +446,14 @@ object kidnapModule extends ModuleTrait {
   	    } catch {
   	      case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
   	    }
+  	    
+    def serviceResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
+    
+    	val a = rst.head.get("result").get.asOpt[List[JsValue]].get
+    	val b = rst.tail.head.get("result").get.asOpt[List[JsValue]].get
+    	
+		import pattern.ParallelMessage.f
+		val result = (a zip b).map (tmp => f(tmp._1.as[JsObject].value.toMap :: tmp._2.as[JsObject].value.toMap :: Nil))
+		Map("result" -> toJson(result))
+    }
 }

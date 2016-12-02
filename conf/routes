@@ -169,7 +169,7 @@ POST	/v2/profile/update							controllers.v2.ProfileController.updateUserProfile
 POST	/v2/profile/query							controllers.v2.ProfileController.queryUserProfile
 
 POST	/v2/kidnap/mine								controllers.v2.KidnapController.queryMineServices
-POST	/v2/kidnap/search							controllers.v2.KidnapController.searchServices
+POST	/v2/kidnap/search							controllers.v2.KidnapController.searchServices2
 POST	/v2/kidnap/query							controllers.v2.KidnapController.queryMultiServices
  
 POST	/v2/kidnap/push								controllers.v2.KidnapController.pushService

@@ -11,4 +11,6 @@ object kidnapCollectionMessages {
 	case class msg_CollectionService(data : JsValue) extends msg_KidnapServiceCollectionCommand
 	case class msg_UncollectionService(data : JsValue) extends msg_KidnapServiceCollectionCommand
 	case class msg_UserCollectionLst(data : JsValue) extends msg_KidnapServiceCollectionCommand
+
+	case class msg_IsUserCollectLst(data : JsValue) extends msg_KidnapServiceCollectionCommand
 }

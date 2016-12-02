@@ -24,18 +24,21 @@ object ScatterGatherActor {
 	}
 }
 
-class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes)(implicit f : List[Map[String, JsValue]] => Map[String, JsValue]) extends Actor with ActorLogging {
+class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes) extends Actor with ActorLogging {
 
 	var next : ActorRef = null
 	var sub_act = Seq[ActorRef]()
 	var excepted = 0
 	val tmp_result : Ref[List[Map[String, JsValue]]] = Ref(Nil) 
+	var f : List[Map[String, JsValue]] => Map[String, JsValue] = null
+	var rst : Option[Map[String, JsValue]] = msr.rst
 	
 	def receive = {
-		case msg : ParallelMessage => {
-			excepted = msg.msgs.length
-			msg.msgs.foreach { m => 
-				val act = context.actorOf(ScatterGatherStepActor.prop(self, MessageRoutes(m.lst.tail, None)))
+		case ParallelMessage(msgs, merge) => {
+			f = merge
+			excepted = msgs.length
+			msgs.foreach { m => 
+				val act = context.actorOf(ScatterGatherStepActor.prop(self, MessageRoutes(m.lst.tail, rst)))
 				act ! m.lst.head
 				sub_act = sub_act :+ act
 			}

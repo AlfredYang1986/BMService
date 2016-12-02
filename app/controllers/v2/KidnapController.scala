@@ -9,6 +9,10 @@ import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
 import module.kidnap.v2.kidnapMessages._
 import module.profile.v2.ProfileMessages.{ msg_UpdateProfileWithoutResult, mag_ChangeToServiceProvider }
+import pattern.ParallelMessage
+import module.order.v2.orderCommentsMessages.msg_OverallOrderLst
+import module.kidnap.v2.kidnapCollectionMessages.msg_IsUserCollectLst
+import module.test.testMessages._
 
 object KidnapController extends Controller {
 	def pushService = Action (request => requestArgsV2(request) { jv => 
@@ -38,5 +42,16 @@ object KidnapController extends Controller {
 	def queryServiceDetail = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
 			MessageRoutes(msg_QueryServiceDetail(jv) :: msg_CommonResultMessage() :: Nil, None)
+		})
+		
+	def searchServices2 = Action (request => requestArgsV2(request) { jv => 
+			import pattern.ResultMessage.lst_result
+			import module.kidnap.v2.kidnapModule.serviceResultMerge
+			MessageRoutes(
+					msg_SearchServices(jv) ::
+					ParallelMessage(
+							MessageRoutes(msg_OverallOrderLst(jv) :: Nil, None) :: 
+							MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) :: Nil, serviceResultMerge) 
+					:: msg_CommonResultMessage() :: Nil, None)
 		})
 }
