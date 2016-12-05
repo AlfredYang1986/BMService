@@ -120,7 +120,7 @@ object kidnapCollectionModule extends ModuleTrait {
 //              case Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson(List[String]())))
               case Nil => (Some(Map("result" -> toJson(List.empty[String]))), None)
 //              case head :: Nil => toJson(Map("status" -> toJson("ok"), "result" -> toJson((kidnapModule.queryMultipleService(toJson(Map("lst" -> head))))._1.get)))
-              case head :: Nil => (Some(Map("result" -> toJson(kidnapModule.queryMultipleService(toJson(Map("lst" -> head)))._1.get))), None)
+              case head :: Nil => (Some(kidnapModule.queryMultipleService(toJson(Map("lst" -> head)))._1.get), None)
               case _ => throw new Exception("wrong input")
             }
         } catch {
