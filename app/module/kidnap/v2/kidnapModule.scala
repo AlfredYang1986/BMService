@@ -467,14 +467,10 @@ object kidnapModule extends ModuleTrait {
     
     def paralleServiceForOrder(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
     	try {
-    		println(data)
-    		println(pr)
     		val order_lst = pr match {
     			case None => throw new Exception("wrong input")
     			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
     		}
-    		println(9876)
-    		println(order_lst)
     		
     		if (order_lst.isEmpty) {
     		    (Some(Map("result" -> toJson(order_lst))), None)
@@ -490,7 +486,6 @@ object kidnapModule extends ModuleTrait {
         			toJson(Map("order" -> tmp, "service" -> toJson(s)))
 //        			toJson(o + ("service" -> toJson(result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get))))
         		}
-        		println(s"fr is $fr")
 //        		(Some(Map("result" -> toJson(fr))), None)
         		(Some(Map("message" -> toJson("service_for_order"), "result" -> toJson(fr))), None)
     		}
