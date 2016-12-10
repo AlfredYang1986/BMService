@@ -69,6 +69,11 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 		case cmd : msg_OrderCommentsCommand => dispatchImpl(cmd, orderCommentsModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
 		case cmd : msg_TestCommand => dispatchImpl(cmd, testModule)
+		case cmd : ParallelMessage => {
+		    cancelActor
+			next = context.actorOf(ScatterGatherActor.prop(originSender, msr), "scat")
+			next ! cmd
+		}
 		case timeout() => {
 			originSender ! new timeout
 			cancelActor

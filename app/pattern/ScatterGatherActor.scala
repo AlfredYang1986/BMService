@@ -17,6 +17,7 @@ import dongdamessages.timeout
 import dongdamessages.error
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import dongdamessages.CommonMessage
+import play.api.libs.json.JsObject
 
 object ScatterGatherActor {
 	def prop(originSender : ActorRef, msr : MessageRoutes) : Props = {
@@ -43,19 +44,17 @@ class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes) extends A
 				sub_act = sub_act :+ act
 			}
 		}
-		case ParalleMessageSuccess(r) => {
-			atomic { implicit thx => 
-				tmp_result() = tmp_result() :+ r 
-			}
-		
-			if (tmp_result.single.get.length == excepted) 
-				rstReturn
-		}
+		case ParalleMessageSuccess(r) => stepSuccess(r)
 		case ParalleMessageFailed(err) => {
 			originSender ! error(err)
 			cancelActor					
 		}
-		case _ => println("something messages"); ???
+		case result(r) => stepSuccess(r.as[JsObject].value.toMap)
+		case err : error => {
+			originSender ! err 
+			cancelActor
+		}
+		case x : AnyRef => println(s"something messages: $x"); ???
 	}
 	
 	val timeOutSchdule = context.system.scheduler.scheduleOnce(2 second, self, new timeout)
@@ -86,5 +85,14 @@ class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes) extends A
 	def cancelActor = {
 		timeOutSchdule.cancel
 //		context.stop(self)
+	}
+	
+	def stepSuccess(r : Map[String, JsValue]) = {
+		atomic { implicit thx => 
+		    tmp_result() = tmp_result() :+ r 
+		}
+		
+		if (tmp_result.single.get.length == excepted) 
+		    rstReturn
 	}
 }
