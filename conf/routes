@@ -176,6 +176,8 @@ POST	/v2/kidnap/push								controllers.v2.KidnapController.pushService
 POST	/v2/kidnap/pop								controllers.v2.KidnapController.popService
 POST	/v2/kidnap/update							controllers.v2.KidnapController.updateService
 
+POST	/v2/kidnap/detail							controllers.v2.KidnapController.queryServiceDetail2
+
 POST	/v2/order/push								controllers.v2.OrderController.pushOrder
 POST	/v2/order/pop								controllers.v2.OrderController.popOrder
 POST	/v2/order/query								controllers.v2.OrderController.queryOrders

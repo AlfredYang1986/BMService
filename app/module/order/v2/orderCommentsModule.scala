@@ -25,6 +25,7 @@ object orderCommentsModule extends ModuleTrait {
 		case msg_queryOrderComment(data) => queryComments(data)
 		
 		case msg_OverallOrderLst(data) => queryOverallOrderLst(data)(pr)
+		case msg_OrdersOverallComments(data) => queryOneOverallOrder(data)(pr)
 		case _ => ???
 	}
 	
@@ -156,6 +157,33 @@ object orderCommentsModule extends ModuleTrait {
     		(Some(Map("result" -> toJson(fr))), None)
     	} catch {
           case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+    	}
+    }
+    
+    def queryOneOverallOrder(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+    	try {
+    		val tmp_service_id = pr match {
+    			case None => throw new Exception("wrong input")
+    			case Some(m) => m.get("service_id").get.asOpt[String].get
+    		}
+    		
+    		val group = (from db() in "service_comments" where ("service_id" -> tmp_service_id) select { x => 
+    			val service_id = x.getAs[String]("service_id").get
+    			val points = x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]]
+    			(service_id, points)
+    		}).toList.groupBy(_._1)
+    		
+    		val result = (group map { iter => 
+    			val points = (iter._2.map (x => x._2))
+    			val avg = average(overallAcc(Nil, points), points.length)
+    			(iter._1, avg)
+    		}).head
+    		
+    		val fr = pr.get + ("points" -> toJson(result._2))
+    		(Some(fr), None)
+    		
+    	} catch {
+    		case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
     	}
     }
    

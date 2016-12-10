@@ -17,4 +17,6 @@ object kidnapMessages {
 	case class msg_QueryMultiServices(data : JsValue) extends msg_KidnapServiceCommand
 	case class msg_SearchServices(data : JsValue) extends msg_KidnapServiceCommand
 	case class msg_MineServices(data : JsValue) extends msg_KidnapServiceCommand
+	
+	case class msg_ServiceForOrders(data : JsValue) extends msg_KidnapServiceCommand
 }

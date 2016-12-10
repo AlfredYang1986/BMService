@@ -49,6 +49,8 @@ object kidnapModule extends ModuleTrait {
 		case msg_QueryMultiServices(data) => queryMultipleService(data)
 		case msg_SearchServices(data) => searchKidnapService(data)
 		case msg_MineServices(data) => mineKidnapService(data)
+		
+		case msg_ServiceForOrders(data) => paralleServiceForOrder(data)(pr)
 		case _ => ???
 	}
 	
@@ -385,7 +387,7 @@ object kidnapModule extends ModuleTrait {
   	               
   	def searchKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
   	    try {
-  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(100.intValue)
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20.intValue)
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
   	        val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
   	      
@@ -451,9 +453,50 @@ object kidnapModule extends ModuleTrait {
     
     	val a = rst.head.get("result").get.asOpt[List[JsValue]].get
     	val b = rst.tail.head.get("result").get.asOpt[List[JsValue]].get
+    	val c = rst.tail.tail.head.get("result").get.asOpt[List[JsValue]].get
     	
 		import pattern.ParallelMessage.f
-		val result = (a zip b).map (tmp => f(tmp._1.as[JsObject].value.toMap :: tmp._2.as[JsObject].value.toMap :: Nil))
+		val result = (a zip b zip c).map (tmp => f(tmp._1._1.as[JsObject].value.toMap :: tmp._1._2.as[JsObject].value.toMap :: tmp._2.as[JsObject].value.toMap :: Nil))
 		Map("result" -> toJson(result))
+    }
+    
+    def detailResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
+		import pattern.ParallelMessage.f
+		Map("result" -> toJson(f(rst)))
+    }
+    
+    def paralleServiceForOrder(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+    	try {
+    		println(data)
+    		println(pr)
+    		val order_lst = pr match {
+    			case None => throw new Exception("wrong input")
+    			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+    		}
+    		println(9876)
+    		println(order_lst)
+    		
+    		if (order_lst.isEmpty) {
+    		    (Some(Map("result" -> toJson(order_lst))), None)
+    		} else {
+        		val service_id_lst = order_lst.map (x => (x \ "service_id").asOpt[String].get)
+        		
+        		val conditions = $or(service_id_lst.map (x => DBObject("service_id" -> x)))
+        		val result = (from db() in "kidnap" where conditions select (DB2JsValue(_))).toList
+        		
+        		val fr = order_lst map { tmp => 
+        			val o = tmp.as[JsObject].value.toMap
+        			val s = result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get).get
+        			toJson(Map("order" -> tmp, "service" -> toJson(s)))
+//        			toJson(o + ("service" -> toJson(result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get))))
+        		}
+        		println(s"fr is $fr")
+//        		(Some(Map("result" -> toJson(fr))), None)
+        		(Some(Map("message" -> toJson("service_for_order"), "result" -> toJson(fr))), None)
+    		}
+    		
+    	} catch {
+    		case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+    	}
     }
 }

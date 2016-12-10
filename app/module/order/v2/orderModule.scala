@@ -27,6 +27,7 @@ import pattern.ModuleTrait
 
 import com.mongodb.casbah.Imports._
 import module.notification.DDNNotifyUsers
+import play.api.libs.json.JsObject
 
 object orderStatus {
     case object reject extends orderStatusDefines(-9, "reject")
@@ -262,14 +263,15 @@ object orderModule extends ModuleTrait {
         }
         
         try { 
+        	val con = (data \ "condition")
             var condition : Option[DBObject] = Some("status" $ne 0)
-            (data \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
-            (data \ "user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
-            (data \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
-            (data \ "date").asOpt[Long].map (x => condition = conditionsAcc(condition, "date", x)).getOrElse(Unit)
-            (data \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
-            (data \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
-        
+            (con \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
+            (con \ "user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
+            (con \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
+            (con \ "date").asOpt[Long].map (x => condition = conditionsAcc(condition, "date", x)).getOrElse(Unit)
+            (con \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
+            (con \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
+       
             if (condition.isEmpty) throw new Exception("wrong input")
             else (Some(Map("result" -> toJson((from db() in "orders" where condition.get select (DB2JsValue(_))).toList))), None)
         } catch {
@@ -320,51 +322,92 @@ object orderModule extends ModuleTrait {
     }
    
     def DB2JsValue(x : MongoDBObject) : JsValue = {
-        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
-        service._1 match {
-        	case None => throw new Exception("wrong input")
-        	case Some(s) => {
+//        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
+//        service._1 match {
+//        	case None => throw new Exception("wrong input")
+//        	case Some(s) => {
 	            toJson(Map("user_id" -> toJson(x.getAs[String]("user_id").get),
 	                       "service_id" -> toJson(x.getAs[String]("service_id").get),
 	                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
 	                       "date" -> toJson(x.getAs[Long]("date").get),
-	                       "status" -> toJson(x.getAs[Int]("status").get),
+	                       "status" -> toJson(x.getAs[Number]("status").get.intValue),
 	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
 	                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
 	                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
-	                       "is_read" -> toJson(x.getAs[Int]("is_read").get),
+	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
 	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
 	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
-	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
-	                       "service" -> toJson(s)
+	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse(""))
+//	                       , "service" -> toJson(s)
 	                  ))
-          	}
-        }
+//          	}
+//        }
     }
 	
     def DB2OptionJsValue(x : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
-        service._1 match {
-        	case None => service
-        	case Some(s) => {
+//        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
+//        service._1 match {
+//        	case None => service
+//        	case Some(s) => {
         		val re = Map("user_id" -> toJson(x.getAs[String]("user_id").get),
 	                       "service_id" -> toJson(x.getAs[String]("service_id").get),
 	                       "owner_id" -> toJson(x.getAs[String]("owner_id").get),
 	                       "date" -> toJson(x.getAs[Long]("date").get),
-	                       "status" -> toJson(x.getAs[Int]("status").get),
+	                       "status" -> toJson(x.getAs[Number]("status").get.intValue),
 	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
 	                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
 	                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
-	                       "is_read" -> toJson(x.getAs[Int]("is_read").get),
+	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
 	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
 	                       "servant_no" -> toJson(x.getAs[Number]("servant_no").map (x => x.intValue).getOrElse(1)),
 	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
-	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse("")),
-	                       "service" -> toJson(s))
+	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse(""))
+//	                       , "service" -> toJson(s)
+	                       )
         		(Some(re), None)
-        	}
-        }
+//        	}
+//        }
+    }
+
+    def orderResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
+   
+    	val s = rst.find(x => x.get("message").get.asOpt[String].get == "service_for_order").get
+    	val c = rst.find(x => x.get("message").get.asOpt[String].get == "collections_lst").get
+    	val n = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
+   
+    	val order = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "order").asOpt[JsValue].get)
+    	val service = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "service").asOpt[JsValue].get)
+    	val coll_lst = c.get("result").get.asOpt[List[JsValue]].get
+    	val service_owner_name_photo = n.get("result").get.asOpt[List[JsValue]].get
+    	
+		import pattern.ParallelMessage.f
+		val s_lst = (service zip coll_lst zip service_owner_name_photo)
+					.map (tmp => f(tmp._1._1.as[JsObject].value.toMap :: 
+							tmp._1._2.as[JsObject].value.toMap :: 
+							tmp._2.as[JsObject].value.toMap :: Nil))
+		
+		Map("message" -> toJson("order_service"), "result" -> toJson(Map("order" -> toJson(order), "service" -> toJson(s_lst))))
+    }
+    
+    def orderOrderMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
+		import pattern.ParallelMessage.f
+		f(rst) + ("message" -> toJson("profile_name_photo"))   	
+    }
+    
+    def orderFinalMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
+		import pattern.ParallelMessage.f
+		
+		val os = rst.find(x => x.get("message").get.asOpt[String].get == "order_service").get
+		val np = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
+
+    	val order = os.get("result").get.asOpt[JsValue].map (x => (x \ "order").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+    	val service = os.get("result").get.asOpt[JsValue].map (x => (x \ "service").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+    	val np_lst = np.get("result").get.asOpt[List[JsValue]].get
+	
+    	val order_lst = (order zip service) map (tmp => tmp._1.as[JsObject].value.toMap + ("service" -> tmp._2))
+    	val result = (order_lst zip np_lst) map (tmp => f(tmp._1 :: tmp._2.as[JsObject].value.toMap :: Nil))
+    	Map("result" -> toJson(result))
     }
 }

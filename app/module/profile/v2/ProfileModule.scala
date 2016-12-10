@@ -24,7 +24,11 @@ object ProfileModule extends ModuleTrait {
 		case msg_UpdateProfile(data) => updateUserProfile(data)(pr)
 		case msg_UpdateProfileWithoutResult(data) => updateProfileWithoutResult(data)(pr)
 		case msg_QueryProfile(data) => queryUserProfile(data)
-		case mag_ChangeToServiceProvider(data) => changeServiceProvider(data)(pr)
+		case msg_ChangeToServiceProvider(data) => changeServiceProvider(data)(pr)
+		
+		case msg_OwnerLstNamePhoto(data) => paralleOwnerLstNamePhoto(data)(pr)
+		case msg_UserLstNamePhoto(data) => paralleUserLstNamePhoto(data)(pr) 
+		case msg_OneOwnerNamePhoto(data) => paralleOneNamePhoto(data)(pr)
 		case _ => ???
 	}
 	
@@ -215,5 +219,50 @@ object ProfileModule extends ModuleTrait {
 		} catch {
 			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}
+	}
+	
+	def paralleServiceNamePhotoImpl(data : JsValue)(pr : Option[Map[String, JsValue]])(f : JsValue => String) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val lst = pr match {
+    			case None => throw new Exception("wrong input")
+    			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+    		}
+    		val owner_lst = (lst map (x => f(x)))
+    
+    		val conditions = $or(owner_lst map (x => DBObject("user_id" -> x)))
+    		val owner_profile_lst = (from db() in "user_profile" where conditions select { x => 
+	    			Map("user_id" -> x.getAs[String]("user_id").get,
+						"screen_name" -> x.getAs[String]("screen_name").get,
+	    				"screen_photo" -> x.getAs[String]("screen_photo").get)
+    			}).toList
+    		
+            val result = owner_lst map (x => toJson(owner_profile_lst.find(y => y.get("user_id").get == x)))
+    		(Some(Map("message" -> toJson("profile_name_photo"), "result" -> toJson(result))), None)
+			
+		} catch {
+        	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}	
+	}
+	
+	def paralleOwnerLstNamePhoto(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = paralleServiceNamePhotoImpl(data)(pr)(x =>  (x \ "owner_id").asOpt[String].get)
+	def paralleUserLstNamePhoto(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = paralleServiceNamePhotoImpl(data)(pr)(x =>  (x \ "user_id").asOpt[String].get)
+	
+	def paralleOneNamePhoto(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val tmp_user_id = pr match {
+				case None => throw new Exception("wrong input")
+				case Some(m) => m.get("owner_id").get.asOpt[String].get
+			}
+		
+			var result = (from db() in "user_profile" where ("user_id" -> tmp_user_id) select { x =>
+				Map("screen_name" -> toJson(x.getAs[String]("screen_name").get),
+					"screen_photo" -> toJson(x.getAs[String]("screen_photo").get))
+			}).head
+    		
+    		(Some(result), None)
+			
+		} catch {
+        	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}	
 	}
 }

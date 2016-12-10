@@ -20,6 +20,7 @@ object kidnapCollectionModule extends ModuleTrait {
 		case msg_UncollectionService(data) => unCollectKidnapService(data)
 		case msg_UserCollectionLst(data) => userCollectionsLst(data)
 		case msg_IsUserCollectLst(data) => isCollectiontLst(data)(pr)
+		case msg_IsUserCollect(data) => isCollection(data)(pr)
 		case _ => ???
 	}
 	
@@ -144,10 +145,29 @@ object kidnapCollectionModule extends ModuleTrait {
 	            	"iscollect" -> toJson(collect_lst.contains(x))))
             }
     		
-    		(Some(Map("result" -> toJson(result))), None)
+    		(Some(Map("message" -> toJson("collections_lst"), "result" -> toJson(result))), None)
 			
 		} catch {
         	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+		}
+	}
+	
+	def isCollection(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+		try {
+			val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+			val tmp_service_id = pr match {
+				case None => throw new Exception("wrong input")
+				case Some(m) => m.get("service_id").get.asOpt[String].get
+			}
+			
+            val collect_lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
+                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
+			val is_collect = collect_lst.contains(tmp_service_id)
+			
+    		(Some(Map("service_id" -> toJson(tmp_service_id), "iscollect" -> toJson(is_collect))), None)
+			
+		} catch {
+			case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}
 	}
 }
