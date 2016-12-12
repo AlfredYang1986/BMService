@@ -54,6 +54,7 @@ class ScatterGatherActor(originSender : ActorRef, msr : MessageRoutes) extends A
 			originSender ! err 
 			cancelActor
 		}
+		case timeout() => Unit
 		case x : AnyRef => println(s"something messages: $x"); ???
 	}
 	
