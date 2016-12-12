@@ -138,7 +138,7 @@ object kidnapCollectionModule extends ModuleTrait {
     	
     		val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val collect_lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
-                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
+                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList.flatten
                           
             val result = service_lst map { x => 
             	toJson(Map("service_id" -> toJson(x),
@@ -161,7 +161,7 @@ object kidnapCollectionModule extends ModuleTrait {
 			}
 			
             val collect_lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
-                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList
+                          x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList.flatten
 			val is_collect = collect_lst.contains(tmp_service_id)
 			
     		(Some(Map("service_id" -> toJson(tmp_service_id), "iscollect" -> toJson(is_collect))), None)

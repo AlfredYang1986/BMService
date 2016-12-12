@@ -457,7 +457,7 @@ object kidnapModule extends ModuleTrait {
   	        }
   	        
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
-  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(100.intValue)
+  	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20.intValue)
   	      
   	        val reVal = conditions(lst, None) match {
   	          case None => toJson(List[String]())

@@ -227,17 +227,25 @@ object ProfileModule extends ModuleTrait {
     			case None => throw new Exception("wrong input")
     			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
     		}
-    		val owner_lst = (lst map (x => f(x)))
-    
-    		val conditions = $or(owner_lst map (x => DBObject("user_id" -> x)))
-    		val owner_profile_lst = (from db() in "user_profile" where conditions select { x => 
-	    			Map("user_id" -> x.getAs[String]("user_id").get,
-						"screen_name" -> x.getAs[String]("screen_name").get,
-	    				"screen_photo" -> x.getAs[String]("screen_photo").get)
-    			}).toList
-    		
-            val result = owner_lst map (x => toJson(owner_profile_lst.find(y => y.get("user_id").get == x)))
-    		(Some(Map("message" -> toJson("profile_name_photo"), "result" -> toJson(result))), None)
+			
+			if (lst.isEmpty) {
+				val fr : List[JsValue] = Nil
+	    		(Some(Map("message" -> toJson("profile_name_photo"), "result" -> toJson(fr))), None)
+				
+			} else {
+							
+	    		val owner_lst = (lst map (x => f(x)))
+	    
+	    		val conditions = $or(owner_lst map (x => DBObject("user_id" -> x)))
+	    		val owner_profile_lst = (from db() in "user_profile" where conditions select { x => 
+		    			Map("user_id" -> x.getAs[String]("user_id").get,
+							"screen_name" -> x.getAs[String]("screen_name").get,
+		    				"screen_photo" -> x.getAs[String]("screen_photo").get)
+	    			}).toList
+	    		
+	            val result = owner_lst map (x => toJson(owner_profile_lst.find(y => y.get("user_id").get == x)))
+	    		(Some(Map("message" -> toJson("profile_name_photo"), "result" -> toJson(result))), None)
+			}
 			
 		} catch {
         	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))

@@ -134,27 +134,35 @@ object orderCommentsModule extends ModuleTrait {
     			case None => throw new Exception("wrong input")
     			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
     		}
-    		val condition = $or(lst map (x => DBObject("service_id" -> (x \ "service_id").asOpt[String].get)))
-    	
-    		val group = (from db() in "service_comments" where condition select { x => 
-    			val service_id = x.getAs[String]("service_id").get
-    			val points = x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]]
-    			(service_id, points)
-    		}).toList.groupBy(_._1)
-    	
-    		val result = group map { iter => 
-    			val points = (iter._2.map (x => x._2))
-    			val avg = average(overallAcc(Nil, points), points.length)
-    			(iter._1, avg)
+    		
+    		if (lst.isEmpty) {
+    		
+    			val fr : List[JsValue] = Nil
+    			(Some(Map("result" -> toJson(fr))), None)	
+    		} else {
+	    		val condition = $or(lst map (x => DBObject("service_id" -> (x \ "service_id").asOpt[String].get)))
+	    	
+	    		val group = (from db() in "service_comments" where condition select { x => 
+	    			val service_id = x.getAs[String]("service_id").get
+	    			val points = x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]]
+	    			(service_id, points)
+	    		}).toList.groupBy(_._1)
+	    	
+	    		val result = group map { iter => 
+	    			val points = (iter._2.map (x => x._2))
+	    			val avg = average(overallAcc(Nil, points), points.length)
+	    			(iter._1, avg)
+	    		}
+	
+	    		val fr = lst map { iter => 
+	    			result.find(p => p._1 == (iter \ "service_id").asOpt[String].get).map { tmp => 
+	    				toJson((iter.as[JsObject].value.toMap + ("points" -> toJson(tmp._2))))
+	    			}.getOrElse(iter)
+	    		}
+	    		
+	    		(Some(Map("result" -> toJson(fr))), None)
     		}
 
-    		val fr = lst map { iter => 
-    			result.find(p => p._1 == (iter \ "service_id").asOpt[String].get).map { tmp => 
-    				toJson((iter.as[JsObject].value.toMap + ("points" -> toJson(tmp._2))))
-    			}.getOrElse(iter)
-    		}
-    		
-    		(Some(Map("result" -> toJson(fr))), None)
     	} catch {
           case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
     	}
