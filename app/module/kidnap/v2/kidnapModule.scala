@@ -380,7 +380,7 @@ object kidnapModule extends ModuleTrait {
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
   	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
   	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
-  	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").get.longValue),
+  	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").map (y => y.intValue).getOrElse(0)),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
   	               "date" -> toJson(x.getAs[Number]("date").get.longValue),
