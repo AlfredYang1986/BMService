@@ -144,8 +144,9 @@ object kidnapModule extends ModuleTrait {
 
   	        service_builder += "status" -> kidnapServiceStatus.offine.t
   	        service_builder += "rate" -> 0.floatValue
-  	      
-  	        (data \ "cans").asOpt[Long].map (cans => service_builder += "cans" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "cans" -> 0.intValue)
+  	     
+  	        (data \ "cans_cat").asOpt[Long].map (x => service_builder += "cans_cat" -> x.asInstanceOf[Number]).getOrElse(service_builder += "cans_cat" -> 0.longValue)
+  	        (data \ "cans").asOpt[Long].map (cans => service_builder += "cans" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "cans" -> 0.longValue)
             (data \ "facility").asOpt[Long].map (cans => service_builder += "facility" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "facility" -> 0.intValue)
   	       
             (data \ "images").asOpt[List[String]].map { lst => 
@@ -169,6 +170,15 @@ object kidnapModule extends ModuleTrait {
   	        service_builder += "least_hours" -> (data \ "least_hours").asOpt[Int].map (x => x).getOrElse(0)
   	        service_builder += "allow_leave" -> (data \ "allow_leave").asOpt[Int].map (x => x).getOrElse(0)
   	        service_builder += "service_cat" -> (data \ "service_cat").asOpt[Int].map (x => x).getOrElse(0)
+  	       
+  	        /**
+  	         * somethin that need to be modified at last
+  	         */
+  	        /**************************************************************/
+  	        service_builder += "least_times" -> (data \ "least_times").asOpt[Int].map (x => x).getOrElse(0)
+  	        service_builder += "lecture_length" -> (data \ "lecture_length").asOpt[Float].map (x => x).getOrElse(0)
+  	        service_builder += "other_words" -> (data \ "other_words").asOpt[String].map (x => x).getOrElse("")
+  	        /**************************************************************/
   	        
   	        service_builder += "date" -> new Date().getTime
 	        service_builder += "servant_no" -> (data \ "servant_no").asOpt[Int].map (x => x).getOrElse(1)
@@ -254,6 +264,7 @@ object kidnapModule extends ModuleTrait {
             }.getOrElse (Unit) 
             origin += "offer_date" -> offer_date.result
            
+  	        (data \ "cans_cat").asOpt[Long].map (x => origin += "cans_cat" -> x.asInstanceOf[Number]).getOrElse(Unit)
             (data \ "cans").asOpt[Long].map (cans => origin += "cans" -> cans.asInstanceOf[Number]).getOrElse(Unit)
             (data \ "facility").asOpt[Long].map (cans => origin += "facility" -> cans.asInstanceOf[Number]).getOrElse(Unit)
   	       
@@ -275,6 +286,15 @@ object kidnapModule extends ModuleTrait {
             (data \ "least_hours").asOpt[Int].map (x => origin += "least_hours" -> x.asInstanceOf[Number]).getOrElse(Unit)
             (data \ "allow_leave").asOpt[Int].map (x => origin += "allow_leave" -> x.asInstanceOf[Number]).getOrElse(Unit)
             (data \ "service_cat").asOpt[Int].map (x => origin += "service_cat" -> x.asInstanceOf[Number]).getOrElse(Unit)
+            
+			/**
+  	         * somethin that need to be modified at last
+  	         */
+  	        /**************************************************************/
+            (data \ "least_times").asOpt[Int].map (x => origin += "least_times" -> x.asInstanceOf[Number]).getOrElse(Unit)
+  	        (data \ "lecture_length").asOpt[Float].map (x => origin += "lecture_length" -> x.asInstanceOf[Number]).getOrElse(Unit)
+  	        (data \ "other_words").asOpt[String].map (x => origin += "other_words" -> x).getOrElse(Unit)
+  	        /**************************************************************/
             
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
@@ -339,7 +359,7 @@ object kidnapModule extends ModuleTrait {
   	}
   	
   	def DB2JsValue(x : MongoDBObject) : Map[String, JsValue] = {
-        val offer_date = toJson(x.getAs[MongoDBList]("offer_date").map { x => x.toList.asInstanceOf[List[BasicDBObject]].map { one_date => 
+  	    val offer_date = toJson(x.getAs[MongoDBList]("offer_date").map { x => x.toList.asInstanceOf[List[BasicDBObject]].map { one_date => 
                             toJson(Map("day" -> toJson(one_date.get("day").asInstanceOf[Number].intValue),
                                        "occurance" -> toJson(one_date.get("occurance").asInstanceOf[BasicDBList].toList.asInstanceOf[List[BasicDBObject]].map { occ => 
                                             toJson(Map("start" -> toJson(occ.getAs[Number]("start").get.intValue),
@@ -360,6 +380,7 @@ object kidnapModule extends ModuleTrait {
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
   	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
   	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
+  	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").get.longValue),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
   	               "date" -> toJson(x.getAs[Number]("date").get.longValue),
@@ -367,10 +388,13 @@ object kidnapModule extends ModuleTrait {
   	               "address" -> toJson(x.getAs[String]("address").get),
   	               "least_hours" -> toJson(x.getAs[Number]("least_hours").map (y => y.intValue).getOrElse(0)),
   	               "allow_leave" -> toJson(x.getAs[Number]("allow_leave").map (y => y.intValue).getOrElse(1)),
-  	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(0)),
+  	               "service_cat" -> toJson(x.getAs[Number]("service_cat").map (y => y.intValue).getOrElse(-1)),
   	               "adjust_address" -> toJson(x.getAs[String]("adjust_address").map (y => y).getOrElse("")),
 				   "servant_no" -> toJson(x.getAs[Number]("servant_no").map (x => x.intValue).getOrElse(1)),
-  	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]])
+  	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]]),
+  	               "least_times" -> toJson(x.getAs[Number]("least_times").map (y => y.intValue).getOrElse(0)),
+  	               "lecture_length" -> toJson(x.getAs[Number]("lecture_length").map (y => y.floatValue).getOrElse(0.0.asInstanceOf[Float])),
+  	               "other_words" -> toJson(x.getAs[String]("other_words").map (y => y).getOrElse(""))
   	               )
     }
   
@@ -484,9 +508,7 @@ object kidnapModule extends ModuleTrait {
         			val o = tmp.as[JsObject].value.toMap
         			val s = result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get).get
         			toJson(Map("order" -> tmp, "service" -> toJson(s)))
-//        			toJson(o + ("service" -> toJson(result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get))))
         		}
-//        		(Some(Map("result" -> toJson(fr))), None)
         		(Some(Map("message" -> toJson("service_for_order"), "result" -> toJson(fr))), None)
     		}
     		
