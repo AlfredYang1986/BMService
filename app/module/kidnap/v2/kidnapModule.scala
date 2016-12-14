@@ -182,7 +182,7 @@ object kidnapModule extends ModuleTrait {
   	        
   	        service_builder += "date" -> new Date().getTime
 	        service_builder += "servant_no" -> (data \ "servant_no").asOpt[Int].map (x => x).getOrElse(1)
-  	        service_builder += "reserve1" -> ""
+  	        service_builder += "reserve1" -> (data \ "reserve1").asOpt[String].map (x => x).getOrElse("")
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
   	        
@@ -294,6 +294,8 @@ object kidnapModule extends ModuleTrait {
             (data \ "least_times").asOpt[Int].map (x => origin += "least_times" -> x.asInstanceOf[Number]).getOrElse(Unit)
   	        (data \ "lecture_length").asOpt[Float].map (x => origin += "lecture_length" -> x.asInstanceOf[Number]).getOrElse(Unit)
   	        (data \ "other_words").asOpt[String].map (x => origin += "other_words" -> x).getOrElse(Unit)
+  	        
+  	        (data \ "reserve1").asOpt[String].map (x => origin += "reserve1" -> x).getOrElse(Unit)
   	        /**************************************************************/
             
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
@@ -394,7 +396,8 @@ object kidnapModule extends ModuleTrait {
   	               "images" -> toJson(x.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]]),
   	               "least_times" -> toJson(x.getAs[Number]("least_times").map (y => y.intValue).getOrElse(0)),
   	               "lecture_length" -> toJson(x.getAs[Number]("lecture_length").map (y => y.floatValue).getOrElse(0.0.asInstanceOf[Float])),
-  	               "other_words" -> toJson(x.getAs[String]("other_words").map (y => y).getOrElse(""))
+  	               "other_words" -> toJson(x.getAs[String]("other_words").map (y => y).getOrElse("")),
+  	               "reserve1" -> toJson(x.getAs[String]("reserve1").map (y => y).getOrElse(""))
   	               )
     }
   

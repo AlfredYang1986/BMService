@@ -372,23 +372,28 @@ object orderModule extends ModuleTrait {
     }
 
     def orderResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
-   
-    	val s = rst.find(x => x.get("message").get.asOpt[String].get == "service_for_order").get
-    	val c = rst.find(x => x.get("message").get.asOpt[String].get == "collections_lst").get
-    	val n = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
-   
-    	val order = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "order").asOpt[JsValue].get)
-    	val service = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "service").asOpt[JsValue].get)
-    	val coll_lst = c.get("result").get.asOpt[List[JsValue]].get
-    	val service_owner_name_photo = n.get("result").get.asOpt[List[JsValue]].get
-    	
-		import pattern.ParallelMessage.f
-		val s_lst = (service zip coll_lst zip service_owner_name_photo)
-					.map (tmp => f(tmp._1._1.as[JsObject].value.toMap :: 
-							tmp._1._2.as[JsObject].value.toMap :: 
-							tmp._2.as[JsObject].value.toMap :: Nil))
-		
-		Map("message" -> toJson("order_service"), "result" -> toJson(Map("order" -> toJson(order), "service" -> toJson(s_lst))))
+  
+    	println(s"order result merge: $rst")
+    	try {
+    		val s = rst.find(x => x.get("message").get.asOpt[String].get == "service_for_order").get
+	    	val c = rst.find(x => x.get("message").get.asOpt[String].get == "collections_lst").get
+	    	val n = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
+	   
+	    	val order = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "order").asOpt[JsValue].get)
+	    	val service = s.get("result").get.asOpt[List[JsValue]].get.map (x => (x \ "service").asOpt[JsValue].get)
+	    	val coll_lst = c.get("result").get.asOpt[List[JsValue]].get
+	    	val service_owner_name_photo = n.get("result").get.asOpt[List[JsValue]].get
+	    	
+			import pattern.ParallelMessage.f
+			val s_lst = (service zip coll_lst zip service_owner_name_photo)
+						.map (tmp => f(tmp._1._1.as[JsObject].value.toMap :: 
+								tmp._1._2.as[JsObject].value.toMap :: 
+								tmp._2.as[JsObject].value.toMap :: Nil))
+			
+			Map("message" -> toJson("order_service"), "result" -> toJson(Map("order" -> toJson(order), "service" -> toJson(s_lst))))
+    	} catch {
+    		case ex : Exception => Map("message" -> toJson("order_service"), "result" -> toJson(List[JsValue]()))
+    	}
     }
     
     def orderOrderMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
@@ -398,16 +403,20 @@ object orderModule extends ModuleTrait {
     
     def orderFinalMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
 		import pattern.ParallelMessage.f
-		
-		val os = rst.find(x => x.get("message").get.asOpt[String].get == "order_service").get
-		val np = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
-
-    	val order = os.get("result").get.asOpt[JsValue].map (x => (x \ "order").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
-    	val service = os.get("result").get.asOpt[JsValue].map (x => (x \ "service").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
-    	val np_lst = np.get("result").get.asOpt[List[JsValue]].get
 	
-    	val order_lst = (order zip service) map (tmp => tmp._1.as[JsObject].value.toMap + ("service" -> tmp._2))
-    	val result = (order_lst zip np_lst) map (tmp => f(tmp._1 :: tmp._2.as[JsObject].value.toMap :: Nil))
-    	Map("result" -> toJson(result))
+		try {
+			val os = rst.find(x => x.get("message").get.asOpt[String].get == "order_service").get
+			val np = rst.find(x => x.get("message").get.asOpt[String].get == "profile_name_photo").get
+	
+	    	val order = os.get("result").get.asOpt[JsValue].map (x => (x \ "order").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+	    	val service = os.get("result").get.asOpt[JsValue].map (x => (x \ "service").asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+	    	val np_lst = np.get("result").get.asOpt[List[JsValue]].get
+		
+	    	val order_lst = (order zip service) map (tmp => tmp._1.as[JsObject].value.toMap + ("service" -> tmp._2))
+	    	val result = (order_lst zip np_lst) map (tmp => f(tmp._1 :: tmp._2.as[JsObject].value.toMap :: Nil))
+	    	Map("result" -> toJson(result))
+		} catch {
+    		case ex : Exception => Map("message" -> toJson("order_service"), "result" -> toJson(List[JsValue]()))
+    	}
     }
 }
