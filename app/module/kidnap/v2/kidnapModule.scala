@@ -145,8 +145,8 @@ object kidnapModule extends ModuleTrait {
   	        service_builder += "status" -> kidnapServiceStatus.offine.t
   	        service_builder += "rate" -> 0.floatValue
   	     
-  	        (data \ "cans_cat").asOpt[Long].map (x => service_builder += "cans_cat" -> x.asInstanceOf[Number]).getOrElse(service_builder += "cans_cat" -> 0.longValue)
-  	        (data \ "cans").asOpt[Long].map (cans => service_builder += "cans" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "cans" -> 0.longValue)
+  	        (data \ "cans_cat").asOpt[Long].map (x => service_builder += "cans_cat" -> x.asInstanceOf[Number]).getOrElse(service_builder += "cans_cat" -> -1.longValue)
+  	        (data \ "cans").asOpt[Long].map (cans => service_builder += "cans" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "cans" -> -1.longValue)
             (data \ "facility").asOpt[Long].map (cans => service_builder += "facility" -> cans.asInstanceOf[Number]).getOrElse(service_builder += "facility" -> 0.intValue)
   	       
             (data \ "images").asOpt[List[String]].map { lst => 
@@ -382,7 +382,7 @@ object kidnapModule extends ModuleTrait {
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
   	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
   	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
-  	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").map (y => y.intValue).getOrElse(0)),
+  	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").map (y => y.intValue).getOrElse(-1)),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
   	               "date" -> toJson(x.getAs[Number]("date").get.longValue),
