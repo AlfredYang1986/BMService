@@ -169,7 +169,8 @@ POST	/v2/profile/update							controllers.v2.ProfileController.updateUserProfile
 POST	/v2/profile/query							controllers.v2.ProfileController.queryUserProfile
 
 POST	/v2/kidnap/mine								controllers.v2.KidnapController.queryMineServices
-POST	/v2/kidnap/search							controllers.v2.KidnapController.searchServices2
+POST	/v2/kidnap/search							controllers.v2.KidnapController.searchServices
+POST	/v2.1/kidnap/search							controllers.v2.KidnapController.searchServices2
 POST	/v2/kidnap/query							controllers.v2.KidnapController.queryMultiServices
  
 POST	/v2/kidnap/push								controllers.v2.KidnapController.pushService
@@ -181,10 +182,13 @@ POST	/v2/kidnap/detail							controllers.v2.KidnapController.queryServiceDetail2
 POST	/v2/order/push								controllers.v2.OrderController.pushOrder
 POST	/v2/order/pop								controllers.v2.OrderController.popOrder
 POST	/v2/order/query								controllers.v2.OrderController.queryOrders
+POST	/v2.1/order/query								controllers.v2.OrderController.queryOrders2
 POST	/v2/order/accept							controllers.v2.OrderController.acceptOrder
 POST	/v2/order/accomplish						controllers.v2.OrderController.accomplishOrder
 POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
+POST	/v2.1/order/query/apply						controllers.v2.OrderController.queryApplyOrders2
 POST	/v2/order/query/owner						controllers.v2.OrderController.queryOwnerOrders
+POST	/v2.1/order/query/owner						controllers.v2.OrderController.queryOwnerOrders2
 
 POST	/v2/order/comment/push						controllers.v2.OrderCommentsController.pushOrderComments
 POST	/v2/order/comment/update					controllers.v2.OrderCommentsController.updateOrderComments

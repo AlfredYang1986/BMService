@@ -43,8 +43,10 @@ object OrderController extends Controller {
 			MessageRoutes(msg_accomplishOrder(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})  
 
-	def queryApplyOrders = queryOrders2
-	def queryOwnerOrders = queryOrders2
+	def queryApplyOrders = queryOrders
+	def queryOwnerOrders = queryOrders
+	def queryApplyOrders2 = queryOrders2
+	def queryOwnerOrders2 = queryOrders2
 		
 	def queryOrders2 = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.lst_result
