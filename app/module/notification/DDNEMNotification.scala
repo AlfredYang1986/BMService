@@ -31,7 +31,7 @@ object DDNEMNotification {
 			      (HTTP(em_host + org_name + "/" + app_name + "/token").header("Accept" -> "application/json", "Content-Type" -> "application/json").
 				        post("grant_type" -> toJson("client_credentials"), "client_id" -> toJson(client_id), "client_secret" -> toJson(client_secret)))
   	 
-				def JS2DBObject(data : JsValue) : Option[MongoDBObject] = {
+		def JS2DBObject(data : JsValue) : Option[MongoDBObject] = {
   	        try {
       	        val builder = MongoDBObject.newBuilder
   	            builder += "access_token" -> (data \ "access_token").asOpt[String].get
@@ -64,7 +64,7 @@ object DDNEMNotification {
   	         if (isTokenValidate(head)) head.getAs[String]("access_token").get
   	         else {
     	          val d = getAuthTokenFromServer
-    	          _data_connection.getCollection("em_token") += JS2DBObject(d).get
+    	          _data_connection.getCollection("em_token").update(DBObject("indentify" -> "em"), JS2DBObject(d).get)
     	          (d \ "access_token").asOpt[String].get
   	         }
   	      }
