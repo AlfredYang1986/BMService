@@ -126,6 +126,16 @@ class AMongoDBLINQ extends IDatabaseContext {
 		}
 		nc
 	}
+	
+	def selectSkipTopLoc[U](skip : Int)(take : Int)(cr : (MongoDBObject) => U) : IQueryable[U] = {
+		val mongoColl = openConnection
+		val ct = mongoColl.find(w).skip(skip).limit(take)
+		var nc = new Linq_List[U]
+		for (i <- ct) {
+			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
+	}
 
 	def count : Int = openConnection.count(w)
 }

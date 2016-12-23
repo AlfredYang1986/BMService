@@ -182,7 +182,7 @@ POST	/v2/kidnap/detail							controllers.v2.KidnapController.queryServiceDetail2
 POST	/v2/order/push								controllers.v2.OrderController.pushOrder
 POST	/v2/order/pop								controllers.v2.OrderController.popOrder
 POST	/v2/order/query								controllers.v2.OrderController.queryOrders
-POST	/v2.1/order/query								controllers.v2.OrderController.queryOrders2
+POST	/v2.1/order/query							controllers.v2.OrderController.queryOrders2
 POST	/v2/order/accept							controllers.v2.OrderController.acceptOrder
 POST	/v2/order/accomplish						controllers.v2.OrderController.accomplishOrder
 POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
