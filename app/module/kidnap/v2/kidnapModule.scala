@@ -415,30 +415,20 @@ object kidnapModule extends ModuleTrait {
   	def searchKidnapService(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
   		
   		def basicConditions = DBObject("status" -> kidnapServiceStatus.online.t)
-  		
-//  		implicit val merge_or : (DBObject, Option[DBObject]) => Option[DBObject] = (a, b) => b match {
-//  			case None => Some(a)
-//  			case Some(x) => Some($or(a, x))
-//  		}
-  	
+ 	
   		var sortByLoc = false
-  		
-  		implicit val merge_and : (DBObject, Option[DBObject]) => Option[DBObject] = (a, b) => b match {
-  			case None => Some(a)
-  			case Some(x) => Some($and(a, x))
-  		}
-  	
-  		def conditionAcc(key : String, data : JsValue, cur : Option[DBObject])
+ 	
+  		def conditionAcc(key : String, data : JsValue)
   						(f : JsValue => Option[AnyRef])(c : AnyRef => DBObject)
-  						(implicit m : (DBObject, Option[DBObject]) => Option[DBObject]) 
   						: Option[DBObject] = f(data \ key) match {
-								  				case None => cur
-								  				case Some(x) => m(c(x), cur)	
+								  				case None => None
+								  				case Some(x) => Some(c(x))	
   											 }
 
-  		def cansCatConditions(cur : Option[DBObject]) = conditionAcc("cans_cat", data, cur)(x => x.asOpt[Int].asInstanceOf[Option[Number]])(y => DBObject("cans_cat" -> y))
-  		def dateConditions(cur : Option[DBObject]) = conditionAcc("date" , data, cur)(x => x.asOpt[Long].asInstanceOf[Option[Number]])(y => ("date" $lte y.asInstanceOf[Number].longValue))
-  		def locationConditions(cur : Option[DBObject]) = conditionAcc("location" , data, cur)(x => x.asOpt[JsValue]) { y => 
+  		def serviceCatConditions = conditionAcc("service_cat", data)(x => x.asOpt[Int].asInstanceOf[Option[Number]])(y => DBObject("service_cat" -> y))
+  		def cansCatConditions = conditionAcc("cans_cat", data)(x => x.asOpt[Int].asInstanceOf[Option[Number]])(y => DBObject("cans_cat" -> y))
+  		def dateConditions = conditionAcc("date" , data)(x => x.asOpt[Long].asInstanceOf[Option[Number]])(y => ("date" $lte y.asInstanceOf[Number].longValue))
+  		def locationConditions = conditionAcc("location" , data)(x => x.asOpt[JsValue]) { y => 
   			sortByLoc = true
   			val tmp = y.asInstanceOf[JsValue]
   			val lat = (tmp \ "latitude").asOpt[Double].map (x => x).getOrElse(throw new Exception("wrong input"))
@@ -446,20 +436,15 @@ object kidnapModule extends ModuleTrait {
   			"location" $near (lat, log)
   		}
 
-  		val conditions = locationConditions(dateConditions(cansCatConditions(Some(basicConditions))))
+  		val conditions = $and((serviceCatConditions :: dateConditions :: cansCatConditions :: locationConditions :: Some(basicConditions) :: Nil) filterNot (_ == None) map (_.get))
   		
   	    try {
   	        val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(20.intValue)
   	        val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0.intValue)
   	        val date = (data \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
   	   
-  	        val c = conditions match {
-  	        	case None => ("status" -> kidnapServiceStatus.online.t, "date" $lte date)
-  	        	case Some(x) => x
-  	        }
-  	        
-			val result = if (sortByLoc) (from db() in "kidnap" where c).selectSkipTopLoc(skip)(take)(DB2JsValue(_)).toList
-						 else (from db() in "kidnap" where c).selectSkipTop(skip)(take)("date")(DB2JsValue(_)).toList
+			val result = if (sortByLoc) (from db() in "kidnap" where conditions).selectSkipTopLoc(skip)(take)(DB2JsValue(_)).toList
+						 else (from db() in "kidnap" where conditions).selectSkipTop(skip)(take)("date")(DB2JsValue(_)).toList
       	           
       	    (Some(Map("result" -> toJson(result))), None)
   	      
