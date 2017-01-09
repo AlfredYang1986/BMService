@@ -29,6 +29,7 @@ object ErrorCode {
 		new ErrorNode("wrong input", -18, "arguments error for server invoke"),
   		new ErrorNode("em register error", -19, "em register error"),
   		new ErrorNode("can not parse result", -20, "can not parse result"),
+		new ErrorNode("log struct error", -21, "log struct error"),
   		
   		new ErrorNode("unknown error", -999, "unknown error")
   	)

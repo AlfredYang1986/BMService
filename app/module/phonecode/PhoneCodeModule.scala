@@ -28,8 +28,8 @@ object PhoneCodeModule extends ModuleTrait {
 			/**
 			 * generate code
 			 */
-//			val code = 1111 // fake one
-			val code = scala.util.Random.nextInt(9000) + 1000
+			val code = 1111 // fake one
+//			val code = scala.util.Random.nextInt(9000) + 1000
 	
 			/**
 			 * generate a reg token
@@ -49,8 +49,8 @@ object PhoneCodeModule extends ModuleTrait {
 			/**
 			 * send code to the phone
 			 */	
-			import play.api.Play.current
-			smsModule().sendSMS(phoneNo, code.toString)
+//			import play.api.Play.current
+//			smsModule().sendSMS(phoneNo, code.toString)
 			
 			/**
 			 * is register 
