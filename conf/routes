@@ -3,159 +3,10 @@
 # ~~~~
 
 # Home page
-GET     /                           				controllers.loginController.index
-
-# login module
-POST	/login/authWithPhone						controllers.loginController.authWithPhone
-POST	/login/authConfirm							controllers.loginController.authConfirm
-POST	/login/authWithThird						controllers.loginController.authWithThird
-POST	/login/connectWithThird						controllers.loginController.connectWithThird
-POST	/login/authUpdateDetails					controllers.loginController.authUpdateDetails
-POST	/login/authCreateUserWithPhone 				controllers.loginController.authCreateUserWithPhone
-POST	/login/authWithPwd							controllers.loginController.authWithPwd
-POST	/login/signout								controllers.loginController.logout
-POST	/login/offline								controllers.loginController.offline
-POST	/login/online								controllers.loginController.online
-POST	/login/userLstInSystem						controllers.loginController.userLstInSystem
-POST	/login/pingtest 							controllers.loginController.pingTest
-POST	/login/authCreateTmpUserWithPhone 			controllers.loginController.authCreateTmpUserWithPhone
-
-# phone validate
-POST	/auth/code/require							controllers.loginController.requirePhoneCheckCode				
-POST	/auth/code/check							controllers.loginController.phoneCheckCode
-
-POST	/auth/realname/push							controllers.loginController.pushRealName
-POST	/auth/realname/approve						controllers.loginController.approveRealName
-POST	/auth/realname/reject						controllers.loginController.rejectRealName
-
-# post module
-POST	/post/postContent							controllers.postController.postContent
-POST	/post/uploadFile							controllers.postController.uploadFile
-POST	/post/postComment							controllers.postController.postComment
-POST	/post/postLike								controllers.postController.postLike
-POST	/post/postPush								controllers.postController.postPush
-POST	/post/postUnlike							controllers.postController.postUnlike
-POST	/post/postUnpush					 		controllers.postController.postUnpush
-
-# query module
-GET		/query/downloadFile/*name					controllers.queryController.downloadFile(name)
-POST	/query/queryHomeContent						controllers.queryController.queryHomeContent
-POST	/query/queryCollections						controllers.queryController.queryCollections
-POST	/query/queryComments						controllers.queryController.queryComments
-POST	/query/queryLike							controllers.queryController.queryLikes
-POST	/query/queryPush				 			controllers.queryController.queryPush
-
-# profile module
-POST	/profile/updateProfile 						controllers.profileController.updateProfile
-POST	/profile/userProfile						controllers.profileController.userProfile
-POST	/profile/multipleUserProfile				controllers.profileController.multipleUserProfile
-POST	/profile/recommendUserProfile				controllers.profileController.recommendUserProfile
-
-POST	/profile/queryDetailDescription				controllers.profileController.queryDetailDescription
-POST	/profile/createAndUpdataDetailDescription 	controllers.profileController.createAndUpdateDettailDescription
-
-# group module
-POST	/group/queryGroups							controllers.groupController.queryGroups
-POST	/group/createSubGroup						controllers.groupController.createSubGroup
-
-POST	/group/createChatGroup						controllers.groupController.createChatGroup
-POST	/group/updateChatGroup						controllers.groupController.updateChatGroup
-POST	/group/joinChatGroup						controllers.groupController.joinChatGroup
-POST	/group/leaveChatGroup						controllers.groupController.leaveChatGroup
-POST	/group/dismissChatGroup						controllers.groupController.dissmissChatGroup
-POST	/group/queryChatGroup						controllers.groupController.queryChatGroup
-
-# message module
-POST 	/messages/sendMessage						controllers.messageController.sendMessage
-POST 	/messages/queryMessages						controllers.messageController.queryMessages
-POST 	/messages/queryMessagesWithFriend			controllers.messageController.queryMessagesWithFriend
-
-# message websocket 
-GET		/messages/registerDevice/:user_id			controllers.MessageNotificationController.registerDevice(user_id)
-
-# friends module
-POST 	/messages/addOneFriend						controllers.messageController.addOneFriend
-POST 	/messages/deleteOneFriend					controllers.messageController.deleteOneFriend
-POST 	/messages/queryAllFriend					controllers.messageController.queryAllFriend
-
-# tags module
-POST	/tags/queryContentsWithTag					controllers.tagController.queryContentsWithTag
-POST	/tags/queryRecommandTags					controllers.tagController.queryRecommandTags
-POST	/tags/queryTagPreViewWithTagName			controllers.tagController.queryTagPreViewWithTagName
-POST	/tags/queryFoundSearchTagData				controllers.tagController.queryFoundSearchTagData
-POST	/tags/queryTagSearchWithInput				controllers.tagController.queryTagSearchWithInput
-
-# user search module
-POST	/users/queryRecommandUsers					controllers.userSearchController.queryRecommandUsers
-POST	/users/queryUsersWithRoleTag				controllers.userSearchController.queryUsersWithRoleTag
-POST	/users/queryUsersPosts						controllers.userSearchController.queryUsersPosts
-POST	/users/queryUsersWithScreenName				controllers.userSearchController.queryUsersWithScreenName
-POST	/users/queryRecommandUsersWithRoleTag		controllers.userSearchController.queryRecommandUsersWithRoleTag
-POST	/users/queryUserScreenWithId				controllers.userSearchController.queryUserScreenWithId
-
-# notification module
-POST	/devices/registerUserDevice					controllers.apnsNotificationController.registerUserDevices
-
-# relationship module
-POST	/connections/follow							controllers.relationshipController.follow
-POST	/connections/unfollow						controllers.relationshipController.unfollow
-POST	/connections/queryFollowingUsers			controllers.relationshipController.queryFollowingUsers
-POST	/connections/queryFollowedUsers				controllers.relationshipController.queryFollowedUsers
-POST	/connections/queryMutureFollowingUsers		controllers.relationshipController.queryMutureFollowingUsers
-POST	/connections/queryRelationsBetweenUsers 	controllers.relationshipController.queryRelationsBetweenUsers
-POST	/connections/sentSMSInvitation				controllers.relationshipController.askPhoneAddressBookFriendsJoin
-
-# role tage module
-POST	/roletags/queryAllRoleTags					controllers.roleTagController.queryAllRoleTags	
-POST	/roletags/addRoleTag						controllers.roleTagController.addRoleTag
-POST	/roletags/queryRecommandRoleTags			controllers.roleTagController.queryRecommandRoleTags
-POST	/roletags/queryRoleTagPreViewWithRoleTag	controllers.roleTagController.queryRoleTagPreViewWithRoleTag
-
-# schools module
-POST	/schools/queryAllRoleTags					controllers.schoolsController.queryAllSchools
-POST	/schools/addRoleTag							controllers.schoolsController.addOneSchool
-
-# email module
-POST	/email/sendPrivacy							controllers.emailController.sendEmail
-
-# kidnap service module
-POST	/kidnap/push								controllers.kidnapController.pushKidnapService
-POST	/kidnap/pop 								controllers.kidnapController.popKidnapService
-POST	/kidnap/publish								controllers.kidnapController.publishKidnapService
-POST	/kidnap/revert								controllers.kidnapController.revertKidnapService
-POST	/kidnap/update								controllers.kidnapController.updateKidnapService
-
-POST	/kidnap/search								controllers.kidnapController.searchKidnapService
-POST	/kidnap/mine								controllers.kidnapController.mineKidnapServiceDetail
-POST	/kidnap/detail								controllers.kidnapController.queryKidnapServiceDetail
-
-POST	/kidnap/collect								controllers.kidnapController.collecteKidnapService
-POST	/kidnap/uncollect							controllers.kidnapController.unCollecteKidnapService
-POST	/kidnap/lst/collect							controllers.kidnapController.queryCollectKidnapService
-
-GET		/kidnap/reset/date							controllers.kidnapController.resetDate
-
-# order module
-POST	/order/push									controllers.orderController.pushOrder
-POST	/order/pay 									controllers.orderController.payOrder
-POST	/order/pop									controllers.orderController.popOrder
-POST	/order/update								controllers.orderController.updateOrder
-POST	/order/query								controllers.orderController.queryOrder
-POST	/order/query/own							controllers.orderController.queryOwnOrder
-POST	/order/query/apply							controllers.orderController.queryApplyOrder
-POST	/order/reject								controllers.orderController.rejectOrder
-POST	/order/accept								controllers.orderController.acceptOrder
-POST	/order/accomplish							controllers.orderController.accomplishOrder
-
-POST	/order/comments/push						controllers.orderController.pushComments
-POST	/order/comments/update						controllers.orderController.updateComments
-POST	/order/comments/pop							controllers.orderController.popComments
-POST	/order/comments/query						controllers.orderController.queryComments
-POST	/order/comments/overall						controllers.orderController.queryOverAllComments
 
 # expose abuse content and users
-POST 	/expose/user								controllers.exposeController.expostUser
-POST 	/expose/content								controllers.exposeController.expostContent
+POST 	/expose/user								controllers.v2.exposeController.expostUser
+POST 	/expose/content								controllers.v2.exposeController.expostContent
 
 # refactor, will replace old interface
 POST	/v2/auth/code								controllers.v2.AuthController.authWithPhoneCode
@@ -202,9 +53,6 @@ POST	/v2/kidnap/collect/lst						controllers.v2.KidnapCollectionController.userC
 
 POST	/alipay/callback							controllers.v2.AlipayController.alipaycallback
 POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
-
-# web pay controller
-# POST	/webpay/wechat/prepayid						controllers.webpayController.wechatPrepayID
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

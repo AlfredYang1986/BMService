@@ -1,4 +1,4 @@
-package controllers
+package controllers.v2
 
 import play.api.mvc._
 import module.expose.ExposeModule
