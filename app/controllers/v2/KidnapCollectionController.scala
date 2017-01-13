@@ -5,7 +5,6 @@ import play.api.mvc._
 import controllers.common.requestArgsQuery._
 import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
-import module.test.testMessages._
 import module.kidnap.v2.kidnapCollectionMessages._
 import pattern.ParallelMessage
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto

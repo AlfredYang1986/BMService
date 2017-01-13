@@ -10,7 +10,6 @@ import module.kidnap.v2.kidnapMessages.msg_ServiceForOrders
 import module.kidnap.v2.kidnapCollectionMessages.msg_IsUserCollectLst
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto
 import module.profile.v2.ProfileMessages.msg_UserLstNamePhoto
-import module.test.testMessages._
 import pattern.LogMessage.msg_log
 import pattern.ParallelMessage
 import play.api.libs.json.Json.toJson
