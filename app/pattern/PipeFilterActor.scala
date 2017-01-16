@@ -25,6 +25,8 @@ import module.profile.v2.ProfileModule
 import module.profile.v2.msg_ProfileCommand
 import module.order.v2.msg_OrderCommentsCommand
 import module.order.v2.orderCommentsModule
+import module.realname.msg_RealNameCommand
+import module.realname.RealNameModule
 
 import play.api.Application
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -68,6 +70,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 		case cmd : msg_OrderCommentsCommand => dispatchImpl(cmd, orderCommentsModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
         case cmd : msg_LogCommand => dispatchImpl(cmd, LogModule)
+        case cmd : msg_RealNameCommand => dispatchImpl(cmd, RealNameModule)
 		case cmd : ParallelMessage => {
 		    cancelActor
 			next = context.actorOf(ScatterGatherActor.prop(originSender, msr), "scat")
