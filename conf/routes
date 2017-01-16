@@ -40,6 +40,8 @@ POST	/v2/order/query/apply						controllers.v2.OrderController.queryApplyOrders
 POST	/v2.1/order/query/apply						controllers.v2.OrderController.queryApplyOrders2
 POST	/v2/order/query/owner						controllers.v2.OrderController.queryOwnerOrders
 POST	/v2.1/order/query/owner						controllers.v2.OrderController.queryOwnerOrders2
+POST    /v2/order/update                            controllers.v2.OrderController.updateOrder
+POST    /v2/order/pay                               controllers.v2.OrderController.payOrder
 
 POST	/v2/order/comment/push						controllers.v2.OrderCommentsController.pushOrderComments
 POST	/v2/order/comment/update					controllers.v2.OrderCommentsController.updateOrderComments
@@ -53,6 +55,9 @@ POST	/v2/kidnap/collect/lst						controllers.v2.KidnapCollectionController.userC
 
 POST	/alipay/callback							controllers.v2.AlipayController.alipaycallback
 POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
+
+POST    /post/uploadFile                            controllers.v2.FopController.uploadFile
+GET     /query/downloadFile/:name                   controllers.v2.FopController.downloadFile(name)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

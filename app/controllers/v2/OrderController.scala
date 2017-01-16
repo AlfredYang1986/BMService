@@ -50,9 +50,21 @@ object OrderController extends Controller {
             import pattern.LogMessage.common_log
             MessageRoutes(msg_log(toJson(Map("method" -> toJson("accomplish order"))), jv)
                 :: msg_accomplishOrder(jv) :: msg_CommonResultMessage() :: Nil, None)
-		})  
+		})
+	def updateOrder = Action (request => requestArgsV2(request) { jv =>
+        import pattern.ResultMessage.common_result
+        import pattern.LogMessage.common_log
+        MessageRoutes(msg_log(toJson(Map("method" -> toJson("update order"))), jv)
+            :: msg_updateOrder(jv) :: msg_CommonResultMessage() :: Nil, None)
+    })
+    def payOrder = Action (request => requestArgsV2(request) { jv =>
+        import pattern.ResultMessage.common_result
+        import pattern.LogMessage.common_log
+        MessageRoutes(msg_log(toJson(Map("method" -> toJson("pay order"))), jv)
+            :: msg_payOrder(jv) :: msg_CommonResultMessage() :: Nil, None)
+    })
 
-	def queryApplyOrders = queryOrders
+    def queryApplyOrders = queryOrders
 	def queryOwnerOrders = queryOrders
 	def queryApplyOrders2 = queryOrders2
 	def queryOwnerOrders2 = queryOrders2
