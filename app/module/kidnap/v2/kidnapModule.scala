@@ -19,7 +19,6 @@ import scala.util.Random
 import java.util.Date
 
 import module.sercurity.Sercurity
-import module.profile.ProfileModule
 
 import dongdamessages.MessageDefines
 import pattern.ModuleTrait
