@@ -13,6 +13,10 @@ POST	/v2/auth/code								controllers.v2.AuthController.authWithPhoneCode
 POST	/v2/auth/third								controllers.v2.AuthController.authWithThird
 POST	/v2/auth/signout							controllers.v2.AuthController.authSignOut
 
+POST	/auth/realname/push							controllers.v2.RealNameController.pushRealName
+POST	/auth/realname/approve						controllers.v2.RealNameController.approveRealName
+POST	/auth/realname/reject						controllers.v2.RealNameController.rejectRealName
+
 POST	/v2/phone/code/send							controllers.v2.PhoneSMSController.sendSMSCode
 POST	/v2/phone/code/check						controllers.v2.PhoneSMSController.checkSMSCode
 
