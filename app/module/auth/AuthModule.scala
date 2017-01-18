@@ -23,8 +23,23 @@ object AuthModule extends ModuleTrait {
 		case msg_AuthThird(data) => authWithThird(data)
 		case msg_AuthSignOut(data) => authSignOut(data)
 		case msg_AuthQuery(data) => authDataQuery(data)(pr)
+		case msg_AuthCheck(data) => authCheck(data)
 		case _ => ???
 	}
+
+    def authCheck(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+        try {
+            val user_id = (data \ "user_id").asOpt[String].get
+
+            (from db() in "users" where ("user_id" -> user_id) select (x => x)).toList match {
+                case Nil => throw new Exception("unknown user")
+                case head :: Nil => (Some(Map("result" -> toJson("ok"))), None)
+            }
+
+        } catch {
+            case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+        }
+    }
 	
 	def authWithPhoneCode(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
 		try {

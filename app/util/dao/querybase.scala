@@ -7,11 +7,16 @@ package util.dao
 
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
+import com.mongodb.MongoCredential
 
 object _data_connection {
 	def conn_name : String = "baby"
 
-	val _conn = MongoConnection()
+	val addr = new com.mongodb.casbah.Imports.ServerAddress("localhost", 2017)
+	val credentialsList = MongoCredential.createPlainCredential("dongdamaster", conn_name, "dongda@master".toCharArray)
+//    val _conn = MongoClient(addr, List(credentialsList))
+	val _conn = MongoClient()
+
 	var _conntion : Map[String, MongoCollection] = Map.empty
 	
 	def getCollection(coll_name : String) : MongoCollection = {

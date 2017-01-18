@@ -16,6 +16,7 @@ import module.kidnap.v2.kidnapCollectionMessages.msg_IsUserCollectLst
 import module.kidnap.v2.kidnapCollectionMessages.msg_IsUserCollect
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto
 import module.profile.v2.ProfileMessages.msg_OneOwnerNamePhoto
+import module.auth.AuthMessage.msg_AuthCheck
 import pattern.LogMessage._
 import play.api.libs.json.Json.toJson
 
@@ -24,7 +25,7 @@ object KidnapController extends Controller {
 			import pattern.ResultMessage.common_result
 			import pattern.LogMessage.common_log
 			MessageRoutes(msg_log(toJson(Map("method" -> toJson("push services"))), jv)
-                :: msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv)
+                :: msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv) :: msg_AuthCheck(jv)
                 :: msg_ChangeToServiceProvider(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def popService = Action (request => requestArgsV2(request) { jv => 
@@ -37,7 +38,7 @@ object KidnapController extends Controller {
 			import pattern.ResultMessage.common_result
             import pattern.LogMessage.common_log
 			MessageRoutes(msg_log(toJson(Map("method" -> toJson("update service"))), jv)
-                :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_PublishService(jv)
+                :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_PublishService(jv) :: msg_AuthCheck(jv)
                 :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def searchServices  = Action (request => requestArgsV2(request) { jv => 
