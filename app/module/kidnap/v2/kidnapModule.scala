@@ -72,6 +72,9 @@ object kidnapModule extends ModuleTrait {
   	
 //  	def pushKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : JsValue = {
   	def pushKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+
+        println(data)
+        println(origin)
   	    try {
       	    val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("unknown user"))
   	        val service_id = Sercurity.md5Hash(owner_id + Sercurity.getTimeSpanWithMillSeconds)
@@ -184,10 +187,7 @@ object kidnapModule extends ModuleTrait {
   	        service_builder += "reserve1" -> (data \ "reserve1").asOpt[String].map (x => x).getOrElse("")
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
-  	        
-//  	        ProfileModule.updateUserProfile(toJson(Map("user_id" -> toJson(owner_id), "is_service_provider" -> toJson(1))))
-  	        
-//  	        toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
+
   	        (Some(Map("service_id" -> toJson(service_id), "user_id" -> toJson(owner_id))), None)
   	      
   	    } catch {
@@ -308,7 +308,9 @@ object kidnapModule extends ModuleTrait {
   	}
   	
   	def publishKidnapService(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-  	
+        println("publish")
+        println(data)
+        println(pr)
   		try {
   			val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse { pr match {
 	  			case None => throw new Exception("wrong input")

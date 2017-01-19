@@ -24,8 +24,8 @@ object KidnapController extends Controller {
 	def pushService = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
 			import pattern.LogMessage.common_log
-			MessageRoutes(msg_log(toJson(Map("method" -> toJson("push services"))), jv)
-                :: msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv) :: msg_AuthCheck(jv)
+			MessageRoutes(msg_log(toJson(Map("method" -> toJson("push services"))), jv) //:: msg_AuthCheck(jv)
+                :: msg_PushService(jv) :: msg_PublishService(jv) :: msg_UpdateProfileWithoutResult(jv)
                 :: msg_ChangeToServiceProvider(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def popService = Action (request => requestArgsV2(request) { jv => 
@@ -37,8 +37,8 @@ object KidnapController extends Controller {
 	def updateService = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
             import pattern.LogMessage.common_log
-			MessageRoutes(msg_log(toJson(Map("method" -> toJson("update service"))), jv)
-                :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_PublishService(jv) :: msg_AuthCheck(jv)
+			MessageRoutes(msg_log(toJson(Map("method" -> toJson("update service"))), jv) //:: msg_AuthCheck(jv)
+                :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_PublishService(jv)
                 :: msg_CommonResultMessage() :: Nil, None)
 		})
 	def searchServices  = Action (request => requestArgsV2(request) { jv => 

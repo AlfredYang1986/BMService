@@ -204,7 +204,7 @@ object ProfileModule extends ModuleTrait {
 				case None => throw new Exception("wrong input")
 				case Some(m) => m.get("user_id").map (x => x.asOpt[String].map (y => y).getOrElse(throw new Exception("wrong input"))).getOrElse(throw new Exception("wrong input"))
 			})
-			
+
 			(from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
 				case head :: Nil => {
 					if (head.getAs[Number]("is_service_provider").get.intValue == 0) {
