@@ -308,9 +308,6 @@ object kidnapModule extends ModuleTrait {
   	}
   	
   	def publishKidnapService(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-        println("publish")
-        println(data)
-        println(pr)
   		try {
   			val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse { pr match {
 	  			case None => throw new Exception("wrong input")

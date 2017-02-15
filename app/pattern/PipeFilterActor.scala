@@ -49,6 +49,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 				cancelActor					
 			}
 			case (Some(r), _) => {
+//				println(r)
 				rst = Some(r) 
 			}
 			case _ => println("never go here")

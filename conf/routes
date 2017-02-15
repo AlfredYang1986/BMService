@@ -63,5 +63,10 @@ POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
 POST    /post/uploadFile                            controllers.v2.FopController.uploadFile
 GET     /query/downloadFile/:name                   controllers.v2.FopController.downloadFile(name)
 
+POST    /v3/tm/push                                 controllers.v3.TimemanagerController.pushServiceTimeManagement
+POST    /v3/tm/query                                controllers.v3.TimemanagerController.queryServiceTimeManagement
+POST    /v3/tm/pop                                  controllers.v3.TimemanagerController.popServiceTimeManagement
+POST    /v3/tm/update                               controllers.v3.TimemanagerController.updateServiceTimeManagement
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
