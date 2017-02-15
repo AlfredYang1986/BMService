@@ -34,6 +34,17 @@ POST	/v2/kidnap/update							controllers.v2.KidnapController.updateService
 
 POST	/v2/kidnap/detail							controllers.v2.KidnapController.queryServiceDetail2
 
+POST	/v3/kidnap/mine								controllers.v3.KidnapController.queryMineServices
+POST	/v3/kidnap/search							controllers.v3.KidnapController.searchServices
+POST	/v3.1/kidnap/search							controllers.v3.KidnapController.searchServices2
+POST	/v3/kidnap/query							controllers.v3.KidnapController.queryMultiServices
+
+POST	/v3/kidnap/push								controllers.v3.KidnapController.pushService
+POST	/v3/kidnap/pop								controllers.v3.KidnapController.popService
+POST	/v3/kidnap/update							controllers.v3.KidnapController.updateService
+
+POST	/v3/kidnap/detail							controllers.v3.KidnapController.queryServiceDetail2
+
 POST	/v2/order/push								controllers.v2.OrderController.pushOrder
 POST	/v2/order/pop								controllers.v2.OrderController.popOrder
 POST	/v2/order/query								controllers.v2.OrderController.queryOrders
