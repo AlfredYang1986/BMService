@@ -72,9 +72,6 @@ object kidnapModule extends ModuleTrait {
   	
 //  	def pushKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : JsValue = {
   	def pushKidnapServiceImpl(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-
-        println(data)
-        println(origin)
   	    try {
       	    val owner_id = (data \ "owner_id").asOpt[String].map (x => x).getOrElse(throw new Exception("unknown user"))
   	        val service_id = Sercurity.md5Hash(owner_id + Sercurity.getTimeSpanWithMillSeconds)

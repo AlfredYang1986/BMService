@@ -48,11 +48,11 @@ class kidnapActor extends Actor {
 
 case class kidnapProp(val kidnap : ActorRef) {
   	implicit val timeout = Timeout(2 second)
-  	def push(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v2.push(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
-  	def pop(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v2.pop(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)  
-  	def update(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v2.update(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)  
-  	def publish(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v2.publish(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)  
-  	def revert(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v2.revert(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)  
+  	def push(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v3.push(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
+  	def pop(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v3.pop(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
+  	def update(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v3.update(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
+  	def publish(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v3.publish(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
+  	def revert(data : JsValue, origin : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = Await.result((kidnap ? module.kidnap.v3.revert(data, origin)).mapTo[(Option[Map[String, JsValue]], Option[JsValue])], timeout.duration)
 }
 
 class kidnapNoneProp(kidnap : ActorRef) extends kidnapProp(kidnap) {

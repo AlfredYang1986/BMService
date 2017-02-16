@@ -13,8 +13,6 @@ import module.auth.AuthModule
 import module.auth.msg_AuthCommand
 import module.emxmpp.EMModule
 import module.emxmpp.msg_EMMessageCommand
-import module.kidnap.v2.kidnapModule
-import module.kidnap.v2.msg_KidnapServiceCommand
 import module.kidnap.v2.kidnapCollectionModule
 import module.kidnap.v2.msg_KidnapServiceCollectionCommand
 import module.order.v2.msg_OrderCommand
@@ -27,6 +25,14 @@ import module.order.v2.msg_OrderCommentsCommand
 import module.order.v2.orderCommentsModule
 import module.realname.msg_RealNameCommand
 import module.realname.RealNameModule
+import module.timemanager.v3.msg_TMCommand
+import module.timemanager.v3.TMModule
+
+
+import module.kidnap.v2.kidnapModule
+import module.kidnap.v2.msg_KidnapServiceCommand
+import module.kidnap.v3.kidnapModule
+import module.kidnap.v3.msg_KidnapServiceCommand
 
 import play.api.Application
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -49,7 +55,7 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 				cancelActor					
 			}
 			case (Some(r), _) => {
-//				println(r)
+				println(r)
 				rst = Some(r) 
 			}
 			case _ => println("never go here")
@@ -65,13 +71,15 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
 		case cmd : msg_PhoneCodeCommand => dispatchImpl(cmd, PhoneCodeModule)
 		case cmd : msg_ProfileCommand => dispatchImpl(cmd, ProfileModule)
 		case cmd : msg_EMMessageCommand => dispatchImpl(cmd, EMModule)  
-		case cmd : msg_KidnapServiceCommand => dispatchImpl(cmd, kidnapModule)
+		case cmd : module.kidnap.v2.msg_KidnapServiceCommand => dispatchImpl(cmd, module.kidnap.v2.kidnapModule)
+        case cmd : module.kidnap.v3.msg_KidnapServiceCommand => dispatchImpl(cmd, module.kidnap.v3.kidnapModule)
 		case cmd : msg_KidnapServiceCollectionCommand => dispatchImpl(cmd, kidnapCollectionModule)
 		case cmd : msg_OrderCommand => dispatchImpl(cmd, orderModule)
 		case cmd : msg_OrderCommentsCommand => dispatchImpl(cmd, orderCommentsModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
         case cmd : msg_LogCommand => dispatchImpl(cmd, LogModule)
         case cmd : msg_RealNameCommand => dispatchImpl(cmd, RealNameModule)
+        case cmd : msg_TMCommand => dispatchImpl(cmd, TMModule)
 		case cmd : ParallelMessage => {
 		    cancelActor
 			next = context.actorOf(ScatterGatherActor.prop(originSender, msr), "scat")

@@ -7,19 +7,21 @@ import controllers.common.requestArgsQuery._
 
 import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
-import module.kidnap.v2.kidnapMessages._
 import module.profile.v2.ProfileMessages.{ msg_UpdateProfileWithoutResult, msg_ChangeToServiceProvider }
 import pattern.ParallelMessage
 import module.order.v2.orderCommentsMessages.msg_OverallOrderLst
 import module.order.v2.orderCommentsMessages.msg_OrdersOverallComments
-import module.kidnap.v3.kidnapCollectionMessages.msg_IsUserCollectLst
-import module.kidnap.v3.kidnapCollectionMessages.msg_IsUserCollect
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto
 import module.profile.v2.ProfileMessages.msg_OneOwnerNamePhoto
 import module.auth.AuthMessage.msg_AuthCheck
 import pattern.LogMessage._
 import play.api.libs.json.Json.toJson
+
+import module.kidnap.v3.kidnapCollectionMessages.msg_IsUserCollectLst
+import module.kidnap.v3.kidnapCollectionMessages.msg_IsUserCollect
+
 import module.timemanager.v3.TMMessages._
+import module.kidnap.v3.kidnapMessages._
 
 object KidnapController extends Controller {
     def pushService = Action (request => requestArgsV2(request) { jv =>
@@ -39,7 +41,7 @@ object KidnapController extends Controller {
         import pattern.ResultMessage.common_result
         import pattern.LogMessage.common_log
         MessageRoutes(msg_log(toJson(Map("method" -> toJson("update service"))), jv) //:: msg_AuthCheck(jv)
-            :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_PublishService(jv)
+            :: msg_RevertService(jv) :: msg_UpdateService(jv) :: msg_updateTMCommand(jv) :: msg_PublishService(jv)
             :: msg_CommonResultMessage() :: Nil, None)
     })
     def searchServices  = Action (request => requestArgsV2(request) { jv =>

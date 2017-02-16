@@ -128,7 +128,7 @@ object TMModule extends ModuleTrait {
     def Js2DBObject(data : JsValue, service_id : String) : MongoDBObject = {
         val builder = MongoDBObject.newBuilder
 
-        builder += "service_id" -> (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+        builder += "service_id" -> service_id
 
         val tm_builder = MongoDBList.newBuilder
         (data \ "tms").asOpt[List[JsValue]].map { arr => arr foreach { one =>
