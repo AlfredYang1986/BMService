@@ -159,7 +159,7 @@ object orderCommentsModule extends ModuleTrait {
 	    				toJson((iter.as[JsObject].value.toMap + ("points" -> toJson(tmp._2))))
 	    			}.getOrElse(iter)
 	    		}
-	    		
+
 	    		(Some(Map("result" -> toJson(fr))), None)
     		}
 

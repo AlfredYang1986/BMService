@@ -1,7 +1,6 @@
 package module.timemanager.v3
 
-import play.api.libs.json.JsValue
-import play.api.libs.json.JsArray
+import play.api.libs.json.{JsArray, JsObject, JsValue}
 import play.api.libs.json.Json.toJson
 import com.mongodb.casbah.Imports._
 import module.sercurity.Sercurity
@@ -33,6 +32,7 @@ object TMModule extends ModuleTrait {
         case msg_popTMCommand(data) => popServiceTM(data)(pr)
         case msg_queryTMCommand(data) => queryServiceTM(data)(pr)
         case msg_updateTMCommand(data) => updateServiceTM(data)(pr)
+        case msg_queryMultipleTMCommand(data) => queryMultipleServiceTM(data)(pr)
         case _ => ???
     }
 
@@ -92,6 +92,31 @@ object TMModule extends ModuleTrait {
                 }
                 case _ => throw new Exception("service not existing")
             }
+
+        } catch {
+            case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+        }
+    }
+
+    def queryMultipleServiceTM(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+        try {
+            val service_lst = pr match {
+                case None => throw new Exception("wrong input")
+                case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
+            }
+
+            val conditions = $or(service_lst map (x => DBObject("service_id" ->(x \ "service_id").asOpt[String].get)))
+            val tms = (from db() in "service_time" where conditions select(x => DB2JsValue(x) + ("service_id" -> toJson(x.getAs[String]("service_id").get)))).toList
+
+            val reVal = service_lst map { x =>
+                import pattern.ParallelMessage.f
+                tms.find(p => p.get("service_id").get.asOpt[String].get == (x \ "service_id").asOpt[String].get) match {
+                    case None => x
+                    case Some(y) => toJson(f(x.as[JsObject].value.toMap :: y :: Nil))
+                }
+            }
+
+            (Some(Map("result" -> toJson(reVal))), None)
 
         } catch {
             case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))

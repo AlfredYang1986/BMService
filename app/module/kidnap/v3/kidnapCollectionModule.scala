@@ -134,6 +134,7 @@ object kidnapCollectionModule extends ModuleTrait {
     			case None => throw new Exception("wrong input")
     			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
     		}
+
     		val service_lst = (lst map (x => (x \ "service_id").asOpt[String].get))
     	
     		val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
@@ -144,7 +145,7 @@ object kidnapCollectionModule extends ModuleTrait {
             	toJson(Map("service_id" -> toJson(x),
 	            	"iscollect" -> toJson(collect_lst.contains(x))))
             }
-    		
+
     		(Some(Map("message" -> toJson("collections_lst"), "result" -> toJson(result))), None)
 			
 		} catch {

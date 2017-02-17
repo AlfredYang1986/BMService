@@ -48,19 +48,25 @@ object KidnapController extends Controller {
         import pattern.ResultMessage.lst_result
         import pattern.LogMessage.common_log
         MessageRoutes(msg_log(toJson(Map("method" -> toJson("search services"))), jv)
-            :: msg_SearchServices(jv) :: msg_CommonResultMessage() :: Nil, None)
+            :: msg_SearchServices(jv) :: msg_queryMultipleTMCommand(jv) :: msg_CommonResultMessage() :: Nil, None)
     })
     def queryMineServices = Action (request => requestArgsV2(request) { jv =>
         import pattern.ResultMessage.lst_result
+        import module.kidnap.v3.kidnapModule.serviceResultMerge
         import pattern.LogMessage.common_log
         MessageRoutes(msg_log(toJson(Map("method" -> toJson("query mine services"))), jv)
-            :: msg_MineServices(jv) :: msg_CommonResultMessage() :: Nil, None)
+            :: msg_MineServices(jv) :: msg_queryMultipleTMCommand(jv) ::
+            ParallelMessage(
+                MessageRoutes(msg_OverallOrderLst(jv) :: Nil, None) ::
+                    MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) ::
+                    MessageRoutes(msg_OwnerLstNamePhoto(jv) :: Nil, None) :: Nil, serviceResultMerge)
+            :: msg_CommonResultMessage() :: Nil, None)
     })
     def queryMultiServices = Action (request => requestArgsV2(request) { jv =>
         import pattern.ResultMessage.lst_result
         import pattern.LogMessage.common_log
         MessageRoutes(msg_log(toJson(Map("method" -> toJson("query multi services"))), jv)
-            :: msg_QueryMultiServices(jv) :: msg_CommonResultMessage() :: Nil, None)
+            :: msg_QueryMultiServices(jv) :: msg_queryMultipleTMCommand(jv) :: msg_CommonResultMessage() :: Nil, None)
     })
     def queryServiceDetail = Action (request => requestArgsV2(request) { jv =>
         import pattern.ResultMessage.common_result
@@ -71,11 +77,11 @@ object KidnapController extends Controller {
 
     def searchServices2 = Action (request => requestArgsV2(request) { jv =>
         import pattern.ResultMessage.lst_result
-        import module.kidnap.v2.kidnapModule.serviceResultMerge
+        import module.kidnap.v3.kidnapModule.serviceResultMerge
         import pattern.LogMessage.common_log
         MessageRoutes(
             msg_log(toJson(Map("method" -> toJson("search services"))), jv) ::
-                msg_SearchServices(jv) ::
+                msg_SearchServices(jv) :: msg_queryMultipleTMCommand(jv) ::
                 ParallelMessage(
                     MessageRoutes(msg_OverallOrderLst(jv) :: Nil, None) ::
                         MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) ::
@@ -85,7 +91,7 @@ object KidnapController extends Controller {
 
     def queryServiceDetail2 = Action (request => requestArgsV2(request) { jv =>
         import pattern.ResultMessage.common_result
-        import module.kidnap.v2.kidnapModule.detailResultMerge
+        import module.kidnap.v3.kidnapModule.detailResultMerge
         import pattern.LogMessage.common_log
         MessageRoutes(
             msg_log(toJson(Map("method" -> toJson("query service detail"))), jv) ::
