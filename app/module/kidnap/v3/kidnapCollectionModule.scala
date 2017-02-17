@@ -136,12 +136,12 @@ object kidnapCollectionModule extends ModuleTrait {
     		}
 
     		val service_lst = (lst map (x => (x \ "service_id").asOpt[String].get))
-    	
+
     		val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
-            val collect_lst = (from db() in "user_service" where ("user_id" -> user_id) select (x => 
+            val collect_lst = (from db() in "user_service" where ("user_id" -> user_id) select (x =>
                           x.getAs[MongoDBList]("services").get.toList.asInstanceOf[List[String]])).toList.flatten
-                          
-            val result = service_lst map { x => 
+
+            val result = service_lst map { x =>
             	toJson(Map("service_id" -> toJson(x),
 	            	"iscollect" -> toJson(collect_lst.contains(x))))
             }

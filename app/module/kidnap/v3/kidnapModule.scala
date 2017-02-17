@@ -497,11 +497,11 @@ object kidnapModule extends ModuleTrait {
   	    }
   	    
     def serviceResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
-    
+
     	val a = rst.head.get("result").get.asOpt[List[JsValue]].get
     	val b = rst.tail.head.get("result").get.asOpt[List[JsValue]].get
     	val c = rst.tail.tail.head.get("result").get.asOpt[List[JsValue]].get
-    	
+
 		import pattern.ParallelMessage.f
 		val result = (a zip b zip c).map (tmp => f(tmp._1._1.as[JsObject].value.toMap :: tmp._1._2.as[JsObject].value.toMap :: tmp._2.as[JsObject].value.toMap :: Nil))
 		Map("result" -> toJson(result))

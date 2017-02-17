@@ -105,18 +105,22 @@ object TMModule extends ModuleTrait {
                 case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
             }
 
-            val conditions = $or(service_lst map (x => DBObject("service_id" ->(x \ "service_id").asOpt[String].get)))
-            val tms = (from db() in "service_time" where conditions select(x => DB2JsValue(x) + ("service_id" -> toJson(x.getAs[String]("service_id").get)))).toList
+            if (service_lst.isEmpty) {
+                (pr, None)
+            } else {
+                val conditions = $or(service_lst map (x => DBObject("service_id" ->(x \ "service_id").asOpt[String].get)))
+                val tms = (from db() in "service_time" where conditions select(x => DB2JsValue(x) + ("service_id" -> toJson(x.getAs[String]("service_id").get)))).toList
 
-            val reVal = service_lst map { x =>
-                import pattern.ParallelMessage.f
-                tms.find(p => p.get("service_id").get.asOpt[String].get == (x \ "service_id").asOpt[String].get) match {
-                    case None => x
-                    case Some(y) => toJson(f(x.as[JsObject].value.toMap :: y :: Nil))
+                val reVal = service_lst map { x =>
+                    import pattern.ParallelMessage.f
+                    tms.find(p => p.get("service_id").get.asOpt[String].get == (x \ "service_id").asOpt[String].get) match {
+                        case None => x
+                        case Some(y) => toJson(f(x.as[JsObject].value.toMap :: y :: Nil))
+                    }
                 }
-            }
 
-            (Some(Map("result" -> toJson(reVal))), None)
+                (Some(Map("result" -> toJson(reVal))), None)
+            }
 
         } catch {
             case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
