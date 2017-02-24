@@ -7,6 +7,7 @@ abstract class msg_OrderCommand extends CommonMessage
 
 object orderMessages {
 	case class msg_PushOrder(data : JsValue) extends msg_OrderCommand
+	case class msg_PushOrderAlipay(data : JsValue) extends msg_OrderCommand
 	case class msg_payOrder(data : JsValue) extends msg_OrderCommand
 	case class msg_popOrder(data : JsValue) extends msg_OrderCommand
 	case class msg_updateOrder(data : JsValue) extends msg_OrderCommand

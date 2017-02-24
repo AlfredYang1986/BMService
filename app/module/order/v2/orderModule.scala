@@ -46,6 +46,7 @@ object orderModule extends ModuleTrait {
 
     def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
 		case msg_PushOrder(data) => pushOrder(data)
+        case msg_PushOrderAlipay(data) => pushOrderAlipay(data)
 		case msg_payOrder(data) => payOrder(data)
 		case msg_popOrder(data) => popOrder(data)
 		case msg_updateOrder(data) => updateOrder(data)
@@ -55,7 +56,25 @@ object orderModule extends ModuleTrait {
 		case msg_accomplishOrder(data) => accomplishOrder(data)
 		case _ => ???
 	}
-	
+
+    def pushOrderAlipay(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+        try {
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+            val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception)
+
+            val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
+            val obj = JsValue2DB(data, order_id)
+
+            obj += "prepay_id" -> ""
+
+            _data_connection.getCollection("orders") += obj
+
+            DB2OptionJsValue(obj)
+        } catch {
+            case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+        }
+    }
+
 	def pushOrder(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
 		try {
 			val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception)

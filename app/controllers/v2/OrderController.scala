@@ -21,6 +21,12 @@ object OrderController extends Controller {
     		MessageRoutes(msg_log(toJson(Map("method" -> toJson("push order"))), jv)
 			    :: msg_PushOrder(jv) :: msg_CommonResultMessage() :: Nil, None)
 		})
+	def pushOrderAlipay = Action (request => requestArgsV2(request) { jv =>
+		import pattern.ResultMessage.common_result
+		import pattern.LogMessage.common_log
+		MessageRoutes(msg_log(toJson(Map("method" -> toJson("push order Alipay"))), jv)
+			:: msg_PushOrderAlipay(jv) :: msg_CommonResultMessage() :: Nil, None)
+	})
 	def popOrder = Action (request => requestArgsV2(request) { jv => 
 			import pattern.ResultMessage.common_result
             import pattern.LogMessage.common_log

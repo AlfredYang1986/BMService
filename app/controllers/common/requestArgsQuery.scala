@@ -58,7 +58,8 @@ object requestArgsQuery extends Controller {
 	}
   	
   	def commonExcution(msr : MessageRoutes)(implicit app : Application) : JsValue = {
-		val act = Akka.system(app).actorOf(Props[RoutesActor], "main")
+//		val act = Akka.system(app).actorOf(Props[RoutesActor], "main")
+		val act = Akka.system(app).actorOf(Props[RoutesActor])
 		val r = act ? excute(msr)
 		Await.result(r.mapTo[JsValue], t.duration)
 	}
