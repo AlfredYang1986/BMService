@@ -15,4 +15,6 @@ object orderMessages {
 	case class msg_acceptOrder(data : JsValue) extends msg_OrderCommand
 	case class msg_rejectOrder(data : JsValue) extends msg_OrderCommand
 	case class msg_accomplishOrder(data : JsValue) extends msg_OrderCommand
+	case class msg_splitOrderTimes(data : JsValue) extends msg_OrderCommand
+    case class msg_mineOrderForSplit(data : JsValue) extends msg_OrderCommand
 }

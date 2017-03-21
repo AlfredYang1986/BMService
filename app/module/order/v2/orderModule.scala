@@ -54,6 +54,8 @@ object orderModule extends ModuleTrait {
 		case msg_acceptOrder(data) => acceptOrder(data)
 		case msg_rejectOrder(data) => rejectOrder(data)
 		case msg_accomplishOrder(data) => accomplishOrder(data)
+        case msg_splitOrderTimes(data) => splitOrderTimes(data)(pr)
+        case msg_mineOrderForSplit(data) => mineOrderForSplit(data)
 		case _ => ???
 	}
 
@@ -163,8 +165,9 @@ object orderModule extends ModuleTrait {
                   (data \ "status").asOpt[Int].map (x => head += "status" -> x.intValue.asInstanceOf[Number]).getOrElse(Unit)
                   (data \ "further_message").asOpt[String].map (x => head += "further_message" -> x).getOrElse(Unit)
                   (data \ "order_thumbs").asOpt[String].map (x => head += "order_thumbs" -> x).getOrElse(Unit)
-                  (data \ "order_date").asOpt[Long].map (x => head += "order_date" -> x.longValue.asInstanceOf[Number]).getOrElse(Unit)
+//                  (data \ "order_date").asOpt[Long].map (x => head += "order_date" -> x.longValue.asInstanceOf[Number]).getOrElse(Unit)
                   (data \ "is_read").asOpt[Int].map (x => head += "is_read" -> x.intValue.asInstanceOf[Number]).getOrElse(Unit)
+                  (data \ "order_date").asOpt[List[JsValue]].map (x => head += "order_date" -> JsOrderDate(data)).getOrElse(Unit)
                   
                   _data_connection.getCollection("orders").update(DBObject("order_id" -> order_id), head)
                   DB2OptionJsValue(head)
@@ -290,13 +293,59 @@ object orderModule extends ModuleTrait {
             (con \ "date").asOpt[Long].map (x => condition = conditionsAcc(condition, "date", x)).getOrElse(Unit)
             (con \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
             (con \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
-       
+
+            val take = (data \ "take").asOpt[Int].getOrElse(5)
+            val skip = (data \ "skip").asOpt[Int].getOrElse(0)
+
+            val result =
+                if (take > 0) (from db() in "orders" where condition.get).selectSkipTop (skip)(take)("data")(DB2JsValue(_)).toList
+                else (from db() in "orders" where condition.get select (DB2JsValue(_))).toList
+
             if (condition.isEmpty) throw new Exception("wrong input")
-            else (Some(Map("result" -> toJson((from db() in "orders" where condition.get select (DB2JsValue(_))).toList))), None)
+            else (Some(Map("result" -> toJson(result))), None)
         } catch {
   	    	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
         }
 	}
+
+    def JsOrderDate(data : JsValue) : MongoDBList = {
+        val lst = (data \ "order_data").asOpt[List[JsValue]].map (x => x).getOrElse(throw new Exception("wrong input"))
+
+        val dl = MongoDBList.newBuilder
+        lst foreach { x =>
+            val tmp = MongoDBObject.newBuilder
+            tmp += "start" -> (x \ "start").asOpt[Long].map (y => y).getOrElse(throw new Exception("wrong input"))
+            tmp += "end" -> (x \ "end").asOpt[Long].map (y => y).getOrElse(throw new Exception("wrong input"))
+
+            dl += tmp.result
+        }
+        dl.result
+//        val order_date = MongoDBObject.newBuilder
+//        (data \ "order_date").asOpt[JsValue].map { x =>
+//            order_date += "start" -> (x \ "start").asOpt[Long].map (y => y).getOrElse(0.longValue)
+//            order_date += "end" -> (x \ "end").asOpt[Long].map (y => y).getOrElse(0.longValue)
+//        }.getOrElse(throw new Exception)
+//        order_date.result
+    }
+
+    def OrderDate2Js(x : MongoDBObject) : JsValue = {
+
+        try {
+            val lst = x.getAs[MongoDBList]("order_date").get.toList.asInstanceOf[List[BasicDBObject]]
+
+            val result = lst map { x =>
+                toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
+                    "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get)))
+            }
+
+            toJson(result)
+        } catch {
+            case ex : Exception =>
+                toJson(
+                    toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
+                        "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))) :: Nil)
+        }
+    }
 
 	def JsValue2DB(data : JsValue, order_id : String) : MongoDBObject = {
         val builder = MongoDBObject.newBuilder
@@ -323,12 +372,7 @@ object orderModule extends ModuleTrait {
         builder += "order_thumbs" -> (data \ "order_thumbs").asOpt[String].map (x => x).getOrElse(throw new Exception)
         builder += "order_title" -> (data \ "order_title").asOpt[String].map (x => x).getOrElse(throw new Exception)
 
-        val order_date = MongoDBObject.newBuilder
-        (data \ "order_date").asOpt[JsValue].map { x => 
-            order_date += "start" -> (x \ "start").asOpt[Long].map (y => y).getOrElse(0.longValue)    
-            order_date += "end" -> (x \ "end").asOpt[Long].map (y => y).getOrElse(0.longValue)    
-        }.getOrElse(throw new Exception)
-        builder += "order_date" -> order_date.result
+        builder += "order_date" -> JsOrderDate(data)
         builder += "is_read" -> (data \ "is_read").asOpt[Int].map (x => x).getOrElse(0)
         builder += "order_id" -> order_id
         
@@ -351,8 +395,7 @@ object orderModule extends ModuleTrait {
 	                       "date" -> toJson(x.getAs[Long]("date").get),
 	                       "status" -> toJson(x.getAs[Number]("status").get.intValue),
 	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
-	                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
-	                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
+	                       "order_date" -> OrderDate2Js(x),
 	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
 	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
@@ -363,7 +406,7 @@ object orderModule extends ModuleTrait {
 //          	}
 //        }
     }
-	
+
     def DB2OptionJsValue(x : MongoDBObject) : (Option[Map[String, JsValue]], Option[JsValue]) = {
 //        val service = kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> toJson(x.getAs[String]("service_id").get))))
 //        service._1 match {
@@ -375,8 +418,7 @@ object orderModule extends ModuleTrait {
 	                       "date" -> toJson(x.getAs[Long]("date").get),
 	                       "status" -> toJson(x.getAs[Number]("status").get.intValue),
 	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
-	                       "order_date" -> toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
-	                                                  "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get))),
+                           "order_date" -> OrderDate2Js(x),
 	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
 	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
@@ -437,5 +479,52 @@ object orderModule extends ModuleTrait {
 		} catch {
     		case ex : Exception => Map("message" -> toJson("order_service"), "result" -> toJson(List[JsValue]()))
     	}
+    }
+
+    def mineOrderForSplit(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+        try {
+            val user_id = (data \ "user_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
+
+            val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(5)
+            val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0)
+
+            val a = data.as[JsObject].value.toMap + ("take" -> take) + ("skip" -> skip)
+            queryOrders(data)
+
+        } catch {
+            case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+        }
+    }
+
+    def splitOrderTimes(data : JsValue)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = {
+        try {
+            println(s"order result split with time")
+
+            pr match {
+                case Some(m) => {
+
+                    val lst : List[JsValue] = m.get("result").get.asOpt[List[JsValue]].get
+                    val result = lst.map {x : JsValue =>
+                        val od = (x \ "order_date").asOpt[List[JsValue]].get
+                        od map (y => Map(
+                            "service_id" -> toJson(x \ "service_id"),
+                            "order_id" -> toJson(x \ "order_id"),
+                            "screen_name" -> toJson(x \ "service" \ "screen_name"),
+                            "screen_photo" -> toJson(x \ "service" \ "screen_photo"),
+                            "cans" -> toJson(x \ "service" \ "cans"),
+                            "start" -> toJson(y \ "start"),
+                            "end" -> toJson(y \ "end")
+                        ))
+                    }.flatten
+
+
+                    (Some(Map("result" -> toJson(result))), None)
+                }
+                case None => throw new Exception("unknow error")
+            }
+
+        } catch {
+            case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
+        }
     }
 }

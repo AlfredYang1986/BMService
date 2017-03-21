@@ -59,6 +59,8 @@ POST	/v2.1/order/query/owner						controllers.v2.OrderController.queryOwnerOrder
 POST    /v2/order/update                            controllers.v2.OrderController.updateOrder
 POST    /v2/order/pay                               controllers.v2.OrderController.payOrder
 
+POST    /v2/order/split                             controllers.v2.OrderController.splitOrderTimelst
+
 POST	/v2/order/comment/push						controllers.v2.OrderCommentsController.pushOrderComments
 POST	/v2/order/comment/update					controllers.v2.OrderCommentsController.updateOrderComments
 POST	/v2/order/comment/pop						controllers.v2.OrderCommentsController.popOrderComments

@@ -6,7 +6,7 @@ import controllers.common.requestArgsQuery._
 import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
 import module.order.v2.orderMessages._
-import module.kidnap.v2.kidnapMessages.msg_ServiceForOrders
+import module.kidnap.v3.kidnapMessages.msg_ServiceForOrders
 import module.kidnap.v2.kidnapCollectionMessages.msg_IsUserCollectLst
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto
 import module.profile.v2.ProfileMessages.msg_UserLstNamePhoto
@@ -76,26 +76,50 @@ object OrderController extends Controller {
 	def queryOwnerOrders2 = queryOrders2
 		
 	def queryOrders2 = Action (request => requestArgsV2(request) { jv => 
-			import pattern.ResultMessage.lst_result
-			import module.order.v2.orderModule.orderResultMerge
-			import module.order.v2.orderModule.orderOrderMerge
-			import module.order.v2.orderModule.orderFinalMerge
-            import pattern.LogMessage.common_log
+		import pattern.ResultMessage.lst_result
+		import module.order.v2.orderModule.orderResultMerge
+		import module.order.v2.orderModule.orderOrderMerge
+		import module.order.v2.orderModule.orderFinalMerge
+		import pattern.LogMessage.common_log
 
-			val service_sub = ParallelMessage(
-								MessageRoutes(msg_ServiceForOrders(jv) :: Nil, None) :: 
-								MessageRoutes(msg_OwnerLstNamePhoto(jv) :: Nil, None) ::
-								MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) :: Nil, orderResultMerge)
-								
-			val order_sub = ParallelMessage(
-								MessageRoutes(msg_UserLstNamePhoto(jv) :: Nil, None) :: 
-								Nil, orderOrderMerge)
-								
-			val para = ParallelMessage(
-							MessageRoutes(service_sub :: Nil, None) ::
-							MessageRoutes(order_sub :: Nil, None) :: Nil, orderFinalMerge)
-			
-			MessageRoutes(msg_log(toJson(Map("method" -> toJson("query orders"))), jv)
-                :: msg_queryOrder(jv) :: para :: msg_CommonResultMessage() :: Nil, None)
-		})
+		val service_sub = ParallelMessage(
+							MessageRoutes(msg_ServiceForOrders(jv) :: Nil, None) ::
+							MessageRoutes(msg_OwnerLstNamePhoto(jv) :: Nil, None) ::
+							MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) :: Nil, orderResultMerge)
+
+		val order_sub = ParallelMessage(
+							MessageRoutes(msg_UserLstNamePhoto(jv) :: Nil, None) ::
+							Nil, orderOrderMerge)
+
+		val para = ParallelMessage(
+						MessageRoutes(service_sub :: Nil, None) ::
+						MessageRoutes(order_sub :: Nil, None) :: Nil, orderFinalMerge)
+
+		MessageRoutes(msg_log(toJson(Map("method" -> toJson("query orders"))), jv)
+			:: msg_queryOrder(jv) :: para :: msg_CommonResultMessage() :: Nil, None)
+	})
+
+	def splitOrderTimelst = Action (request => requestArgsV2(request) { jv =>
+        import pattern.ResultMessage.lst_result
+        import module.order.v2.orderModule.orderResultMerge
+        import module.order.v2.orderModule.orderOrderMerge
+        import module.order.v2.orderModule.orderFinalMerge
+        import pattern.LogMessage.common_log
+
+        val service_sub = ParallelMessage(
+            MessageRoutes(msg_ServiceForOrders(jv) :: Nil, None) ::
+                MessageRoutes(msg_OwnerLstNamePhoto(jv) :: Nil, None) ::
+                MessageRoutes(msg_IsUserCollectLst(jv) :: Nil, None) :: Nil, orderResultMerge)
+
+        val order_sub = ParallelMessage(
+            MessageRoutes(msg_UserLstNamePhoto(jv) :: Nil, None) ::
+                Nil, orderOrderMerge)
+
+        val para = ParallelMessage(
+            MessageRoutes(service_sub :: Nil, None) ::
+                MessageRoutes(order_sub :: Nil, None) :: Nil, orderFinalMerge)
+
+        MessageRoutes(msg_log(toJson(Map("method" -> toJson("query orders"))), jv)
+            :: msg_queryOrder(jv) :: para :: msg_splitOrderTimes(jv) :: msg_CommonResultMessage() :: Nil, None)
+    })
 }

@@ -518,7 +518,7 @@ object kidnapModule extends ModuleTrait {
     			case None => throw new Exception("wrong input")
     			case Some(m) => m.get("result").map (x => x.asOpt[List[JsValue]].get).getOrElse(throw new Exception("wrong input"))
     		}
-    		
+
     		if (order_lst.isEmpty) {
     		    (Some(Map("result" -> toJson(order_lst))), None)
     		} else {
@@ -526,12 +526,13 @@ object kidnapModule extends ModuleTrait {
         		
         		val conditions = $or(service_id_lst.map (x => DBObject("service_id" -> x)))
         		val result = (from db() in "kidnap" where conditions select (DB2JsValue(_))).toList
-        		
-        		val fr = order_lst map { tmp => 
+
+        		val fr = order_lst map { tmp =>
         			val o = tmp.as[JsObject].value.toMap
         			val s = result.find(x => x.get("service_id").get.asOpt[String].get == o.get("service_id").get.asOpt[String].get).get
         			toJson(Map("order" -> tmp, "service" -> toJson(s)))
         		}
+
         		(Some(Map("message" -> toJson("service_for_order"), "result" -> toJson(fr))), None)
     		}
     		
