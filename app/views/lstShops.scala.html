@@ -1,0 +1,32 @@
+@(shops : List[play.api.libs.json.JsValue])
+
+@main("shops list") {
+
+    <table border="1">
+        <tr>
+            <th>id</th>
+            <th>screen_name</th>
+            <th>screen_photo</th>
+            <th>address</th>
+            <th>personal_description</th>
+            <th>operation</th>
+        </tr>
+
+        @{shops.map { iter =>
+        <tr>
+            <td>{(iter \ "user_id").asOpt[String].map (x => x).getOrElse("")}</td>
+            <td>{(iter \ "screen_name").asOpt[String].map (x => x).getOrElse("")}</td>
+            <td><img width="100" height="100" src={"/query/downloadFile/" + (iter \ "screen_photo").asOpt[String].map (x => x).getOrElse("")} ></img></td>
+            <td>{(iter \ "address").asOpt[String].map (x => x).getOrElse("")}</td>
+            <td>{(iter \ "personal_description").asOpt[String].map (x => x).getOrElse("")}</td>
+            <td>
+                <a href={"/admin/detail/shop/" + (iter \ "user_id").asOpt[String].get }><span>update page</span></a>
+                <br/>
+                <br/>
+                <a href={"/admin/lst/" + (iter \ "user_id").asOpt[String].get + "/services"}><span>his services</span></a>
+            </td>
+        </tr>
+        }}
+    </table>
+
+}

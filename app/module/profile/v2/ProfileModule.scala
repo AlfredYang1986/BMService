@@ -157,7 +157,7 @@ object ProfileModule extends ModuleTrait {
 	
 	def DB2Map(obj : MongoDBObject, token : String) : Map[String, JsValue] = {
 	    var has_phone = obj.getAs[String]("contact_no").map (x => x.length > 0).getOrElse(false)
-	    
+
 		val re = Map("user_id" -> toJson(obj.getAs[String]("user_id").get),
 					"isLogin" -> toJson(obj.getAs[Number]("isLogin").get.intValue),
 					"gender" -> toJson(obj.getAs[Number]("gender").get.intValue),
@@ -166,7 +166,7 @@ object ProfileModule extends ModuleTrait {
 					"school" -> toJson(obj.getAs[String]("school").get),
 					"company" -> toJson(obj.getAs[String]("company").get),
 					"occupation" -> toJson(obj.getAs[String]("occupation").get),
-					"personal_description" -> toJson(obj.getAs[String]("personal_description").get),
+					"personal_description" -> toJson(obj.getAs[String]("personal_description").map (x => x).getOrElse("")),
 					"is_service_provider" -> toJson(obj.getAs[Number]("is_service_provider").get.intValue),
 					"about" -> toJson(obj.getAs[String]("about").get),
 					"address" -> toJson(obj.getAs[String]("address").get),
@@ -187,7 +187,7 @@ object ProfileModule extends ModuleTrait {
 			val query_user_id = (data \ "user_id").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
 			val query_auth_token = (data \ "auth_token").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
 			val owner_user_id = (data \ "owner_user_id").asOpt[String].map(x => x).getOrElse(throw new Exception("wrong input"))
-		
+
 			(from db() in "user_profile" where ("user_id" -> owner_user_id) select (x => x)).toList match {
 				case head :: Nil => (Some(DB2Map(head, "")), None)
 				case _ => throw new Exception("unknown user")
@@ -272,5 +272,12 @@ object ProfileModule extends ModuleTrait {
 		} catch {
         	case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
 		}	
+	}
+
+	def queryMultipleProfiles(data : JsValue) : List[JsValue] = {
+		val take = (data \ "take").asOpt[Int].map (x => x).getOrElse(50)
+		val skip = (data \ "skip").asOpt[Int].map (x => x).getOrElse(0)
+
+		(from db() in "user_profile").selectSkipTop(skip)(take)("date")(x => toJson(DB2Map(x, ""))).toList
 	}
 }

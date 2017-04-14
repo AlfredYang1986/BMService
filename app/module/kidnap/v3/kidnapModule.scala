@@ -127,11 +127,11 @@ object kidnapModule extends ModuleTrait {
   	       
   	        val location = MongoDBObject.newBuilder
   	        (data \ "location").asOpt[JsValue].map { loc => 
-  	            location += "latitude" -> (loc \ "latitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
-  	            location += "longtitude" -> (loc \ "longtitude").asOpt[Float].map (tmp => tmp).getOrElse(0.floatValue) 
+  	            location += "latitude" -> (loc \ "latitude").asOpt[Float].map (tmp => tmp).getOrElse(0.0.floatValue)
+  	            location += "longtitude" -> (loc \ "longtitude").asOpt[Float].map (tmp => tmp).getOrElse(0.0.floatValue)
   	        }.getOrElse {
-  	            location += "latitude" -> 0.floatValue
-  	            location += "longtitude" -> 0.floatValue
+  	            location += "latitude" -> 0.0.floatValue
+  	            location += "longtitude" -> 0.0.floatValue
   	        }
   	        service_builder += "location" -> location.result
   	        
@@ -161,8 +161,8 @@ object kidnapModule extends ModuleTrait {
                 age_boundary += "lsl" -> (boundary \ "lsl").asOpt[Int].map (x => x).getOrElse(3)
                 age_boundary += "usl" -> (boundary \ "usl").asOpt[Int].map (x => x).getOrElse(11)
             }.getOrElse {
-  	            age_boundary += "lsl" -> 3.longValue
-  	            age_boundary += "usl" -> 11.longValue
+  	            age_boundary += "lsl" -> 3.intValue
+  	            age_boundary += "usl" -> 11.intValue
             }
   	        service_builder += "age_boundary" -> age_boundary.result
            
@@ -497,7 +497,6 @@ object kidnapModule extends ModuleTrait {
   	    }
   	    
     def serviceResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
-
     	val a = rst.head.get("result").get.asOpt[List[JsValue]].get
     	val b = rst.tail.head.get("result").get.asOpt[List[JsValue]].get
     	val c = rst.tail.tail.head.get("result").get.asOpt[List[JsValue]].get

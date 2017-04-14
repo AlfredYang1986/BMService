@@ -1,0 +1,41 @@
+@(kidnaps : List[play.api.libs.json.JsValue])(user_id : String)
+
+@main("services list") {
+
+    <h2>service for user : @{user_id}</h2>
+
+    <table border="1" width="100%">
+        <tr>
+            <th>service_id</th>
+            <th>title</th>
+            <th>description</th>
+            <th>price</th>
+            <th>address</th>
+            <th>images</th>
+            <th>oprations</th>
+        </tr>
+
+        @{kidnaps.map { iter =>
+        <tr>
+            <td>{(iter  \ "service_id")}</td>
+            <td>{(iter  \ "title")}</td>
+            <td>{(iter  \ "description")}</td>
+            <td>{(iter  \ "price")}</td>
+            <td>{(iter  \ "address")}</td>
+            <td>
+                {
+                    val lst = (iter \ "images").asOpt[List[String]].map (x => x).getOrElse(Nil)
+                    lst.map { img =>
+                        <img src={"/query/downloadFile/" + img} width="100px"/>
+                    }
+                }
+            </td>
+            <td>
+                <a href={"/admin/detail/service/" + (iter \ "service_id").asOpt[String].get} >service detial</a>
+            </td>
+        </tr>
+        }}
+
+
+    </table>
+}

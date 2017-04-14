@@ -1,0 +1,127 @@
+@(service : play.api.libs.json.JsValue)
+
+@main("service detail") {
+    <h2>service: @{(service \ "service_id").asOpt[String].get} </h2>
+    <div>
+        <span>title(显示名称): </span>
+        <span><input style="width: 80%" data-input="title" value=@{(service \ "title").asOpt[String].get} /></span>
+    </div>
+    <div>
+        <span>description(课程描述): </span>
+        <span><textarea style="width: 80%" data-input="description">@{(service \ "description").asOpt[String].get}</textarea></span>
+    </div>
+    <div>
+        <span>capacity(一次容纳数量): </span>
+        <span><input style="width: 80%" data-input="capacity" value=@{(service \ "capacity").asOpt[Int].get} /></span>
+    </div>
+    <div>
+        <span>servant_no(教师数量): </span>
+        <span><input style="width: 80%" data-input="servant_no" value=@{(service \ "servant_no").asOpt[Int].get} /></span>
+    </div>
+    <div>
+        <span>price(价格): </span>
+        <span><input style="width: 80%" data-input="price" value=@{(service \ "price")} /></span>
+    </div>
+
+    <div>
+        <p><strong>service_cat: 一级 （课程=0，看顾=1）</strong></p>
+        <p><strong>cans_cat： 二级 </strong></p>
+        <p>当 service_cat == 1 => cans_cat为 日间=0 课后=1   ["日间看顾", "课后看顾"]</p>
+        <p>当service_cat == 0 => cans_cat为 ["艺术"(0), "运动"(1), "科学"(2), "语言"(3), "阅读"(4), "手工"(5)]</p>
+        <p><strong>cans</strong></p>
+        <p>当cans_cat为艺术时：["钢琴", "舞蹈", "书法", "中国画", "绘画", "尤克丽丽", "戏剧"]</p>
+        <p>当cans_cat为运动时：["瑜伽健身", "篮球", "马术", "围棋", "击剑", "桌游"]</p>
+        <p>当cans_cat为科学时：["3D打印", "机器人", "心理学", "行为习惯"]</p>
+        <p>当cans_cat为语言时：["英语"]</p>
+        <p>当cans_cat为阅读时：["绘本"]</p>
+        <p>当cans_cat为手工时：["烘焙", "陶艺"]</p>
+    </div>
+
+    <div>
+        <span>service_cat(课程或者看顾): </span>
+        <span><input style="width: 80%" data-input="service_cat" value=@{(service \ "service_cat").asOpt[Int].get} /></span>
+    </div>
+    <div>
+        <span>cans_cat(附属类别): </span>
+        <span><input style="width: 80%" data-input="cans_cat" value=@{(service \ "cans_cat").asOpt[Int].get} /></span>
+    </div>
+    <div>
+        <span>cans(相当于标签): </span>
+        <span><input style="width: 80%" data-input="cans" value=@{(service \ "cans").asOpt[Int].get} /></span>
+    </div>
+
+    <div>
+        <span>least_times(最少预定次数): </span>
+        <span><input style="width: 80%" data-input="least_times" value=@{(service \ "least_times")} /></span>
+    </div>
+    <div>
+        <span>lecture_length(课程时长): </span>
+        <span><input style="width: 80%" data-input="lecture_length" value=@{(service \ "lecture_length")} /></span>
+    </div>
+    <div>
+        <span>address(地址): </span>
+        <span><input style="width: 80%" data-input="address" value=@{(service \ "address")} /></span>
+    </div>
+    <div>
+        <span>age_boundary(合适年龄): </span>
+        <span>上限<input style="width: 40%" data-input="age_boundary_lsl" value=@{(service \ "age_boundary" \ "lsl")} /></span>
+        <span>下限<input style="width: 40%" data-input="age_boundary_usl" value=@{(service \ "age_boundary" \ "usl")} /></span>
+    </div>
+    <div>
+        <span>location(坐标): </span>
+        <span>经度<input style="width: 40%" data-input="location_latitude" value=@{(service \ "location" \ "latitude")} /></span>
+        <span>纬度<input style="width: 40%" data-input="location_longtitude" value=@{(service \ "location" \ "longtitude")} /></span>
+    </div>
+
+    <button onclick="changeService()">修改</button>
+
+    <script type="text/javascript">
+        function changeService() {
+            var title = $('input[data-input="title"]').val();
+            var description = $('textarea[data-input="description"]').val();
+            var capacity = Number($('input[data-input="capacity"]').val());
+            var servant_no = Number($('input[data-input="servant_no"]').val());
+            var price = Number($('input[data-input="price"]').val());
+            var service_cat = Number($('input[data-input="service_cat"]').val());
+            var cans_cat = Number($('input[data-input="cans_cat"]').val());
+            var cans = Number($('input[data-input="cans"]').val());
+            var least_times = Number($('input[data-input="least_times"]').val());
+            var lecture_length = Number($('input[data-input="lecture_length"]').val());
+            var address = $('input[data-input="address"]').val();
+
+            var query_object = new Object();
+            query_object["service_id"] = "@{(service \ "service_id").asOpt[String].get}";
+            query_object["title"] = title;
+            query_object["description"] = description;
+            query_object["capacity"] = capacity;
+            query_object["servant_no"] = servant_no;
+            query_object["price"] = price;
+            query_object["service_cat"] = service_cat;
+            query_object["cans_cat"] = cans_cat;
+            query_object["cans"] = cans;
+            query_object["least_times"] = least_times;
+            query_object["lecture_length"] = lecture_length;
+            query_object["address"] = address;
+
+            $.ajax({
+                url: "/admin/service/update",
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json, charset=utf-8',
+                data: JSON.stringify(query_object),
+                cache: false,
+                success: function (data) {
+                    if (data.status == "ok") {
+                        alert("修改成功");
+                        location.reload();
+                    } else {
+                        alert(data.error.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("请检查您的输入");
+                }
+            });
+        }
+    </script>
+}

@@ -84,5 +84,13 @@ POST    /v3/tm/update                               controllers.v3.TimemanagerCo
 
 POST    /email/sendPrivacy                          controllers.emailController.sendEmail
 
+GET     /admin/lst/shop/:p                          controllers.v3.AdminController.lstShopProfile(p)
+GET     /admin/detail/shop/:id                      controllers.v3.AdminController.detailShopProfile(id)
+POST    /admin/shop/update                          controllers.v3.AdminController.updateShopProfile
+GET     /admin/lst/services/:p                      controllers.v3.AdminController.lstServices(p)
+GET     /admin/lst/:u/services                      controllers.v3.AdminController.lstUserServices(u)
+GET     /admin/detail/service/:id                   controllers.v3.AdminController.detailService(id)
+POST    /admin/service/update                       controllers.v3.AdminController.updateService
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
