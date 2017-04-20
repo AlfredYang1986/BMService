@@ -36,6 +36,14 @@ object weekDay {
 
 sealed abstract class weekDayDefines(val t : Int, val des : String)
 
+object source {
+	case object user_input extends sourceDefines(-1, "user input")
+	case object dianping extends sourceDefines(0, "da zhong dian ping")
+	case object nuomi extends sourceDefines(1, "nuo mi")
+}
+
+sealed abstract class sourceDefines(val t : Int, val des : String)
+
 object kidnapModule extends ModuleTrait {
  
 	def dispatchMsg(msg : MessageDefines)(pr : Option[Map[String, JsValue]]) : (Option[Map[String, JsValue]], Option[JsValue]) = msg match {
@@ -182,6 +190,8 @@ object kidnapModule extends ModuleTrait {
   	        service_builder += "date" -> new Date().getTime
 	        service_builder += "servant_no" -> (data \ "servant_no").asOpt[Int].map (x => x).getOrElse(1)
   	        service_builder += "reserve1" -> (data \ "reserve1").asOpt[String].map (x => x).getOrElse("")
+
+            service_builder += "data_source" -> (data \ "data_source").asOpt[Int].map (x => x).getOrElse(source.user_input.t)
   	        
   	        _data_connection.getCollection("kidnap") += service_builder.result
 
@@ -293,7 +303,9 @@ object kidnapModule extends ModuleTrait {
   	        
   	        (data \ "reserve1").asOpt[String].map (x => origin += "reserve1" -> x).getOrElse(Unit)
   	        /**************************************************************/
-            
+
+            (data \ "data_source").asOpt[String].map (x => origin += "data_source" -> x).getOrElse(Unit)
+
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
 //            toJson(Map("status" -> toJson("ok"), "result" -> toJson(Map("service_id" -> toJson(service_id)))))
@@ -392,7 +404,8 @@ object kidnapModule extends ModuleTrait {
   	               "least_times" -> toJson(x.getAs[Number]("least_times").map (y => y.intValue).getOrElse(0)),
   	               "lecture_length" -> toJson(x.getAs[Number]("lecture_length").map (y => y.floatValue).getOrElse(0.0.asInstanceOf[Float])),
   	               "other_words" -> toJson(x.getAs[String]("other_words").map (y => y).getOrElse("")),
-  	               "reserve1" -> toJson(x.getAs[String]("reserve1").map (y => y).getOrElse(""))
+  	               "reserve1" -> toJson(x.getAs[String]("reserve1").map (y => y).getOrElse("")),
+	               "data_source" -> toJson(x.getAs[Number]("data_source").map (y => y.intValue).getOrElse(-1))
   	               )
     }
   

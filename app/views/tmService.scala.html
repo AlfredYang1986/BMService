@@ -1,0 +1,171 @@
+@(service : play.api.libs.json.JsValue)(tms : List[play.api.libs.json.JsValue])
+
+@main("time management") {
+    <h2>service: @{(service \ "service_id").asOpt[String].get} </h2>
+    <div>
+        <span>title(显示名称): </span>
+        <span><input style="width: 80%" data-input="title" value=@{(service \ "title").asOpt[String].get} /></span>
+    </div>
+    <div>
+        <span>description(课程描述): </span>
+        <span><textarea style="width: 80%" data-input="description">@{(service \ "description").asOpt[String].get}</textarea></span>
+    </div>
+    <div>
+        <span>price(价格): </span>
+        <span><input style="width: 80%" data-input="price" value=@{(service \ "price")} /></span>
+    </div>
+
+    <div data-input="tms-container" >
+    @{tms.map { iter =>
+        import java.text.SimpleDateFormat
+        val df = new SimpleDateFormat("yyyy-MM-dd")
+        val df_hours = new SimpleDateFormat("HH:mm")
+
+        <div data-input="tms" style="width: 80%">
+            <p>-----------------------------------------------</p>
+            <div>
+                <div>Pattern: <span>0: 每天重复</span><span>1: 每周重复</span><span>2: 每月重复</span><span>3: 经此一次</span></div>
+                <input data-input="pattern" value={(iter \ "pattern").asOpt[Int].get.toString} />
+            </div>
+
+            <div>
+                <div>Start Date: <span>开始时间, 精确到天, 格式是yyyy-MM-dd</span></div>
+                {
+                    val start_date = (iter \ "startdate").asOpt[Long].get
+                    val reportDate = df.format(start_date)
+
+                    <input data-input="startdate" value={reportDate} />
+                }
+            </div>
+
+            <div>
+                <div>End Date: <span>结束时间, 精确到天, 格式是yyyy-MM-dd</span></div>
+                {
+                    val end_date = (iter \ "enddate").asOpt[Long].get
+                    val reportDate = if (end_date > 0) df.format(end_date)
+                                     else end_date.toString
+
+                    <input data-input="enddate" value={reportDate} />
+                }
+            </div>
+
+            <div>
+                <div>Start Hours: <span>开始小时, 精确到分, 格式是HH:mm</span></div>
+                {
+                    val start_hours = (iter \ "starthours").asOpt[Long].get
+
+                    <input data-input="starthours" value={start_hours.toString} />
+                }
+            </div>
+
+            <div>
+                <div>End Hours: <span>结束小时, 精确到分, 格式是HH:mm</span></div>
+                {
+                    val end_hours = (iter \ "endhours").asOpt[Long].get
+
+                    <input data-input="endhours" value={end_hours.toString} />
+                }
+            </div>
+            <p>-----------------------------------------------</p>
+        </div>
+    }}
+    </div>
+
+    <button onclick=addTime() >添加时间</button>
+    <button onclick=saveTMChanges() >保存修改</button>
+
+    <div data-input="tms" data-cat="clone" style="width: 80%; display: none">
+        <p>-----------------------------------------------</p>
+        <div>
+            <div>Pattern: <span>0: 每天重复</span><span>1: 每周重复</span><span>2: 每月重复</span><span>3: 经此一次</span></div>
+            <input data-input="pattern" />
+        </div>
+
+        <div>
+            <div>Start Date: <span>开始时间, 精确到天, 格式是yyyy-MM-dd</span></div>
+            <input data-input="startdate" />
+        </div>
+
+        <div>
+            <div>End Date: <span>结束时间, 精确到天, 格式是yyyy-MM-dd, 无限期填写-1</span></div>
+            <input data-input="enddate" />
+        </div>
+
+        <div>
+            <div>Start Hours: <span>开始小时, 精确到分, 格式是HHmm</span></div>
+            <input data-input="starthours" />
+        </div>
+
+        <div>
+            <div>End Hours: <span>结束小时, 精确到分, 格式是HHmm</span></div>
+            <input data-input="endhours" />
+        </div>
+        <p>-----------------------------------------------</p>
+    </div>
+
+    <script type="text/javascript" >
+        function addTime() {
+            var cp = $('div[data-cat="clone"]').clone();
+            cp.removeAttr("data-cat");
+            cp.appendTo('div[data-input="tms-container"]');
+            cp.show();
+        }
+
+        function saveTMChanges() {
+            var service_id = "@{(service \ "service_id").asOpt[String].get}";
+
+            var tms = [];
+            $.each($('div[data-input="tms-container"] > div[data-input="tms"]'), function(index, iter) {
+                var query_object = new Object();
+                var pattern = $(iter).find('input[data-input="pattern"]').val();
+                query_object["pattern"] = Number(pattern);
+
+                var startDate = $(iter).find('input[data-input="startdate"]').val();
+                query_object["startdate"] = string2TimeSpan(startDate);
+
+                var endDate = $(iter).find('input[data-input="enddate"]').val();
+                if (endDate == "-1")
+                    query_object["enddate"] = -1;
+                else
+                    query_object["enddate"] = string2TimeSpan(endDate);
+
+                var starthours = $(iter).find('input[data-input="starthours"]').val();
+                query_object["starthours"] = Number(starthours);
+
+                var endhours = $(iter).find('input[data-input="endhours"]').val();
+                query_object["endhours"] = Number(endhours);
+
+                tms.push(query_object);
+            });
+
+            var o = new Object();
+            o["service_id"] = service_id;
+            o["tms"] = tms;
+
+            $.ajax({
+                url: "/admin/tm/update",
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json, charset=utf-8',
+                data: JSON.stringify(o),
+                cache: false,
+                success: function (data) {
+                    if (data.status == "ok") {
+                        alert("修改成功");
+                        location.reload();
+                    } else {
+                        alert(data.error.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("请检查您的输入");
+                }
+            });
+        }
+
+        function string2TimeSpan(date) {
+            var dt = new Date(date.replace(/-/,"/"));
+            return dt.getTime()
+        }
+    </script>
+}

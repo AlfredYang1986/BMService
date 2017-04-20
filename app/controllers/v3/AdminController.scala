@@ -8,6 +8,7 @@ import module.kidnap.v3.kidnapModule
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 import controllers.common.requestArgsQuery._
+import module.timemanager.v3.TMModule
 
 /**
   * Created by Alfred on 13/04/2017.
@@ -65,6 +66,23 @@ object AdminController extends Controller {
 			val (_, origin) = kidnapModule.queryServiceStatus((js \ "service_id").asOpt[String])
 			toJson(common_result((kidnapModule.updateKidnapServiceImpl(js, origin)._1.get))._1.get)
 		}
+		requestArgs(request)(tf)
+	}
+
+	def tmService(service_id : String) = Action { request =>
+		try {
+			val result = toJson(kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> service_id)))._1.get)
+			val tmp = TMModule.queryServiceTM(toJson(Map("service_id" -> service_id)))(None)._1.get
+			val tms = tmp.get("tms").map (x => x.asOpt[List[JsValue]].get).getOrElse(Nil)
+			Ok(views.html.tmService(result)(tms))
+		} catch {
+			case _ : Exception => BadRequest("wrong args")
+		}
+	}
+
+	def updateTMService = Action { request =>
+		import pattern.ResultMessage.common_result
+		val tf : JsValue => JsValue = js => toJson(common_result(TMModule.updateServiceTM(js)(None)._1.get)._1.get)
 		requestArgs(request)(tf)
 	}
 }

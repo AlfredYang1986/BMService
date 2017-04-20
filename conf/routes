@@ -91,6 +91,8 @@ GET     /admin/lst/services/:p                      controllers.v3.AdminControll
 GET     /admin/lst/:u/services                      controllers.v3.AdminController.lstUserServices(u)
 GET     /admin/detail/service/:id                   controllers.v3.AdminController.detailService(id)
 POST    /admin/service/update                       controllers.v3.AdminController.updateService
+GET     /admin/service/tm/:id                       controllers.v3.AdminController.tmService(id)
+POST    /admin/tm/update                            controllers.v3.AdminController.updateTMService
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

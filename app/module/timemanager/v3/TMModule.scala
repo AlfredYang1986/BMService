@@ -81,16 +81,12 @@ object TMModule extends ModuleTrait {
             (from db() in "service_time" where ("service_id" -> service_id) select (x => x)).toList match {
                 case head :: Nil => {
                     val reVal = DB2JsValue(head)
-                    println(reVal)
                     pr match {
                         case None => (Some(reVal + ("service_id" -> toJson(service_id))), None)
-                        case Some(re) => {
-                            println(re ++ reVal)
-                            (Some(re ++ reVal), None)
-                        }
+                        case Some(re) => (Some(re ++ reVal), None)
                     }
                 }
-                case _ => throw new Exception("service not existing")
+                case _ => (Some(Map("tms" -> toJson(List[JsValue]()), "service_id" -> toJson(service_id))), None)
             }
 
         } catch {
@@ -141,7 +137,7 @@ object TMModule extends ModuleTrait {
                         case Some(re) => (Some(re), None)
                     }
                 }
-                case _ => throw new Exception("service not existing")
+                case _ => pushServiceTM(data)(pr)
             }
 
         } catch {

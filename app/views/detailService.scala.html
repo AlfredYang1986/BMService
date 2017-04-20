@@ -28,7 +28,7 @@
         <p><strong>cans_cat： 二级 </strong></p>
         <p>当 service_cat == 1 => cans_cat为 日间=0 课后=1   ["日间看顾", "课后看顾"]</p>
         <p>当service_cat == 0 => cans_cat为 ["艺术"(0), "运动"(1), "科学"(2), "语言"(3), "阅读"(4), "手工"(5)]</p>
-        <p><strong>cans</strong></p>
+        <p><strong>cans: 当下面没有的时候，填写99</strong></p>
         <p>当cans_cat为艺术时：["钢琴", "舞蹈", "书法", "中国画", "绘画", "尤克丽丽", "戏剧"]</p>
         <p>当cans_cat为运动时：["瑜伽健身", "篮球", "马术", "围棋", "击剑", "桌游"]</p>
         <p>当cans_cat为科学时：["3D打印", "机器人", "心理学", "行为习惯"]</p>
@@ -48,6 +48,10 @@
     <div>
         <span>cans(相当于标签): </span>
         <span><input style="width: 80%" data-input="cans" value=@{(service \ "cans").asOpt[Int].get} /></span>
+    </div>
+    <div>
+        <span>reserve1(自定义标签): </span>
+        <span><input style="width: 80%" data-input="reserve1" value=@{(service \ "reserve1").asOpt[String].get} /></span>
     </div>
 
     <div>
@@ -74,6 +78,7 @@
     </div>
 
     <button onclick="changeService()">修改</button>
+    <a href=@{"/admin/service/tm/" + (service \ "service_id").asOpt[String].get}>时间管理</a>
 
     <script type="text/javascript">
         function changeService() {
@@ -88,6 +93,15 @@
             var least_times = Number($('input[data-input="least_times"]').val());
             var lecture_length = Number($('input[data-input="lecture_length"]').val());
             var address = $('input[data-input="address"]').val();
+            var reserve1 = $('input[data-input="reserve1"').val();
+
+            var age_object = new Object();
+            age_object["lsl"] = Number($('input[data-input="age_boundary_lsl"]').val());
+            age_object["usl"] = Number($('input[data-input="age_boundary_usl"]').val());
+
+            var location_object = new Object();
+            location_object["latitude"] = Number($('input[data-input="location_latitude"]').val());
+            location_object["longtitude"] = Number($('input[data-input="location_longtitude"]').val());
 
             var query_object = new Object();
             query_object["service_id"] = "@{(service \ "service_id").asOpt[String].get}";
@@ -102,6 +116,9 @@
             query_object["least_times"] = least_times;
             query_object["lecture_length"] = lecture_length;
             query_object["address"] = address;
+            query_object["age_boundary"] = age_object;
+            query_object["location"] = location_object;
+            query_object["reserve1"] = reserve1;
 
             $.ajax({
                 url: "/admin/service/update",
