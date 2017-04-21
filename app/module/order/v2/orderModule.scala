@@ -85,10 +85,10 @@ object orderModule extends ModuleTrait {
             val order_id = Sercurity.md5Hash(user_id + service_id + Sercurity.getTimeSpanWithMillSeconds)
             val x = Future(JsValue2DB(data, order_id))
             val y = Future(WechatPayModule.prepayid(data, order_id))
-            
+
             val obj = Await.result (x map (o => o), Timeout(1 second).duration).asInstanceOf[MongoDBObject]
             val js = Await.result (y map (v => v), Timeout(10 second).duration).asInstanceOf[JsValue]
-           
+
             val prepay_id = (js \ "result" \ "prepay_id").asOpt[String].map (x => x).getOrElse("")
             
             obj += "prepay_id" -> prepay_id
@@ -309,7 +309,7 @@ object orderModule extends ModuleTrait {
 	}
 
     def JsOrderDate(data : JsValue) : MongoDBList = {
-        val lst = (data \ "order_data").asOpt[List[JsValue]].map (x => x).getOrElse(throw new Exception("wrong input"))
+        val lst = (data \ "order_date").asOpt[List[JsValue]].map (x => x).getOrElse(throw new Exception("wrong input"))
 
         val dl = MongoDBList.newBuilder
         lst foreach { x =>
@@ -334,8 +334,7 @@ object orderModule extends ModuleTrait {
             val lst = x.getAs[MongoDBList]("order_date").get.toList.asInstanceOf[List[BasicDBObject]]
 
             val result = lst map { x =>
-                toJson(Map("start" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("start").get),
-                    "end" -> toJson(x.getAs[MongoDBObject]("order_date").get.getAs[Long]("end").get)))
+                toJson(Map("start" -> toJson(x.getAs[Long]("start").get), "end" -> toJson(x.getAs[Long]("end").get)))
             }
 
             toJson(result)
