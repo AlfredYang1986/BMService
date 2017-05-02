@@ -93,6 +93,10 @@ GET     /admin/detail/service/:id                   controllers.v3.AdminControll
 POST    /admin/service/update                       controllers.v3.AdminController.updateService
 GET     /admin/service/tm/:id                       controllers.v3.AdminController.tmService(id)
 POST    /admin/tm/update                            controllers.v3.AdminController.updateTMService
+GET     /admin/service/image/:id                    controllers.v3.AdminController.serviceImgsManagement(id)
+POST    /admin/service/delete/img                   controllers.v3.AdminController.deleteImages
+GET     /admin/shop/image/:id                       controllers.v3.AdminController.shopImgsManagement(id)
+POST    /admin/shop/delete/img                      controllers.v3.AdminController.deleteShopImages
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)

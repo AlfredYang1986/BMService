@@ -280,4 +280,27 @@ object ProfileModule extends ModuleTrait {
 
 		(from db() in "user_profile").selectSkipTop(skip)(take)("date")(x => toJson(DB2Map(x, ""))).toList
 	}
+
+	def deleteShopImage(data : JsValue) : JsValue = {
+		try {
+			val user_id = (data \ "owner_user_id").asOpt[String].get
+			val image_name = (data \ "image").asOpt[String].get
+
+			(from db() in "user_profile" where ("user_id" -> user_id) select (x => x)).toList match {
+				case head :: Nil => {
+					val screen_photo = head.getAs[String]("screen_photo").get
+					if (screen_photo == image_name) {
+						head += "screen_photo" -> ""
+
+						_data_connection.getCollection("user_profile").update(DBObject("user_id" -> user_id), head)
+						toJson(Map("status" -> "ok"))
+					} else throw new Exception("wrong input")
+				}
+				case _ => throw new Exception("unknown error")
+			}
+
+		} catch {
+			case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+		}
+	}
 }

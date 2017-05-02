@@ -33,6 +33,7 @@
     </div>
 
     <button onclick="changeUserProfile()">修改</button>
+    <a href=@{"/admin/shop/image/" + (shop \ "user_id").asOpt[String].get}>图片管理</a>
 
     <script type="text/javascript">
         function changeUserProfile() {

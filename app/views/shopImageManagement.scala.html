@@ -1,0 +1,50 @@
+@(shop : play.api.libs.json.JsValue)
+
+@main("shop images management") {
+    <h2>shop: @{(shop \ "user_id").asOpt[String].get} </h2>
+
+    <table border="1">
+        <tr>
+            <th>图片名</th>
+            <th>图片</th>
+            <th>操作</th>
+        </tr>
+
+        @{(shop \ "screen_photo").asOpt[String].map { x =>
+            <tr>
+                <td>{x}</td>
+                <td><img src={"/query/downloadFile/" + x} /></td>
+                <td><button onclick={"deleteImage(\"" + (shop \ "screen_photo").asOpt[String].get + "\",\"" + x + "\")"}>删除此图片(删除不可恢复，请谨慎操作)</button></td>
+            </tr>
+        }.getOrElse(Unit)}
+    </table>
+
+    <script type="text/javascript">
+        function deleteImage(image_name) {
+            var query_object = new Object();
+
+            query_object["owner_user_id"] = "@{(shop \ "user_id").asOpt[String].get}";
+            query_object["image"] = image_name;
+
+            $.ajax({
+                url: "/admin/shop/delete/img",
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json, charset=utf-8',
+                data: JSON.stringify(query_object),
+                cache: false,
+                success: function (data) {
+                    if (data.status == "ok") {
+                        alert("修改成功");
+                        location.reload();
+                    } else {
+                        alert(data.error.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("请检查您的输入");
+                }
+            });
+        }
+    </script>
+}

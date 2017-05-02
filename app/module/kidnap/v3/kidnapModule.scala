@@ -305,6 +305,7 @@ object kidnapModule extends ModuleTrait {
   	        /**************************************************************/
 
             (data \ "data_source").asOpt[String].map (x => origin += "data_source" -> x).getOrElse(Unit)
+            (data \ "servant_no").asOpt[Int].map (x => origin += "servant_no" -> x.asInstanceOf[Number]).getOrElse(Unit)
 
             _data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), origin)
 
@@ -552,4 +553,23 @@ object kidnapModule extends ModuleTrait {
     		case ex : Exception => (None, Some(ErrorCode.errorToJson(ex.getMessage)))
     	}
     }
+
+	def deleteImage(data : JsValue) : JsValue = {
+		try {
+			val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse("wrong input")
+			val image_name = (data \ "image").asOpt[String].map (x => x).getOrElse("wrong input")
+
+			(from db() in "kidnap" where ("service_id" -> service_id) select (x => x)).toList match {
+				case head :: Nil => {
+					val img_lst = head.getAs[MongoDBList]("images").get.toList.asInstanceOf[List[String]]
+					head += "images" -> img_lst.filterNot(x => x == image_name)
+					_data_connection.getCollection("kidnap").update(DBObject("service_id" -> service_id), head)
+					toJson(Map("status" -> "ok"))
+				}
+				case _ => throw new Exception("unknown user")
+			}
+		} catch {
+			case ex : Exception => ErrorCode.errorToJson(ex.getMessage)
+		}
+	}
 }

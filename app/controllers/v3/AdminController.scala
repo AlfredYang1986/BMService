@@ -85,4 +85,26 @@ object AdminController extends Controller {
 		val tf : JsValue => JsValue = js => toJson(common_result(TMModule.updateServiceTM(js)(None)._1.get)._1.get)
 		requestArgs(request)(tf)
 	}
+
+	def serviceImgsManagement(service_id : String) = Action {
+		try {
+			val result = toJson(kidnapModule.queryKidnapServiceDetail(toJson(Map("service_id" -> service_id)))._1.get)
+			Ok(views.html.serviceImgMag(result))
+		} catch {
+			case _ : Exception => BadRequest("wrong args")
+		}
+	}
+
+	def deleteImages = Action (request => requestArgs(request)(kidnapModule.deleteImage))
+
+	def shopImgsManagement(user_id : String) = Action {
+		try {
+			val shop = toJson(ProfileModule.queryUserProfile(toJson(Map("user_id" -> "", "auth_token" -> "", "owner_user_id" -> user_id)))._1.get)
+			Ok(views.html.shopImageManagement(shop))
+		} catch {
+			case _ : Exception => BadRequest("wrong args")
+		}
+	}
+
+	def deleteShopImages = Action (request => requestArgs(request)(ProfileModule.deleteShopImage))
 }

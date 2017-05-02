@@ -79,6 +79,7 @@
 
     <button onclick="changeService()">修改</button>
     <a href=@{"/admin/service/tm/" + (service \ "service_id").asOpt[String].get}>时间管理</a>
+    <a href=@{"/admin/service/image/" + (service \ "service_id").asOpt[String].get}>图片管理</a>
 
     <script type="text/javascript">
         function changeService() {
