@@ -61,6 +61,24 @@ POST    /v2/order/pay                               controllers.v2.OrderControll
 
 POST    /v2/order/split                             controllers.v2.OrderController.splitOrderTimelst
 
+# 订单机制修改后，产生巨大的变化，以前v2版本的所有order接口全部不能再使用
+############################################################
+POST    /v3/order/post                              controllers.v3.OrderController.postOrder
+POST    /v3/order/pop                               controllers.v3.OrderController.popOrder
+POST    /v3/order/reject                            controllers.v3.OrderController.rejectOrder
+POST    /v3/order/accept                            controllers.v3.OrderController.acceptOrder
+POST    /v3/order/cancel                            controllers.v3.OrderController.cancelOrder
+POST    /v3/order/prepay                            controllers.v3.OrderController.prepayOrder
+POST    /v3/order/postpay                           controllers.v3.OrderController.postpayOrder
+POST    /v3/order/accompilsh                        controllers.v3.OrderController.accomplishOrder
+
+POST    /v3/order/query                             controllers.v3.OrderController.queryOrders2
+POST    /v3/order/query/owner                       controllers.v3.OrderController.queryOrders2
+
+POST    /v3/order/update                            controllers.v3.OrderController.updateOrder
+POST    /v3/order/split                             controllers.v3.OrderController.splitOrderTimelst
+############################################################
+
 POST	/v2/order/comment/push						controllers.v2.OrderCommentsController.pushOrderComments
 POST	/v2/order/comment/update					controllers.v2.OrderCommentsController.updateOrderComments
 POST	/v2/order/comment/pop						controllers.v2.OrderCommentsController.popOrderComments

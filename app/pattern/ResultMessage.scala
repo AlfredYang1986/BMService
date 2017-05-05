@@ -1,9 +1,10 @@
 package pattern
 
+import java.util.Date
+
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 import dongdamessages.CommonMessage
-
 import util.errorcode.ErrorCode
 
 abstract class msg_ResultCommand extends CommonMessage
@@ -13,4 +14,5 @@ object ResultMessage {
 	implicit val lst_result : Map[String, JsValue] => (Option[Map[String, JsValue]], Option[JsValue]) = m => (Some(m + ("status" -> toJson("ok"))), None)
 
 	case class msg_CommonResultMessage()(implicit val func : Map[String, JsValue] => (Option[Map[String, JsValue]], Option[JsValue])) extends msg_ResultCommand
+	case class msg_PlusDateToResultMessage(data : JsValue) extends msg_ResultCommand
 }

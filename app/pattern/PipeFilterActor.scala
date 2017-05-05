@@ -17,6 +17,8 @@ import module.kidnap.v2.kidnapCollectionModule
 import module.kidnap.v2.msg_KidnapServiceCollectionCommand
 import module.order.v2.msg_OrderCommand
 import module.order.v2.orderModule
+import module.order.v3.msg_OrderCommand
+import module.order.v3.orderModule
 import module.phonecode.PhoneCodeModule
 import module.phonecode.msg_PhoneCodeCommand
 import module.profile.v2.ProfileModule
@@ -75,7 +77,8 @@ class PipeFilterActor(originSender : ActorRef, msr : MessageRoutes) extends Acto
         case cmd : module.kidnap.v3.msg_KidnapServiceCommand => dispatchImpl(cmd, module.kidnap.v3.kidnapModule)
 		case cmd : module.kidnap.v2.msg_KidnapServiceCollectionCommand => dispatchImpl(cmd, module.kidnap.v2.kidnapCollectionModule)
 		case cmd : module.kidnap.v3.msg_KidnapServiceCollectionCommand => dispatchImpl(cmd, module.kidnap.v3.kidnapCollectionModule)
-		case cmd : msg_OrderCommand => dispatchImpl(cmd, orderModule)
+		case cmd : module.order.v2.msg_OrderCommand => dispatchImpl(cmd, module.order.v2.orderModule)
+		case cmd : module.order.v3.msg_OrderCommand => dispatchImpl(cmd, module.order.v3.orderModule)
 		case cmd : msg_OrderCommentsCommand => dispatchImpl(cmd, orderCommentsModule)
 		case cmd : msg_ResultCommand => dispatchImpl(cmd, ResultModule)
         case cmd : msg_LogCommand => dispatchImpl(cmd, LogModule)
