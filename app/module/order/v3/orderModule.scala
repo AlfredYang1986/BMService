@@ -288,7 +288,7 @@ object orderModule extends ModuleTrait {
         	val con = (data \ "condition")
             var condition : Option[DBObject] = Some("status" $ne 0)
             (con \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
-            (con \ "user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
+            (con \ "order_user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
             (con \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
             (con \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
             (con \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
@@ -377,7 +377,7 @@ object orderModule extends ModuleTrait {
         builder += "is_read" -> (data \ "is_read").asOpt[Int].map (x => x).getOrElse(0)
         builder += "order_id" -> order_id
         
-        builder += "total_fee" -> (data \ "total_fee").asOpt[Float].map (x => x).getOrElse(throw new Exception)
+        builder += "total_fee" -> (data \ "total_fee").asOpt[Int].map (x => x).getOrElse(throw new Exception)
         
         builder += "further_message" -> (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
         builder += "servant_no" -> (data \ "servant_no").asOpt[Int].map (x => x).getOrElse(1)
@@ -400,7 +400,7 @@ object orderModule extends ModuleTrait {
 	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
 	                       "prepay_id" -> toJson(x.getAs[String]("prepay_id").map (x => x).getOrElse("")),
-	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.floatValue).getOrElse(0.01.asInstanceOf[Float])),
+	                       "total_fee" -> toJson(x.getAs[Number]("total_fee").map (x => x.intValue).getOrElse(0)),
 	                       "further_message" -> toJson(x.getAs[String]("further_message").map (x => x).getOrElse(""))
 //	                       , "service" -> toJson(s)
 	                  ))
@@ -515,9 +515,15 @@ object orderModule extends ModuleTrait {
                         od map (y => Map(
                             "service_id" -> toJson(x \ "service_id"),
                             "order_id" -> toJson(x \ "order_id"),
-                            "screen_name" -> toJson(x \ "service" \ "screen_name"),
-                            "screen_photo" -> toJson(x \ "service" \ "screen_photo"),
-                            "cans" -> toJson(x \ "service" \ "cans"),
+                            "user" -> toJson(Map("screen_name" -> toJson(x \ "screen_name"),
+                                                 "screen_photo" -> toJson(x \ "screen_photo"))),
+                            "owner" -> toJson(Map("screen_name" -> toJson(x \ "service" \ "screen_name"),
+                                                  "screen_photo" -> toJson(x \ "service" \ "screen_photo"))),
+//                            "screen_name" -> toJson(x \ "service" \ "screen_name"),
+//                            "screen_photo" -> toJson(x \ "service" \ "screen_photo"),
+//                            "cans" -> toJson(x \ "service" \ "cans"),
+                            "order_title" -> toJson(x \ "order_title"),
+                            "order_thumbs" -> toJson(x \ "order_thumbs"),
                             "start" -> toJson(y \ "start"),
                             "end" -> toJson(y \ "end")
                         ))
