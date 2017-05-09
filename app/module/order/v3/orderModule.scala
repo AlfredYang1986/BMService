@@ -396,6 +396,7 @@ object orderModule extends ModuleTrait {
 	                       "date" -> toJson(x.getAs[Long]("date").get),
 	                       "status" -> toJson(x.getAs[Number]("status").get.intValue),
 	                       "order_thumbs" -> toJson(x.getAs[String]("order_thumbs").get),
+                           "order_title" -> toJson(x.getAs[String]("order_title").map (x => x).getOrElse("")),
 	                       "order_date" -> OrderDate2Js(x),
 	                       "is_read" -> toJson(x.getAs[Number]("is_read").get.intValue),
 	                       "order_id" -> toJson(x.getAs[String]("order_id").get),
@@ -521,9 +522,13 @@ object orderModule extends ModuleTrait {
                                                   "screen_photo" -> toJson(x \ "service" \ "screen_photo"))),
 //                            "screen_name" -> toJson(x \ "service" \ "screen_name"),
 //                            "screen_photo" -> toJson(x \ "service" \ "screen_photo"),
-//                            "cans" -> toJson(x \ "service" \ "cans"),
                             "order_title" -> toJson(x \ "order_title"),
                             "order_thumbs" -> toJson(x \ "order_thumbs"),
+                            "cans_cat" -> toJson(x \ "service" \ "cans_cat"),
+                            "cans" -> toJson(x \ "service" \ "cans"),
+                            "reserve1" -> toJson(x \ "service" \ "reserve1"),
+                            "service_cat" -> toJson(x \ "service" \ "service_cat"),
+                            "address" -> toJson(x \ "service" \ "address"),
                             "start" -> toJson(y \ "start"),
                             "end" -> toJson(y \ "end")
                         ))
@@ -643,6 +648,7 @@ object orderModule extends ModuleTrait {
 
     def v3_accept(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
         try {
+            println(data)
             val order_id = (data \ "order_id").asOpt[String].map (x => x).getOrElse(throw new Exception("wrong input"))
             val further_message = (data \ "further_message").asOpt[String].map (x => x).getOrElse("")
 
