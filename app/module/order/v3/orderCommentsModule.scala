@@ -180,14 +180,14 @@ object orderCommentsModule extends ModuleTrait {
     			val points = x.getAs[MongoDBList]("points").get.toList.asInstanceOf[List[Double]]
     			(service_id, points)
     		}).toList.groupBy(_._1)
-    		
-    		val result = (group map { iter => 
-    			val points = (iter._2.map (x => x._2))
-    			val avg = average(overallAcc(Nil, points), points.length)
-    			(iter._1, avg)
-    		}).head
-    		
-    		val fr = pr.get + ("points" -> toJson(result._2))
+
+    		val result = if (group.isEmpty) List.fill(5)(0.toDouble)
+                         else (group map { iter =>
+                		        val points = (iter._2.map (x => x._2))
+                    			average(overallAcc(Nil, points), points.length)
+                         }).head
+
+    		val fr = pr.get + ("points" -> toJson(result))
     		(Some(fr), None)
     		
     	} catch {

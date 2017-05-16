@@ -9,8 +9,8 @@ import dongdamessages.MessageRoutes
 import pattern.ResultMessage.msg_CommonResultMessage
 import module.profile.v2.ProfileMessages.{ msg_UpdateProfileWithoutResult, msg_ChangeToServiceProvider }
 import pattern.ParallelMessage
-import module.order.v2.orderCommentsMessages.msg_OverallOrderLst
-import module.order.v2.orderCommentsMessages.msg_OrdersOverallComments
+import module.order.v3.orderCommentsMessages.msg_OverallOrderLst
+import module.order.v3.orderCommentsMessages.msg_OrdersOverallComments
 import module.profile.v2.ProfileMessages.msg_OwnerLstNamePhoto
 import module.profile.v2.ProfileMessages.msg_OneOwnerNamePhoto
 import module.auth.AuthMessage.msg_AuthCheck
@@ -95,7 +95,7 @@ object KidnapController extends Controller {
         import pattern.LogMessage.common_log
         MessageRoutes(
             msg_log(toJson(Map("method" -> toJson("query service detail"))), jv) ::
-                msg_QueryServiceDetail(jv) ::
+                msg_QueryServiceDetail(jv) :: msg_queryTMCommand(jv) ::
                 ParallelMessage(
                     MessageRoutes(msg_OrdersOverallComments(jv) :: Nil, None) ::
                         MessageRoutes(msg_IsUserCollect(jv) :: Nil, None) ::

@@ -261,23 +261,27 @@ object orderModule extends ModuleTrait {
 //	}
 	
 	def queryOrders(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-		      
+
+        def orderIdCondition(v : String) = "order_id" $eq v
         def serviceIdCondition(v : String) = "service_id" $eq v
         def userIdCondition(u : String) = "user_id" $eq u
         def statusCondition(s : Int) = "status" $eq s
         def dateCondition(d : Long) = "date" $lte d
         def ownIdCondition(o : String) = "owner_id" $eq o
-        def orderDateCondition(o : (Long, Long)) = $and("order_date.start" $gte o._1, "order_date.end" $lt o._2)
-     
+        def orderDateCondition(o : (Long, Long)) =
+            "order_date" $elemMatch $and("order_date.start" $gte o._1, "order_date.end" $lt o._2)
+
+
         def conditionsAcc(o : Option[DBObject], key : String, value : Any) : Option[DBObject] = {
             val n = key match {
-              case "service_id" => serviceIdCondition(value.asInstanceOf[String])
-              case "user_id" => userIdCondition(value.asInstanceOf[String])
-              case "owner_id" => ownIdCondition(value.asInstanceOf[String])
-              case "status" => statusCondition(value.asInstanceOf[Int])
-              case "date" => dateCondition(value.asInstanceOf[Long])
-              case "order_date" => orderDateCondition(value.asInstanceOf[(Long, Long)])
-              case _ => ???
+                case "service_id" => serviceIdCondition(value.asInstanceOf[String])
+                case "user_id" => userIdCondition(value.asInstanceOf[String])
+                case "owner_id" => ownIdCondition(value.asInstanceOf[String])
+                case "status" => statusCondition(value.asInstanceOf[Int])
+                case "date" => dateCondition(value.asInstanceOf[Long])
+                case "order_date" => orderDateCondition(value.asInstanceOf[(Long, Long)])
+                case "order_id" => orderIdCondition(value.asInstanceOf[String])
+                case _ => ???
             }
             
             if (o.isEmpty) Option(n)
@@ -287,6 +291,7 @@ object orderModule extends ModuleTrait {
         try { 
         	val con = (data \ "condition")
             var condition : Option[DBObject] = Some("status" $ne 0)
+            (con \ "order_id").asOpt[String].map (x => condition = conditionsAcc(condition, "order_id", x)).getOrElse(Unit)
             (con \ "service_id").asOpt[String].map (x => condition = conditionsAcc(condition, "service_id", x)).getOrElse(Unit)
             (con \ "order_user_id").asOpt[String].map (x => condition = conditionsAcc(condition, "user_id", x)).getOrElse(Unit)
             (con \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
@@ -300,7 +305,7 @@ object orderModule extends ModuleTrait {
             val skip = (data \ "skip").asOpt[Int].getOrElse(0)
 
             val result =
-                if (take > 0) (from db() in "orders" where condition.get).selectSkipTop (skip)(take)("data")(DB2JsValue(_)).toList
+                if (take > 0) (from db() in "orders" where condition.get).selectSkipTop (skip)(take)("date")(DB2JsValue(_)).toList
                 else (from db() in "orders" where condition.get select (DB2JsValue(_))).toList
 
             if (condition.isEmpty) throw new Exception("wrong input")

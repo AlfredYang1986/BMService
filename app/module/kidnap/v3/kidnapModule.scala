@@ -388,8 +388,8 @@ object kidnapModule extends ModuleTrait {
 //  	               "offer_date" -> offer_date,
   	               "location" -> toJson(Map("latitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("latitude").get.floatValue),
   	                                        "longtitude" -> toJson(x.getAs[MongoDBObject]("location").get.getAs[Number]("longtitude").get.floatValue))),
-  	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.floatValue),
-  	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.floatValue))),
+  	               "age_boundary" -> toJson(Map("lsl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("lsl").get.intValue),
+  	                                        "usl" -> toJson(x.getAs[MongoDBObject]("age_boundary").get.getAs[Number]("usl").get.intValue()))),
   	               "cans_cat" -> toJson(x.getAs[Number]("cans_cat").map (y => y.intValue).getOrElse(-1)),
   	               "cans" -> toJson(x.getAs[Number]("cans").get.longValue),
   	               "facility" -> toJson(x.getAs[Number]("facility").get.longValue),
@@ -412,6 +412,7 @@ object kidnapModule extends ModuleTrait {
   
   	def queryKidnapServiceDetail(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
   	    try {
+			println(data)
   	        val service_id = (data \ "service_id").asOpt[String].map (x => x).getOrElse(throw new Exception("service not existing"))
   	        val result = (from db() in "kidnap" where ("service_id" -> service_id) select (DB2JsValue(_))).head
       	    (Some(result), None)
@@ -522,6 +523,7 @@ object kidnapModule extends ModuleTrait {
     
     def detailResultMerge(rst : List[Map[String, JsValue]]) : Map[String, JsValue] = {
 		import pattern.ParallelMessage.f
+		println(rst)
 		Map("result" -> toJson(f(rst)))
     }
     
