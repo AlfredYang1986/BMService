@@ -3,29 +3,26 @@ package module.order.v3
 import play.api.libs.concurrent.Akka
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
+import java.util.{Calendar, Date}
 
-import java.util.Date
 import scala.concurrent.Await
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
 import akka.util.Timeout
 import akka.actor.Props
-
 import module.webpay.WechatPayModule
 import module.notification.DDNActor
 import module.order.v3.orderMessages._
 import module.kidnap.v3.kidnapModule
 import module.sercurity.Sercurity
-
 import util.dao.from
 import util.dao._data_connection
 import util.errorcode.ErrorCode
-
 import dongdamessages.MessageDefines
 import pattern.ModuleTrait
-
 import com.mongodb.casbah.Imports._
+import module.common.TimespanOpt
 import module.notification.DDNNotifyUsers
 import play.api.libs.json.JsObject
 
@@ -261,7 +258,6 @@ object orderModule extends ModuleTrait {
 //	}
 	
 	def queryOrders(data : JsValue) : (Option[Map[String, JsValue]], Option[JsValue]) = {
-
         def orderIdCondition(v : String) = "order_id" $eq v
         def serviceIdCondition(v : String) = "service_id" $eq v
         def userIdCondition(u : String) = "user_id" $eq u
@@ -270,7 +266,14 @@ object orderModule extends ModuleTrait {
         def ownIdCondition(o : String) = "owner_id" $eq o
         def orderDateCondition(o : (Long, Long)) =
             "order_date" $elemMatch $and("order_date.start" $gte o._1, "order_date.end" $lt o._2)
-
+        def orderDateTodayCondition = {
+            val (s, e) = TimespanOpt.todayRange
+            $and("order_date.start" $gte s, "order_date.start" $lte e)
+        }
+        def orderDateHistoryCondition = {
+            val (_, e) = TimespanOpt.todayRange
+            "order_date.start" $lte e
+        }
 
         def conditionsAcc(o : Option[DBObject], key : String, value : Any) : Option[DBObject] = {
             val n = key match {
@@ -281,6 +284,8 @@ object orderModule extends ModuleTrait {
                 case "date" => dateCondition(value.asInstanceOf[Long])
                 case "order_date" => orderDateCondition(value.asInstanceOf[(Long, Long)])
                 case "order_id" => orderIdCondition(value.asInstanceOf[String])
+                case "only_today" => orderDateTodayCondition
+                case "only_history" => orderDateHistoryCondition
                 case _ => ???
             }
             
@@ -297,6 +302,16 @@ object orderModule extends ModuleTrait {
             (con \ "owner_id").asOpt[String].map (x => condition = conditionsAcc(condition, "owner_id", x)).getOrElse(Unit)
             (con \ "status").asOpt[Int].map (x => condition = conditionsAcc(condition, "status", x)).getOrElse(Unit)
             (con \ "order_date").asOpt[JsValue].map (x => condition = conditionsAcc(condition, "order_date", ((x \ "start").asOpt[Long].get, (x \ "end").asOpt[Long].get))).getOrElse(Unit)
+
+            (con \ "only_today").asOpt[Int].map { x =>
+                if (x == 1) condition = conditionsAcc(condition, "only_today", x)
+                else Unit
+            }.getOrElse(Unit)
+
+            (con \ "only_history").asOpt[Int].map { x =>
+                if (x == 1) condition = conditionsAcc(condition, "only_history", x)
+                else Unit
+            }.getOrElse(Unit)
 
             val timespan = (con \ "date").asOpt[Long].map (x => x).getOrElse(new Date().getTime)
             condition = conditionsAcc(condition, "date", timespan)
@@ -539,8 +554,20 @@ object orderModule extends ModuleTrait {
                         ))
                     }.flatten
 
+                    val (s, e) = TimespanOpt.todayRange
+                    val r0 = (data \ "condition" \ "only_today").asOpt[Int].map { x =>
+                        if (x == 1) result.filter(y =>
+                            y.get("start").get.asOpt[Long].get < e &&
+                            y.get("end").get.asOpt[Long].get > s)
+                        else result
+                    }.getOrElse(result)
 
-                    (Some(Map("result" -> toJson(result))), None)
+                    val r1 = (data \ "condition" \ "only_history").asOpt[Int].map { x =>
+                        if (x == 1) r0.filter(y => y.get("start").get.asOpt[Long].get < e)
+                        else r0
+                    }.getOrElse(r0)
+
+                    (Some(Map("result" -> toJson(r1))), None)
                 }
                 case None => throw new Exception("unknow error")
             }
