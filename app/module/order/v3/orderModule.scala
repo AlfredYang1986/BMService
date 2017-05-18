@@ -567,7 +567,8 @@ object orderModule extends ModuleTrait {
                         else r0
                     }.getOrElse(r0)
 
-                    (Some(Map("result" -> toJson(r1))), None)
+                    val reVal = r1.sortBy(x => x.get("start").get.asOpt[Long].get)
+                    (Some(Map("result" -> toJson(reVal))), None)
                 }
                 case None => throw new Exception("unknow error")
             }
