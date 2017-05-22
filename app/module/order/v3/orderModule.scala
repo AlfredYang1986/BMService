@@ -589,7 +589,7 @@ object orderModule extends ModuleTrait {
                                       service_id : String) = {
 
         var content : Map[String, JsValue] = Map.empty
-        content += "type" -> toJson(module.common.AcitionType.orderPushed.index)
+        content += "type" -> toJson(t)
         content += "sender_id" -> toJson(sender_id)
         content += "date" -> toJson(new Date().getTime)
         content += "receiver_id" -> toJson(receiver_id)

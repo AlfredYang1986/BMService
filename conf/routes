@@ -89,6 +89,10 @@ POST	/v2/kidnap/collect							controllers.v2.KidnapCollectionController.collectS
 POST	/v2/kidnap/uncollect						controllers.v2.KidnapCollectionController.uncollectService
 POST	/v2/kidnap/collect/lst						controllers.v2.KidnapCollectionController.userCollectionLst
 
+POST	/v3/kidnap/collect							controllers.v3.KidnapCollectionController.collectService
+POST	/v3/kidnap/uncollect						controllers.v3.KidnapCollectionController.uncollectService
+POST	/v3/kidnap/collect/lst						controllers.v3.KidnapCollectionController.userCollectionLst
+
 POST	/alipay/callback							controllers.v2.AlipayController.alipaycallback
 POST	/alipay/redirect							controllers.v2.AlipayController.redirecturi
 
